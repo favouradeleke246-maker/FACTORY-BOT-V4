@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA - Full Version
-Real AI naming, real art, real GitHub repos, real Twitter posts
+LevelForge+ ULTRA - Full Version (FIXED)
 """
 
 import os
 import json
 import random
+import time
 import requests
 import base64
 from datetime import datetime
@@ -67,14 +67,14 @@ game_name = generate_ai_name()
 print(f"   ✅ {game_name}")
 
 # ============ 2. REAL SPRITE WITH SDXL ============
-print("\n🎨 Generating game art with SDXL...")
+print("\n🎨 Generating game art...")
 
 sprite_path = Path("sprite.png")
 
 def generate_ai_sprite():
     if replicate_token:
         try:
-            # Start SDXL generation
+            print("   Trying Replicate SDXL...")
             response = requests.post(
                 "https://api.replicate.com/v1/predictions",
                 headers={"Authorization": f"Bearer {replicate_token}", "Content-Type": "application/json"},
@@ -91,8 +91,16 @@ def generate_ai_sprite():
                 timeout=30
             )
             
+            if response.status_code != 201:
+                print(f"   Replicate API error: {response.status_code}")
+                return False
+                
             prediction = response.json()
-            get_url = prediction["urls"]["get"]
+            get_url = prediction.get("urls", {}).get("get")
+            
+            if not get_url:
+                print("   No URL in response")
+                return False
             
             # Poll for result
             for attempt in range(30):
@@ -100,23 +108,37 @@ def generate_ai_sprite():
                 status_resp = requests.get(get_url, headers={"Authorization": f"Bearer {replicate_token}"})
                 status_data = status_resp.json()
                 
-                if status_data["status"] == "succeeded":
+                if status_data.get("status") == "succeeded":
                     image_url = status_data["output"][0]
                     img_data = requests.get(image_url).content
                     with open(sprite_path, "wb") as f:
                         f.write(img_data)
                     return True
-                elif status_data["status"] == "failed":
-                    break
+                elif status_data.get("status") == "failed":
+                    print("   Replicate generation failed")
+                    return False
+            print("   Replicate timeout")
         except Exception as e:
             print(f"   Replicate error: {e}")
     
-    # Fallback: Generate cool gradient art
+    # Fallback: Generate cool art (FIXED VERSION)
+    print("   Using fallback art generator...")
     img = Image.new('RGB', (512, 512), color=(random.randint(50,200), random.randint(50,200), random.randint(50,200)))
     draw = ImageDraw.Draw(img)
-    for i in range(10):
+    
+    # Fixed rectangle drawing (no negative sizes)
+    for i in range(5):
         color = (random.randint(100,255), random.randint(100,255), random.randint(100,255))
-        draw.rectangle([i*50, i*50, 512-i*50, 512-i*50], outline=color, width=3)
+        x1 = i * 50
+        y1 = i * 50
+        x2 = 512 - (i * 50)
+        y2 = 512 - (i * 50)
+        if x2 > x1 and y2 > y1:  # Only draw if dimensions are valid
+            draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
+    
+    # Draw center circle
+    draw.ellipse([156, 156, 356, 356], outline=(255,255,255), width=5)
+    
     img.save(sprite_path)
     return True
 
@@ -192,6 +214,7 @@ print("\n📦 Creating GitHub repository...")
 
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 repo_url = None
+github_owner = os.getenv("GITHUB_REPOSITORY_OWNER", "favouradeleke246-maker")
 
 if github_token:
     try:
@@ -205,18 +228,6 @@ if github_token:
         if response.status_code == 201:
             repo_url = response.json()["html_url"]
             print(f"   ✅ Repo created: {repo_url}")
-            
-            # Upload files to repo
-            for file_path in project_dir.glob("*"):
-                if file_path.is_file():
-                    with open(file_path, 'rb') as f:
-                        content = base64.b64encode(f.read()).decode()
-                    requests.put(
-                        f"https://api.github.com/repos/{os.getenv('GITHUB_REPOSITORY_OWNER', 'favouradeleke246-maker')}/{repo_name}/contents/{file_path.name}",
-                        headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"},
-                        json={"message": f"Add {file_path.name}", "content": content, "branch": "main"},
-                        timeout=30
-                    )
         else:
             print(f"   ⚠️ Repo creation: {response.status_code}")
     except Exception as e:
@@ -237,11 +248,7 @@ if all([twitter_key, twitter_secret, twitter_access, twitter_access_secret]):
         media = api.media_upload(str(sprite_path))
         
         # Post tweet
-        tweet_text = f"""🎮 {game_name} - New daily game just dropped!
-
-Play now: https://github.com/{os.getenv('GITHUB_REPOSITORY_OWNER', 'favouradeleke246-maker')}/{repo_name}
-
-#gamedev #indiedev #{game_name.replace(' ', '')}"""
+        tweet_text = f"🎮 {game_name} - New daily game just dropped!\n\nPlay now: https://github.com/{github_owner}/{repo_name}\n\n#gamedev #indiedev #{game_name.replace(' ', '')}"
         
         tweet = api.update_status(status=tweet_text, media_ids=[media.media_id])
         tweet_url = f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id}"
@@ -259,7 +266,7 @@ if telegram_token and telegram_chat_id:
 *Date:* {datetime.now().strftime('%Y-%m-%d')}
 
 🔗 *Links:*
-• GitHub: {repo_url or 'https://github.com/' + os.getenv('GITHUB_REPOSITORY_OWNER', '') + '/' + repo_name}
+• GitHub: {repo_url or f'https://github.com/{github_owner}/{repo_name}'}
 • Twitter: {tweet_url or 'Not posted'}
 
 ✨ *Features:*
@@ -275,7 +282,10 @@ Next game in 24 hours!"""
             json={"chat_id": telegram_chat_id, "text": message, "parse_mode": "Markdown"},
             timeout=10
         )
-        print(f"   ✅ Report sent to Telegram!")
+        if response.status_code == 200:
+            print(f"   ✅ Report sent to Telegram!")
+        else:
+            print(f"   ❌ Telegram error: {response.status_code}")
     except Exception as e:
         print(f"   ❌ Telegram error: {e}")
 
