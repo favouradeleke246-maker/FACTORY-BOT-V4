@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA - Full Version (FIXED)
+LevelForge+ ULTRA - DALL-E 3 Version (Uses OpenAI for art!)
 """
 
 import os
@@ -8,20 +8,19 @@ import json
 import random
 import time
 import requests
-import base64
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
+import base64
 
 print("=" * 60)
-print("🎮 LEVELFORGE+ ULTRA - FULL VERSION")
+print("🎮 LEVELFORGE+ ULTRA - DALL-E 3 VERSION")
 print("=" * 60)
 
 # ============ GET SECRETS ============
 telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
-replicate_token = os.getenv("REPLICATE_API_TOKEN")
 github_token = os.getenv("GH_TOKEN")
 twitter_key = os.getenv("TWITTER_API_KEY")
 twitter_secret = os.getenv("TWITTER_API_SECRET")
@@ -29,13 +28,12 @@ twitter_access = os.getenv("TWITTER_ACCESS_TOKEN")
 twitter_access_secret = os.getenv("TWITTER_ACCESS_SECRET")
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
-print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
-print(f"✅ Replicate: {'OK' if replicate_token else 'NO'}")
+print(f"✅ OpenAI: {'OK' if openai_key else 'NO'} (Will use DALL-E 3 for art!)")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"✅ Twitter: {'OK' if twitter_key else 'NO'}")
 
 # ============ 1. AI GAME NAME ============
-print("\n🎮 Generating game name with AI...")
+print("\n🎮 Generating game name with GPT...")
 
 def generate_ai_name():
     if openai_key:
@@ -45,7 +43,7 @@ def generate_ai_name():
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
                 json={
                     "model": "gpt-3.5-turbo",
-                    "messages": [{"role": "user", "content": "Generate ONE creative video game name. Return ONLY the name, no quotes."}],
+                    "messages": [{"role": "user", "content": "Generate ONE creative video game name. Return ONLY the name, no quotes. Make it sound fun and unique."}],
                     "temperature": 0.9,
                     "max_tokens": 20
                 },
@@ -58,7 +56,6 @@ def generate_ai_name():
         except Exception as e:
             print(f"   OpenAI error: {e}")
     
-    # Fallback
     prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Solar", "Nova"]
     suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone"]
     return f"{random.choice(prefixes)} {random.choice(suffixes)}"
@@ -66,84 +63,67 @@ def generate_ai_name():
 game_name = generate_ai_name()
 print(f"   ✅ {game_name}")
 
-# ============ 2. REAL SPRITE WITH SDXL ============
-print("\n🎨 Generating game art...")
+# ============ 2. DALL-E 3 ART GENERATION ============
+print("\n🎨 Generating game art with DALL-E 3...")
 
 sprite_path = Path("sprite.png")
 
-def generate_ai_sprite():
-    if replicate_token:
-        try:
-            print("   Trying Replicate SDXL...")
-            response = requests.post(
-                "https://api.replicate.com/v1/predictions",
-                headers={"Authorization": f"Bearer {replicate_token}", "Content-Type": "application/json"},
-                json={
-                    "version": "db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
-                    "input": {
-                        "prompt": f"game character sprite, pixel art style, {game_name} main character, centered, 512x512",
-                        "negative_prompt": "blurry, low quality, realistic",
-                        "width": 512,
-                        "height": 512,
-                        "num_outputs": 1
-                    }
-                },
-                timeout=30
-            )
-            
-            if response.status_code != 201:
-                print(f"   Replicate API error: {response.status_code}")
-                return False
-                
-            prediction = response.json()
-            get_url = prediction.get("urls", {}).get("get")
-            
-            if not get_url:
-                print("   No URL in response")
-                return False
-            
-            # Poll for result
-            for attempt in range(30):
-                time.sleep(2)
-                status_resp = requests.get(get_url, headers={"Authorization": f"Bearer {replicate_token}"})
-                status_data = status_resp.json()
-                
-                if status_data.get("status") == "succeeded":
-                    image_url = status_data["output"][0]
-                    img_data = requests.get(image_url).content
-                    with open(sprite_path, "wb") as f:
-                        f.write(img_data)
-                    return True
-                elif status_data.get("status") == "failed":
-                    print("   Replicate generation failed")
-                    return False
-            print("   Replicate timeout")
-        except Exception as e:
-            print(f"   Replicate error: {e}")
+def generate_dalle_art():
+    if not openai_key:
+        print("   No OpenAI key - using fallback art")
+        return generate_fallback_art()
     
-    # Fallback: Generate cool art (FIXED VERSION)
+    try:
+        # Call DALL-E 3 API
+        response = requests.post(
+            "https://api.openai.com/v1/images/generations",
+            headers={
+                "Authorization": f"Bearer {openai_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "dall-e-3",
+                "prompt": f"A colorful, fun game sprite for a video game called '{game_name}'. Pixel art style, game character or mascot, centered on white background, bright colors, cute and appealing, 2D game asset style.",
+                "size": "1024x1024",
+                "quality": "standard",
+                "n": 1
+            },
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            image_url = response.json()["data"][0]["url"]
+            img_data = requests.get(image_url).content
+            with open(sprite_path, "wb") as f:
+                f.write(img_data)
+            print(f"   ✅ DALL-E 3 created: {sprite_path}")
+            return True
+        else:
+            print(f"   DALL-E error: {response.status_code} - {response.text[:100]}")
+            return generate_fallback_art()
+            
+    except Exception as e:
+        print(f"   DALL-E exception: {e}")
+        return generate_fallback_art()
+
+def generate_fallback_art():
+    """Fallback if DALL-E fails"""
     print("   Using fallback art generator...")
-    img = Image.new('RGB', (512, 512), color=(random.randint(50,200), random.randint(50,200), random.randint(50,200)))
+    img = Image.new('RGB', (512, 512), color=(20, 20, 40))
     draw = ImageDraw.Draw(img)
     
-    # Fixed rectangle drawing (no negative sizes)
-    for i in range(5):
-        color = (random.randint(100,255), random.randint(100,255), random.randint(100,255))
-        x1 = i * 50
-        y1 = i * 50
-        x2 = 512 - (i * 50)
-        y2 = 512 - (i * 50)
-        if x2 > x1 and y2 > y1:  # Only draw if dimensions are valid
-            draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
+    colors = [(255, 100, 100), (100, 255, 100), (100, 100, 255), (255, 255, 100)]
+    for i, color in enumerate(colors):
+        size = 512 - (i * 100)
+        offset = (512 - size) // 2
+        draw.ellipse([offset, offset, offset + size, offset + size], outline=color, width=5)
     
-    # Draw center circle
-    draw.ellipse([156, 156, 356, 356], outline=(255,255,255), width=5)
-    
+    draw.rectangle([240, 240, 272, 272], fill=(255, 255, 255))
     img.save(sprite_path)
     return True
 
-generate_ai_sprite()
-print(f"   ✅ Sprite saved: {sprite_path}")
+generate_dalle_art()
+print(f"   ✅ Sprite ready: {sprite_path}")
 
 # ============ 3. CREATE GODOT PROJECT ============
 print("\n📁 Creating Godot project...")
@@ -151,7 +131,6 @@ print("\n📁 Creating Godot project...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
 
-# Copy sprite
 import shutil
 shutil.copy(sprite_path, project_dir / "icon.png")
 
@@ -244,11 +223,9 @@ if all([twitter_key, twitter_secret, twitter_access, twitter_access_secret]):
         auth = tweepy.OAuth1UserHandler(twitter_key, twitter_secret, twitter_access, twitter_access_secret)
         api = tweepy.API(auth)
         
-        # Upload media
         media = api.media_upload(str(sprite_path))
         
-        # Post tweet
-        tweet_text = f"🎮 {game_name} - New daily game just dropped!\n\nPlay now: https://github.com/{github_owner}/{repo_name}\n\n#gamedev #indiedev #{game_name.replace(' ', '')}"
+        tweet_text = f"🎮 {game_name} - New daily game just dropped!\n\n✨ AI-generated name + DALL-E 3 art + Godot project\n\n#gamedev #indiedev #dalle3 #{game_name.replace(' ', '')}"
         
         tweet = api.update_status(status=tweet_text, media_ids=[media.media_id])
         tweet_url = f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id}"
@@ -270,8 +247,8 @@ if telegram_token and telegram_chat_id:
 • Twitter: {tweet_url or 'Not posted'}
 
 ✨ *Features:*
-• AI-generated name
-• AI-generated art
+• AI-generated name (GPT)
+• AI-generated art (DALL-E 3)
 • Complete Godot project
 
 Next game in 24 hours!"""
@@ -302,7 +279,7 @@ entries.append({
     "game": game_name,
     "repo": repo_url,
     "tweet": tweet_url,
-    "sprite": "sprite.png"
+    "art_source": "DALL-E 3"
 })
 
 portfolio_file.write_text(json.dumps(entries[-30:], indent=2))
@@ -311,11 +288,12 @@ print(f"   ✅ Portfolio has {len(entries)} games")
 # ============ DONE ============
 print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
+print(f"   Art by: DALL-E 3")
 print("=" * 60)
 
-# Save build info
 with open("build_info.txt", "w") as f:
     f.write(f"Game: {game_name}\n")
     f.write(f"Time: {datetime.now()}\n")
     f.write(f"Repo: {repo_url}\n")
     f.write(f"Tweet: {tweet_url}\n")
+    f.write(f"Art: DALL-E 3\n")
