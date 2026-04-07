@@ -10,35 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
-    - name: Install tools
-      run: |
-        pip install requests pillow PyGithub tweepy python-dotenv
+    - name: Install Pillow
+      run: pip install pillow requests
     
     - name: Run Game Factory
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
-        TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
-        TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-        TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+        GITHUB_USERNAME: ${{ github.repository_owner }}
       run: python levelforge_github.py
     
-    - name: Save results
+    - name: Upload results
       uses: actions/upload-artifact@v4
       with:
         name: game-output
         path: |
-          workspace/
-          sprites/
+          sprite.png
           portfolio.json
+          build_info.txt
