@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA - DALL-E 3 Version (Uses OpenAI for art!)
+LevelForge+ ULTRA - FREE VERSION (Hugging Face FLUX)
 """
 
 import os
@@ -11,16 +11,18 @@ import requests
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
-import base64
+import io
 
 print("=" * 60)
-print("🎮 LEVELFORGE+ ULTRA - DALL-E 3 VERSION")
+print("🎮 LEVELFORGE+ ULTRA - FREE VERSION")
+print("🤗 Using Hugging Face FLUX (100% FREE)")
 print("=" * 60)
 
 # ============ GET SECRETS ============
 telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
+huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 github_token = os.getenv("GH_TOKEN")
 twitter_key = os.getenv("TWITTER_API_KEY")
 twitter_secret = os.getenv("TWITTER_API_SECRET")
@@ -28,12 +30,13 @@ twitter_access = os.getenv("TWITTER_ACCESS_TOKEN")
 twitter_access_secret = os.getenv("TWITTER_ACCESS_SECRET")
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
-print(f"✅ OpenAI: {'OK' if openai_key else 'NO'} (Will use DALL-E 3 for art!)")
+print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
+print(f"✅ Hugging Face: {'OK' if huggingface_token else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"✅ Twitter: {'OK' if twitter_key else 'NO'}")
 
 # ============ 1. AI GAME NAME ============
-print("\n🎮 Generating game name with GPT...")
+print("\n🎮 Generating game name with AI...")
 
 def generate_ai_name():
     if openai_key:
@@ -63,66 +66,74 @@ def generate_ai_name():
 game_name = generate_ai_name()
 print(f"   ✅ {game_name}")
 
-# ============ 2. DALL-E 3 ART GENERATION ============
-print("\n🎨 Generating game art with DALL-E 3...")
+# ============ 2. FREE ART GENERATION (Hugging Face FLUX) ============
+print("\n🎨 Generating game art with Hugging Face FLUX (FREE)...")
 
 sprite_path = Path("sprite.png")
 
-def generate_dalle_art():
-    if not openai_key:
-        print("   No OpenAI key - using fallback art")
+def generate_free_art():
+    if not huggingface_token:
+        print("   No Hugging Face token - using fallback art")
         return generate_fallback_art()
     
     try:
-        # Call DALL-E 3 API
-        response = requests.post(
-            "https://api.openai.com/v1/images/generations",
-            headers={
-                "Authorization": f"Bearer {openai_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "dall-e-3",
-                "prompt": f"A colorful, fun game sprite for a video game called '{game_name}'. Pixel art style, game character or mascot, centered on white background, bright colors, cute and appealing, 2D game asset style.",
-                "size": "1024x1024",
-                "quality": "standard",
-                "n": 1
-            },
-            timeout=60
-        )
+        # FLUX model - great for game sprites
+        API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev"
+        headers = {"Authorization": f"Bearer {huggingface_token}"}
+        
+        prompt = f"pixel art game sprite, {game_name} game character, cute mascot, centered, bright colors, game asset, transparent background, 512x512"
+        
+        print("   Calling Hugging Face API...")
+        response = requests.post(API_URL, headers=headers, json={"inputs": prompt}, timeout=60)
         
         if response.status_code == 200:
-            image_url = response.json()["data"][0]["url"]
-            img_data = requests.get(image_url).content
             with open(sprite_path, "wb") as f:
-                f.write(img_data)
-            print(f"   ✅ DALL-E 3 created: {sprite_path}")
+                f.write(response.content)
+            print(f"   ✅ Hugging Face FLUX created: {sprite_path}")
             return True
+        elif response.status_code == 401:
+            print("   ❌ Invalid Hugging Face token")
+            return generate_fallback_art()
+        elif response.status_code == 429:
+            print("   ⏳ Rate limited - using fallback")
+            return generate_fallback_art()
         else:
-            print(f"   DALL-E error: {response.status_code} - {response.text[:100]}")
+            print(f"   ⚠️ API error {response.status_code} - using fallback")
             return generate_fallback_art()
             
+    except requests.exceptions.Timeout:
+        print("   ⏳ Timeout - using fallback art")
+        return generate_fallback_art()
     except Exception as e:
-        print(f"   DALL-E exception: {e}")
+        print(f"   ⚠️ Error: {e} - using fallback")
         return generate_fallback_art()
 
 def generate_fallback_art():
-    """Fallback if DALL-E fails"""
+    """Fallback if Hugging Face fails"""
     print("   Using fallback art generator...")
     img = Image.new('RGB', (512, 512), color=(20, 20, 40))
     draw = ImageDraw.Draw(img)
     
-    colors = [(255, 100, 100), (100, 255, 100), (100, 100, 255), (255, 255, 100)]
+    colors = [(255, 100, 100), (100, 255, 100), (100, 100, 255), (255, 255, 100), (255, 100, 255)]
     for i, color in enumerate(colors):
-        size = 512 - (i * 100)
+        size = 512 - (i * 80)
         offset = (512 - size) // 2
-        draw.ellipse([offset, offset, offset + size, offset + size], outline=color, width=5)
+        draw.ellipse([offset, offset, offset + size, offset + size], outline=color, width=4)
     
-    draw.rectangle([240, 240, 272, 272], fill=(255, 255, 255))
+    # Draw star in center
+    draw.polygon([(256, 200), (270, 240), (312, 242), (278, 268), (288, 310), (256, 286), (224, 310), (234, 268), (200, 242), (242, 240)], fill=(255, 215, 0))
+    
     img.save(sprite_path)
+    print(f"   ✅ Fallback sprite created")
     return True
 
-generate_dalle_art()
+generate_free_art()
+
+# Verify file exists
+if not sprite_path.exists():
+    print("   ❌ ERROR: No sprite created!")
+    generate_fallback_art()
+
 print(f"   ✅ Sprite ready: {sprite_path}")
 
 # ============ 3. CREATE GODOT PROJECT ============
@@ -223,9 +234,14 @@ if all([twitter_key, twitter_secret, twitter_access, twitter_access_secret]):
         auth = tweepy.OAuth1UserHandler(twitter_key, twitter_secret, twitter_access, twitter_access_secret)
         api = tweepy.API(auth)
         
+        # Verify credentials
+        api.verify_credentials()
+        
+        # Upload media
         media = api.media_upload(str(sprite_path))
         
-        tweet_text = f"🎮 {game_name} - New daily game just dropped!\n\n✨ AI-generated name + DALL-E 3 art + Godot project\n\n#gamedev #indiedev #dalle3 #{game_name.replace(' ', '')}"
+        # Post tweet
+        tweet_text = f"🎮 {game_name} - New daily game just dropped!\n\n✨ AI-generated name + FREE AI art + Godot project\n\n#gamedev #indiedev #{game_name.replace(' ', '')}"
         
         tweet = api.update_status(status=tweet_text, media_ids=[media.media_id])
         tweet_url = f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id}"
@@ -248,8 +264,10 @@ if telegram_token and telegram_chat_id:
 
 ✨ *Features:*
 • AI-generated name (GPT)
-• AI-generated art (DALL-E 3)
+• FREE AI art (Hugging Face FLUX)
 • Complete Godot project
+
+🤖 *100% FREE - No payment needed!*
 
 Next game in 24 hours!"""
     
@@ -279,7 +297,7 @@ entries.append({
     "game": game_name,
     "repo": repo_url,
     "tweet": tweet_url,
-    "art_source": "DALL-E 3"
+    "art_source": "Hugging Face FLUX (FREE)"
 })
 
 portfolio_file.write_text(json.dumps(entries[-30:], indent=2))
@@ -288,7 +306,7 @@ print(f"   ✅ Portfolio has {len(entries)} games")
 # ============ DONE ============
 print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
-print(f"   Art by: DALL-E 3")
+print(f"   Art by: Hugging Face FLUX (100% FREE)")
 print("=" * 60)
 
 with open("build_info.txt", "w") as f:
@@ -296,4 +314,4 @@ with open("build_info.txt", "w") as f:
     f.write(f"Time: {datetime.now()}\n")
     f.write(f"Repo: {repo_url}\n")
     f.write(f"Tweet: {tweet_url}\n")
-    f.write(f"Art: DALL-E 3\n")
+    f.write(f"Art: Hugging Face FLUX (FREE)\n")
