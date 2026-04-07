@@ -11,7 +11,7 @@ print("=" * 60)
 # ============ CHECK SECRETS ============
 telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
-github_token = os.getenv("GITHUB_TOKEN")
+github_token = os.getenv("GH_TOKEN")
 
 print(f"\n✅ Telegram Token: {'FOUND' if telegram_token else 'MISSING'}")
 print(f"✅ Telegram Chat ID: {'FOUND' if telegram_chat_id else 'MISSING'}")
