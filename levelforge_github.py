@@ -208,7 +208,7 @@ if github_token:
     except Exception as e:
         print(f"   ⚠️ GitHub error: {e}")
 
-# ============ 5. POST TO BLUESKY (FREE) - FIXED VERSION ============
+# ============ 5. POST TO BLUESKY (FREE) - FIXED DATETIME FORMAT ============
 print("\n🦋 Posting to Bluesky...")
 
 bluesky_post_url = None
@@ -237,7 +237,7 @@ if bluesky_handle and bluesky_password:
                 if len(post_text) > 280:
                     post_text = post_text[:277] + "..."
                 
-                # Create the post
+                # Create the post with CORRECT datetime format for Bluesky
                 post_response = requests.post(
                     "https://bsky.social/xrpc/com.atproto.repo.createRecord",
                     headers={
@@ -250,7 +250,7 @@ if bluesky_handle and bluesky_password:
                         "record": {
                             "$type": "app.bsky.feed.post",
                             "text": post_text,
-                            "createdAt": datetime.now().isoformat()
+                            "createdAt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                         }
                     },
                     timeout=15
@@ -330,7 +330,7 @@ print(f"   ✅ Portfolio has {len(entries)} games")
 print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
 print(f"   📦 GitHub: {repo_url or 'Created'}")
-print(f"   🦋 Bluesky: {'Posted' if bluesky_post_url else 'Failed - check handle/password'}")
+print(f"   🦋 Bluesky: {'Posted' if bluesky_post_url else 'Failed - check logs'}")
 print("=" * 60)
 
 with open("build_info.txt", "w") as f:
