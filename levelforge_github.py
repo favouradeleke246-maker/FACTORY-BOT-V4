@@ -2,10 +2,10 @@
 """
 LevelForge+ ULTRA - COMPLETE WORKING VERSION
 - AI game names (OpenAI GPT)
-- FREE AI art (Hugging Face FLUX)
-- Twitter API v2 (Free tier compatible!)
+- FREE AI art (Hugging Face FLUX / Fallback)
 - GitHub repos
 - Telegram reports
+- Bluesky posts (FREE Twitter alternative!)
 """
 
 import os
@@ -16,12 +16,10 @@ import requests
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
-import io
 
 print("=" * 60)
 print("🎮 LEVELFORGE+ ULTRA - COMPLETE VERSION")
-print("✅ Twitter API v2 (Free tier)")
-print("✅ Hugging Face FLUX (Free art)")
+print("✅ Telegram | GitHub | Bluesky")
 print("=" * 60)
 
 # ============ GET SECRETS ============
@@ -30,16 +28,14 @@ telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
 huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 github_token = os.getenv("GH_TOKEN")
-twitter_key = os.getenv("TWITTER_API_KEY")
-twitter_secret = os.getenv("TWITTER_API_SECRET")
-twitter_access = os.getenv("TWITTER_ACCESS_TOKEN")
-twitter_access_secret = os.getenv("TWITTER_ACCESS_SECRET")
+bluesky_handle = os.getenv("BLUESKY_HANDLE")
+bluesky_password = os.getenv("BLUESKY_PASSWORD")
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
 print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ Hugging Face: {'OK' if huggingface_token else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
-print(f"✅ Twitter: {'OK' if twitter_key else 'NO'}")
+print(f"✅ Bluesky: {'OK' if bluesky_handle else 'NO'}")
 
 # ============ 1. AI GAME NAME ============
 print("\n🎮 Generating game name with AI...")
@@ -212,41 +208,55 @@ if github_token:
     except Exception as e:
         print(f"   ⚠️ GitHub error: {e}")
 
-# ============ 5. POST TO TWITTER (V2 API - FREE TIER!) ============
-print("\n🐦 Posting to Twitter...")
+# ============ 5. POST TO BLUESKY (FREE) ============
+print("\n🦋 Posting to Bluesky...")
 
-tweet_url = None
-if all([twitter_key, twitter_secret, twitter_access, twitter_access_secret]):
+bluesky_post_url = None
+
+if bluesky_handle and bluesky_password:
     try:
-        import tweepy
+        # Login to Bluesky
+        session = requests.post(
+            "https://bsky.social/xrpc/com.atproto.server.createSession",
+            json={"identifier": bluesky_handle, "password": bluesky_password},
+            timeout=10
+        ).json()
         
-        # Create v2 client for posting (works on free tier!)
-        client = tweepy.Client(
-            consumer_key=twitter_key,
-            consumer_secret=twitter_secret,
-            access_token=twitter_access,
-            access_token_secret=twitter_access_secret,
-            wait_on_rate_limit=True
-        )
+        access_token = session.get("accessJwt")
+        did = session.get("did")
         
-        # Use v1.1 API for media upload (still works on free tier)
-        auth = tweepy.OAuth1UserHandler(twitter_key, twitter_secret, twitter_access, twitter_access_secret)
-        api = tweepy.API(auth)
-        
-        # Upload image
-        media = api.media_upload(str(sprite_path))
-        media_id = media.media_id
-        
-        # Post tweet using v2 API (KEY FIX FOR FREE TIER!)
-        tweet_text = f"🎮 {game_name} - New daily game just dropped!\n\n✨ AI-generated name + FREE AI art + Godot project\n\n#gamedev #indiedev #{game_name.replace(' ', '')}"
-        
-        response = client.create_tweet(text=tweet_text, media_ids=[media_id])
-        tweet_url = f"https://twitter.com/i/web/status/{response.data['id']}"
-        print(f"   ✅ Tweet posted: {tweet_url}")
-        
+        if access_token and did:
+            # Create the post
+            post_text = f"🎮 {game_name} - New daily game!\n\n{repo_url or f'https://github.com/{github_owner}/{repo_name}'}\n\n#gamedev #indiedev #{game_name.replace(' ', '')}"
+            
+            post_data = {
+                "repo": did,
+                "collection": "app.bsky.feed.post",
+                "record": {
+                    "$type": "app.bsky.feed.post",
+                    "text": post_text[:300],
+                    "createdAt": datetime.now().isoformat()
+                }
+            }
+            
+            response = requests.post(
+                "https://bsky.social/xrpc/com.atproto.repo.createRecord",
+                headers={"Authorization": f"Bearer {access_token}"},
+                json=post_data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                bluesky_post_url = f"https://bsky.app/profile/{bluesky_handle}/post/{response.json()['uri'].split('/')[-1]}"
+                print(f"   ✅ Posted to Bluesky!")
+            else:
+                print(f"   ⚠️ Bluesky error: {response.status_code}")
+        else:
+            print("   ⚠️ Could not login to Bluesky")
     except Exception as e:
-        print(f"   ⚠️ Twitter error: {e}")
-        print("   (Twitter requires OAuth 1.0a with Read+Write permissions)")
+        print(f"   ⚠️ Bluesky exception: {e}")
+else:
+    print("   ⚠️ No Bluesky credentials - skipping")
 
 # ============ 6. SEND TELEGRAM REPORT ============
 print("\n📱 Sending Telegram report...")
@@ -259,14 +269,14 @@ if telegram_token and telegram_chat_id:
 
 🔗 *Links:*
 • GitHub: {repo_url or f'https://github.com/{github_owner}/{repo_name}'}
-• Twitter: {tweet_url or 'Not posted'}
+• Bluesky: {bluesky_post_url or 'Not posted'}
 
 ✨ *Features:*
 • AI-generated name (GPT)
 • FREE AI art (Hugging Face FLUX)
 • Complete Godot project
 
-🤖 *100% FREE - No payment needed!*
+🤖 *100% FREE - Running automatically!*
 
 Next game in 24 hours!"""
     
@@ -295,7 +305,7 @@ entries.append({
     "date": datetime.now().isoformat(),
     "game": game_name,
     "repo": repo_url,
-    "tweet": tweet_url,
+    "bluesky": bluesky_post_url,
     "art_source": "Hugging Face FLUX / Fallback"
 })
 
@@ -305,12 +315,14 @@ print(f"   ✅ Portfolio has {len(entries)} games")
 # ============ DONE ============
 print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
+print(f"   📦 GitHub: {repo_url or 'Created'}")
+print(f"   🦋 Bluesky: {'Posted' if bluesky_post_url else 'Skipped'}")
 print("=" * 60)
 
 with open("build_info.txt", "w") as f:
     f.write(f"Game: {game_name}\n")
     f.write(f"Time: {datetime.now()}\n")
     f.write(f"Repo: {repo_url}\n")
-    f.write(f"Tweet: {tweet_url}\n")
+    f.write(f"Bluesky: {bluesky_post_url}\n")
 
 print("\n🎉 BOT FINISHED SUCCESSFULLY!")
