@@ -48,7 +48,7 @@ def generate_ai_name():
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
                 json={
                     "model": "gpt-3.5-turbo",
-                    "messages": [{"role": "user", "content": "Generate ONE creative video game name. Return ONLY the name, no quotes. Make it sound fun and unique."}],
+                    "messages": [{"role": "user", "content": "Generate ONE creative video game name. Return ONLY the name, no quotes. Make it sound fun and unique. Max 20 characters."}],
                     "temperature": 0.9,
                     "max_tokens": 20
                 },
@@ -56,7 +56,7 @@ def generate_ai_name():
             )
             if response.status_code == 200:
                 name = response.json()["choices"][0]["message"]["content"].strip().strip('"')
-                if name and len(name) < 40:
+                if name and len(name) < 30:
                     return name
         except Exception as e:
             print(f"   OpenAI error: {e}")
@@ -208,7 +208,7 @@ if github_token:
     except Exception as e:
         print(f"   ⚠️ GitHub error: {e}")
 
-# ============ 5. POST TO BLUESKY (FREE) ============
+# ============ 5. POST TO BLUESKY (FREE) - FIXED VERSION ============
 print("\n🦋 Posting to Bluesky...")
 
 bluesky_post_url = None
@@ -216,45 +216,59 @@ bluesky_post_url = None
 if bluesky_handle and bluesky_password:
     try:
         # Login to Bluesky
+        print("   Logging in...")
         session = requests.post(
             "https://bsky.social/xrpc/com.atproto.server.createSession",
             json={"identifier": bluesky_handle, "password": bluesky_password},
-            timeout=10
-        ).json()
+            timeout=15
+        )
         
-        access_token = session.get("accessJwt")
-        did = session.get("did")
-        
-        if access_token and did:
-            # Create the post
-            post_text = f"🎮 {game_name} - New daily game!\n\n{repo_url or f'https://github.com/{github_owner}/{repo_name}'}\n\n#gamedev #indiedev #{game_name.replace(' ', '')}"
+        if session.status_code == 200:
+            session_data = session.json()
+            access_token = session_data.get("accessJwt")
+            did = session_data.get("did")
             
-            post_data = {
-                "repo": did,
-                "collection": "app.bsky.feed.post",
-                "record": {
-                    "$type": "app.bsky.feed.post",
-                    "text": post_text[:300],
-                    "createdAt": datetime.now().isoformat()
-                }
-            }
-            
-            response = requests.post(
-                "https://bsky.social/xrpc/com.atproto.repo.createRecord",
-                headers={"Authorization": f"Bearer {access_token}"},
-                json=post_data,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                bluesky_post_url = f"https://bsky.app/profile/{bluesky_handle}/post/{response.json()['uri'].split('/')[-1]}"
-                print(f"   ✅ Posted to Bluesky!")
+            if access_token and did:
+                # Create post (keep under 300 chars)
+                repo_link = repo_url or f"https://github.com/{github_owner}/{repo_name}"
+                post_text = f"🎮 {game_name}\n\nNew daily game!\n\n{repo_link}\n\n#gamedev #indiedev"
+                
+                # Ensure under 280 chars
+                if len(post_text) > 280:
+                    post_text = post_text[:277] + "..."
+                
+                # Create the post
+                post_response = requests.post(
+                    "https://bsky.social/xrpc/com.atproto.repo.createRecord",
+                    headers={
+                        "Authorization": f"Bearer {access_token}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "repo": did,
+                        "collection": "app.bsky.feed.post",
+                        "record": {
+                            "$type": "app.bsky.feed.post",
+                            "text": post_text,
+                            "createdAt": datetime.now().isoformat()
+                        }
+                    },
+                    timeout=15
+                )
+                
+                if post_response.status_code == 200:
+                    bluesky_post_url = f"https://bsky.app/profile/{bluesky_handle}"
+                    print(f"   ✅ Posted to Bluesky!")
+                else:
+                    print(f"   ❌ Post failed: {post_response.status_code}")
+                    print(f"   Response: {post_response.text[:200]}")
             else:
-                print(f"   ⚠️ Bluesky error: {response.status_code}")
+                print(f"   ❌ Login response missing tokens")
         else:
-            print("   ⚠️ Could not login to Bluesky")
+            print(f"   ❌ Login failed: {session.status_code}")
+            print(f"   Response: {session.text[:200]}")
     except Exception as e:
-        print(f"   ⚠️ Bluesky exception: {e}")
+        print(f"   ❌ Bluesky error: {e}")
 else:
     print("   ⚠️ No Bluesky credentials - skipping")
 
@@ -269,7 +283,7 @@ if telegram_token and telegram_chat_id:
 
 🔗 *Links:*
 • GitHub: {repo_url or f'https://github.com/{github_owner}/{repo_name}'}
-• Bluesky: {bluesky_post_url or 'Not posted'}
+• Bluesky: {bluesky_post_url or 'Not posted (check logs)'}
 
 ✨ *Features:*
 • AI-generated name (GPT)
@@ -316,7 +330,7 @@ print(f"   ✅ Portfolio has {len(entries)} games")
 print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
 print(f"   📦 GitHub: {repo_url or 'Created'}")
-print(f"   🦋 Bluesky: {'Posted' if bluesky_post_url else 'Skipped'}")
+print(f"   🦋 Bluesky: {'Posted' if bluesky_post_url else 'Failed - check handle/password'}")
 print("=" * 60)
 
 with open("build_info.txt", "w") as f:
