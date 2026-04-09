@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.1
+LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.3
 - Self-learning AI bot
 - Dynamic cool art (changes daily)
+- Demo page with price & crypto payment (Solana)
 - Full DeathRoll branding
 """
 
 import os
 import json
 import random
-import time
 import requests
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.1")
-print("✅ Dynamic Art | Self-Learning | Full Automation")
+print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.3")
+print("✅ Demo Page | Solana Payments | Dynamic Art")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "3.1.0"
+BOT_VERSION = "3.3.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR REAL CONTACT INFO ============
@@ -33,10 +33,16 @@ BRAND_TIKTOK = "@favouradeleke662"
 BRAND_WEBSITE = "https://deathroll.co"
 BRAND_GITHUB = "favouradeleke246-maker"
 
+# Solana wallet addresses (crypto payments)
+SOLANA_TRUST_WALLET = "6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3"
+SOLANA_PHANTOM_WALLET = "Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb"
+
 print(f"🏷️ Brand: {BRAND_NAME}")
 print(f"📧 Email: {BRAND_EMAIL_PRIMARY}")
 print(f"📱 Telegram: {BRAND_TELEGRAM}")
 print(f"🎵 TikTok: {BRAND_TIKTOK}")
+print(f"💰 Solana (Trust): {SOLANA_TRUST_WALLET[:10]}...")
+print(f"💰 Solana (Phantom): {SOLANA_PHANTOM_WALLET[:10]}...")
 
 # ============ GET SECRETS ============
 telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -46,12 +52,15 @@ github_token = os.getenv("GH_TOKEN")
 bluesky_handle = os.getenv("BLUESKY_HANDLE")
 bluesky_password = os.getenv("BLUESKY_PASSWORD")
 bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
+monetization_url = os.getenv("MONETIZATION_URL")   # optional donation link
+game_price = os.getenv("GAME_PRICE", "5")          # default $5
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
 print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"✅ Bluesky: {'OK' if bluesky_handle else 'NO'}")
 print(f"✅ X Learning: {'OK' if bearer_token else 'NO'}")
+print(f"💰 Game Price: ${game_price}")
 
 # ============ SELF-IMPROVEMENT SYSTEM ============
 print("\n🧠 Running self-improvement analysis...")
@@ -189,41 +198,26 @@ def generate_cool_art():
     return generate_algorithmic_sprite()
 
 def generate_algorithmic_sprite():
-    """Generate a cool, stylized game sprite that changes daily"""
-    # Random seed based on game name and date to ensure variation
     random.seed(game_name + datetime.now().strftime("%Y-%m-%d"))
     img = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    
-    # Background gradient (radial glow)
     center = 256
     for r in range(256, 0, -20):
         alpha = int(100 * (1 - r/256))
         color = (random.randint(30, 80), random.randint(30, 80), random.randint(100, 180), alpha)
         draw.ellipse([center-r, center-r, center+r, center+r], fill=color)
-    
-    # Main character colors vary per game
     body_color = (random.randint(180, 255), random.randint(80, 180), random.randint(50, 150))
-    # Body (oval)
     draw.ellipse([180, 200, 332, 380], fill=body_color, outline=(0,0,0), width=3)
-    # Head
     head_color = (body_color[0], body_color[1] - 20, body_color[2] - 20)
     draw.ellipse([210, 130, 302, 230], fill=head_color, outline=(0,0,0), width=3)
-    # Eyes (different expressions)
-    eye_color = (255,255,255)
-    draw.ellipse([235, 170, 255, 190], fill=eye_color)
-    draw.ellipse([257, 170, 277, 190], fill=eye_color)
-    # Pupils
-    pupil_color = (0,0,0)
-    draw.ellipse([242, 175, 252, 185], fill=pupil_color)
-    draw.ellipse([264, 175, 274, 185], fill=pupil_color)
-    # Smile (happy or determined)
+    draw.ellipse([235, 170, 255, 190], fill=(255,255,255))
+    draw.ellipse([257, 170, 277, 190], fill=(255,255,255))
+    draw.ellipse([242, 175, 252, 185], fill=(0,0,0))
+    draw.ellipse([264, 175, 274, 185], fill=(0,0,0))
     if random.random() > 0.5:
         draw.arc([240, 190, 272, 210], 0, 180, fill=(0,0,0), width=2)
     else:
         draw.arc([240, 190, 272, 210], 0, -180, fill=(0,0,0), width=2)
-    
-    # Accessory based on mechanic (changes daily)
     if "dash" in selected_mechanic:
         draw.polygon([(220, 130), (256, 80), (292, 130)], fill=(255,215,0), outline=(0,0,0), width=2)
     elif "shield" in selected_mechanic:
@@ -236,20 +230,15 @@ def generate_algorithmic_sprite():
         draw.ellipse([180, 200, 332, 380], outline=(200,200,200,100), width=4)
     else:
         draw.polygon([(256, 350), (280, 400), (232, 400)], fill=(255,0,0), outline=(0,0,0), width=2)
-    
-    # Glow effect
     draw.ellipse([150, 100, 362, 412], outline=(255,255,100), width=4)
-    # Game name text
     try:
         draw.text((180, 460), game_name[:15], fill=(255,255,255))
     except:
         pass
-    # Random stars
     for _ in range(30):
         x = random.randint(30, 482)
         y = random.randint(30, 482)
         draw.point((x, y), fill=(255,255,200))
-    
     img.save(sprite_path)
     return True
 
@@ -327,8 +316,10 @@ Created by **DeathRoll Studio**, this game features:
 |-----|--------|
 | Arrow Keys | Move your character |
 | Space | Special ability |
-## 📥 Download
-- [Download from GitHub](https://github.com/{BRAND_GITHUB}/{repo_name}/archive/main.zip)
+## 📥 Download & Purchase
+- **Price:** ${game_price} USD
+- **Payment:** Solana (Trust Wallet or Phantom Wallet)
+- **Free demo version:** [Download from GitHub](https://github.com/{BRAND_GITHUB}/{repo_name}/archive/main.zip)
 ## 🤝 Connect With DeathRoll
 | Platform | Link |
 |----------|------|
@@ -342,13 +333,166 @@ Created by **DeathRoll Studio**, this game features:
 (project_dir / "README.md").write_text(readme_content)
 print(f"   ✅ Created README with DeathRoll branding")
 
-# ============ 7. CREATE GITHUB REPO ============
+# ============ 7. DEMO PAGE WITH PRICE & CRYPTO PAYMENT ============
+print("\n🌐 Creating demo landing page with price and Solana addresses...")
+
+donation_section = ""
+if monetization_url and monetization_url != "":
+    donation_section = f'<a href="{monetization_url}" class="btn btn-secondary" target="_blank">☕ Support via Donation</a>'
+
+landing_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{game_name} – DeathRoll Studio</title>
+    <meta name="description" content="Play {game_name}, a {selected_type} game with {selected_mechanic}. Created by DeathRoll Studio.">
+    <meta property="og:title" content="{game_name}">
+    <meta property="og:image" content="icon.png">
+    <meta property="og:description" content="A {selected_type} game with {selected_mechanic}. Download now!">
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }}
+        .card {{
+            max-width: 800px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 30px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.2);
+        }}
+        h1 {{ font-size: 2.5rem; margin-bottom: 10px; }}
+        .sprite {{
+            width: 256px;
+            height: 256px;
+            margin: 20px auto;
+            background: #1e1a2f;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }}
+        .sprite img {{ width: 100%; height: 100%; object-fit: contain; }}
+        .badge {{
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 40px;
+            margin: 5px;
+            font-size: 0.9rem;
+        }}
+        .price {{
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 15px 0;
+        }}
+        .btn {{
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 15px 10px;
+            transition: transform 0.2s, background 0.2s;
+        }}
+        .btn:hover {{
+            transform: scale(1.05);
+            background: #ff4757;
+        }}
+        .btn-secondary {{
+            background: #4a90e2;
+        }}
+        .btn-secondary:hover {{
+            background: #357abd;
+        }}
+        .contact {{
+            background: rgba(255,255,255,0.05);
+            border-radius: 30px;
+            padding: 20px;
+            margin-top: 20px;
+        }}
+        .wallet {{
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }}
+        .footer {{
+            margin-top: 30px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }}
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🎮 {game_name}</h1>
+    <div class="sprite">
+        <img src="icon.png" alt="Game sprite">
+    </div>
+    <div>
+        <span class="badge">{selected_type}</span>
+        <span class="badge">{selected_mechanic}</span>
+    </div>
+    <div class="price">${game_price} USD</div>
+    <p style="margin: 20px 0; line-height: 1.5;">
+        A <strong>{selected_type}</strong> where you master the <strong>{selected_mechanic}</strong>.<br>
+        Created daily by DeathRoll Studio with AI-powered design.
+    </p>
+    <div>
+        <a href="{repo_link}" class="btn">⬇️ Download Demo</a>
+        <a href="mailto:{BRAND_EMAIL_PRIMARY}?subject=Purchase%20{game_name}" class="btn btn-secondary">💰 Contact to Buy</a>
+        {donation_section}
+    </div>
+    <div class="contact">
+        <strong>📞 To purchase this game, send ${game_price} SOL to either wallet:</strong><br>
+        <div class="wallet">
+            🔵 <strong>Trust Wallet (Solana):</strong><br>
+            <code>{SOLANA_TRUST_WALLET}</code>
+        </div>
+        <div class="wallet">
+            🟣 <strong>Phantom Wallet (Solana):</strong><br>
+            <code>{SOLANA_PHANTOM_WALLET}</code>
+        </div>
+        <p>After payment, email <a href="mailto:{BRAND_EMAIL_PRIMARY}" style="color:#ffd700;">{BRAND_EMAIL_PRIMARY}</a> or Telegram <strong>{BRAND_TELEGRAM}</strong> with your transaction ID. You will receive full game files and a commercial license.</p>
+    </div>
+    <div class="footer">
+        🎵 TikTok: {BRAND_TIKTOK} | 🌐 {BRAND_WEBSITE}<br>
+        Every game is unique – check back tomorrow for a new adventure!
+    </div>
+</div>
+</body>
+</html>
+"""
+(project_dir / "demo.html").write_text(landing_html)
+print(f"   ✅ Demo page with price ${game_price} and Solana wallets created")
+
+# ============ 8. CREATE GITHUB REPO ============
 print("\n📦 Creating GitHub repository...")
 repo_url = None
 github_owner = BRAND_GITHUB
 if github_token:
     try:
-        response = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} - A {selected_type} game by DeathRoll Studio", "private": False, "auto_init": True}, timeout=30)
+        response = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} - A {selected_type} game by DeathRoll Studio | Price ${game_price}", "private": False, "auto_init": True}, timeout=30)
         if response.status_code == 201:
             repo_url = response.json()["html_url"]
             print(f"   ✅ Repo created: {repo_url}")
@@ -357,7 +501,7 @@ if github_token:
     except Exception as e:
         print(f"   ⚠️ GitHub error: {e}")
 
-# ============ 8. POST TO BLUESKY ============
+# ============ 9. POST TO BLUESKY ============
 print("\n🦋 Posting to Bluesky...")
 bluesky_post_url = None
 repo_link = repo_url or f"https://github.com/{github_owner}/{repo_name}"
@@ -369,7 +513,7 @@ if bluesky_handle and bluesky_password:
             access_token = session_data.get("accessJwt")
             did = session_data.get("did")
             if access_token and did:
-                post_text = f"🎮 {game_name} - New game from DeathRoll Studio!\n\nA {selected_type} with {selected_mechanic}\n\n{repo_link}\n\n#gamedev #indiedev"
+                post_text = f"🎮 {game_name} - New game from DeathRoll Studio!\n\n{selected_type} with {selected_mechanic}\n\nPrice: ${game_price} SOL\nBuy via Trust/Phantom: {SOLANA_TRUST_WALLET[:8]}...\n\n{repo_link}\n\n#gamedev #indiedev"
                 post_response = requests.post("https://bsky.social/xrpc/com.atproto.repo.createRecord", headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}, json={"repo": did, "collection": "app.bsky.feed.post", "record": {"$type": "app.bsky.feed.post", "text": post_text[:300], "createdAt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")}}, timeout=30)
                 if post_response.status_code == 200:
                     bluesky_post_url = f"https://bsky.app/profile/{bluesky_handle}"
@@ -377,23 +521,29 @@ if bluesky_handle and bluesky_password:
     except Exception as e:
         print(f"   ❌ Bluesky error: {e}")
 
-# ============ 9. SEND TELEGRAM REPORT ============
+# ============ 10. SEND TELEGRAM REPORT ============
 print("\n📱 Sending Telegram report...")
 if telegram_token and telegram_chat_id:
     message = f"""🎮 *DEATHROLL STUDIO - DAILY GAME* 🎮
+
 *Game:* {game_name}
 *Genre:* {selected_type}
 *Mechanic:* {selected_mechanic}
+*Price:* ${game_price} USD (Solana)
 *Date:* {datetime.now().strftime('%Y-%m-%d')}
+
 📊 *X Trends:* {trending_genres[0] if trending_genres else 'N/A'}
+
 🔗 *Links:*
 • GitHub: {repo_link}
+• Demo Page: {repo_link}/demo.html
 • Bluesky: {bluesky_post_url or 'Not posted'}
+
+💰 *Solana Wallets for Payment:*
+Trust: `{SOLANA_TRUST_WALLET[:15]}...`
+Phantom: `{SOLANA_PHANTOM_WALLET[:15]}...`
+
 🏷️ *DeathRoll Studio*
-📧 Support: {BRAND_EMAIL_PRIMARY}
-📱 Telegram: {BRAND_TELEGRAM}
-🎵 TikTok: {BRAND_TIKTOK}
-🌐 Website: {BRAND_WEBSITE}
 🤖 *Bot learns and improves daily!* v{BOT_VERSION}"""
     try:
         response = requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": telegram_chat_id, "text": message, "parse_mode": "Markdown"}, timeout=30)
@@ -402,14 +552,14 @@ if telegram_token and telegram_chat_id:
     except Exception as e:
         print(f"   ❌ Telegram error: {e}")
 
-# ============ 10. SAVE LEARNING DATA ============
+# ============ 11. SAVE LEARNING DATA ============
 print("\n💾 Saving learning data...")
 learning_file = Path("learning_data.json")
-learning_data = {"last_run": datetime.now().isoformat(), "game_name": game_name, "genre": selected_type, "mechanic": selected_mechanic, "trending_genres": trending_genres, "repo_url": repo_link, "bot_version": BOT_VERSION}
+learning_data = {"last_run": datetime.now().isoformat(), "game_name": game_name, "genre": selected_type, "mechanic": selected_mechanic, "trending_genres": trending_genres, "repo_url": repo_link, "price": game_price, "bot_version": BOT_VERSION}
 learning_file.write_text(json.dumps({"history": [learning_data], "last_update": datetime.now().isoformat()}, indent=2))
 print(f"   ✅ Learning data saved")
 
-# ============ 11. UPDATE PORTFOLIO ============
+# ============ 12. UPDATE PORTFOLIO ============
 print("\n📁 Updating portfolio...")
 portfolio_file = Path("portfolio.json")
 entries = []
@@ -418,36 +568,47 @@ if portfolio_file.exists():
         entries = json.loads(portfolio_file.read_text())
     except:
         entries = []
-entries.append({"date": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "mechanic": selected_mechanic, "trending": trending_genres, "repo": repo_link, "bluesky": bluesky_post_url})
+entries.append({"date": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "mechanic": selected_mechanic, "trending": trending_genres, "repo": repo_link, "price": game_price, "bluesky": bluesky_post_url})
 portfolio_file.write_text(json.dumps(entries[-50:], indent=2))
 print(f"   ✅ Portfolio has {len(entries)} games")
 
-# ============ 12. CREATE SUPPORT FILE ============
-print("\n📧 Creating support file...")
-support_content = f"""DeathRoll Studio - Support Information
+# ============ 13. CREATE SUPPORT & PURCHASE FILE ============
+print("\n📧 Creating support and purchase file...")
+support_content = f"""DeathRoll Studio - Support & Purchase Information
+
 Game: {game_name}
 Date: {datetime.now().strftime('%Y-%m-%d')}
-Contact Information:
+Price: ${game_price} USD
+
+Payment Methods: Solana (only)
+
+Trust Wallet Solana Address:
+{SOLANA_TRUST_WALLET}
+
+Phantom Wallet Solana Address:
+{SOLANA_PHANTOM_WALLET}
+
+How to purchase:
+1. Send exactly ${game_price} SOL to either wallet address.
+2. Email {BRAND_EMAIL_PRIMARY} or Telegram {BRAND_TELEGRAM} with your transaction ID.
+3. You will receive:
+   - Full Godot project files
+   - Commercial license
+   - Lifetime updates
+
+Contact for support or questions:
 - Primary Email: {BRAND_EMAIL_PRIMARY}
 - Secondary Email: {BRAND_EMAIL_SECONDARY}
 - Telegram: {BRAND_TELEGRAM}
 - TikTok: {BRAND_TIKTOK}
 - Website: {BRAND_WEBSITE}
-- GitHub: https://github.com/{BRAND_GITHUB}
-For support requests, please email: {BRAND_EMAIL_PRIMARY}
-Include in your email:
-1. Game name: {game_name}
-2. Platform you're playing on
-3. Description of the issue
-We'll respond within 24-48 hours.
-Thank you for playing DeathRoll Studio games!
 """
 (project_dir / "SUPPORT.txt").write_text(support_content)
-print(f"   ✅ Created support file")
+print(f"   ✅ Created support & purchase file")
 
-# ============ 13. VERIFICATION ============
+# ============ 14. VERIFICATION ============
 print("\n🔍 Verifying all systems...")
-systems_status = {"AI Name Generation": True, "Art Generation": True, "Godot Project": True, "GitHub Integration": github_token is not None, "Bluesky Posting": bluesky_handle is not None, "X Learning": bearer_token is not None, "Self-Improvement": True, "Brand Integration": True, "Support System": True}
+systems_status = {"AI Name Generation": True, "Art Generation": True, "Godot Project": True, "GitHub Integration": github_token is not None, "Bluesky Posting": bluesky_handle is not None, "X Learning": bearer_token is not None, "Self-Improvement": True, "Brand Integration": True, "Demo Page": True, "Payment Contact": True}
 for system, status in systems_status.items():
     print(f"   {system}: {'✅' if status else '⚠️'}")
 
@@ -460,11 +621,15 @@ print(f"   📱 Telegram: {BRAND_TELEGRAM}")
 print(f"   🎵 TikTok: {BRAND_TIKTOK}")
 print(f"   🎮 Genre: {selected_type}")
 print(f"   ⚡ Mechanic: {selected_mechanic}")
+print(f"   💰 Price: ${game_price} SOL")
+print(f"   💸 Trust Wallet: {SOLANA_TRUST_WALLET[:15]}...")
+print(f"   💸 Phantom Wallet: {SOLANA_PHANTOM_WALLET[:15]}...")
 print(f"   📦 GitHub: {repo_link}")
 print("=" * 60)
 
 with open("build_info.txt", "w") as f:
-    f.write(f"Game: {game_name}\nGenre: {selected_type}\nMechanic: {selected_mechanic}\nTime: {datetime.now()}\nRepo: {repo_link}\nEmail: {BRAND_EMAIL_PRIMARY}\nTelegram: {BRAND_TELEGRAM}\nTikTok: {BRAND_TIKTOK}\nBot Version: {BOT_VERSION}\n")
+    f.write(f"Game: {game_name}\nGenre: {selected_type}\nMechanic: {selected_mechanic}\nPrice: ${game_price} SOL\nTime: {datetime.now()}\nRepo: {repo_link}\nEmail: {BRAND_EMAIL_PRIMARY}\nTelegram: {BRAND_TELEGRAM}\nTikTok: {BRAND_TIKTOK}\nTrust Wallet: {SOLANA_TRUST_WALLET}\nPhantom Wallet: {SOLANA_PHANTOM_WALLET}\nBot Version: {BOT_VERSION}\n")
 
 print("\n🎉 DEATHROLL STUDIO BOT FINISHED SUCCESSFULLY!")
-print("🧠 Your bot learned, adapted, and created a new game with dynamic art!")
+print("🧠 Your bot learned, adapted, and created a new game with demo page and Solana payment!")
+print("💰 Buyers can send SOL to your Trust or Phantom wallet.")
