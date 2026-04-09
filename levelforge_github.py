@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.4
+LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.5
 - Self-learning AI bot
 - Dynamic cool art (changes daily)
+- AI-powered social media descriptions
+- Embedded images in Bluesky & Telegram
 - Demo page with price & crypto payment (Solana)
-- Fixed repo_link error
-- Trust Wallet website as monetization link
 """
 
 import os
@@ -17,12 +17,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.4")
-print("✅ Demo Page | Solana Payments | Dynamic Art")
+print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.5")
+print("✅ AI Descriptions | Embedded Images | Solana Payments")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "3.4.0"
+BOT_VERSION = "3.5.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR REAL CONTACT INFO ============
@@ -38,8 +38,8 @@ BRAND_GITHUB = "favouradeleke246-maker"
 SOLANA_TRUST_WALLET = "6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3"
 SOLANA_PHANTOM_WALLET = "Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb"
 
-# Monetization link – Trust Wallet website (or any other)
-MONETIZATION_LINK = "https://trustwallet.com"  # You can change this
+# Monetization link – Trust Wallet website
+MONETIZATION_LINK = "https://trustwallet.com"
 
 print(f"🏷️ Brand: {BRAND_NAME}")
 print(f"📧 Email: {BRAND_EMAIL_PRIMARY}")
@@ -337,7 +337,7 @@ Created by **DeathRoll Studio**, this game features:
 (project_dir / "README.md").write_text(readme_content)
 print(f"   ✅ Created README with DeathRoll branding")
 
-# ============ 7. CREATE GITHUB REPO (BEFORE DEMO PAGE) ============
+# ============ 7. CREATE GITHUB REPO ============
 print("\n📦 Creating GitHub repository...")
 repo_url = None
 github_owner = BRAND_GITHUB
@@ -352,11 +352,13 @@ if github_token:
     except Exception as e:
         print(f"   ⚠️ GitHub error: {e}")
 
-# Define repo_link after repo creation (or fallback)
 repo_link = repo_url or f"https://github.com/{github_owner}/{repo_name}"
 
-# ============ 8. DEMO PAGE WITH PRICE & CRYPTO PAYMENT (NOW repo_link exists) ============
+# ============ 8. DEMO PAGE WITH CORRECT RAW LINK ============
 print("\n🌐 Creating demo landing page with price and Solana addresses...")
+
+# Generate a raw link that renders the HTML directly (using raw.githack.com)
+raw_demo_link = f"https://raw.githack.com/{github_owner}/{repo_name}/main/demo.html"
 
 donation_section = ""
 if monetization_url and monetization_url != "":
@@ -507,55 +509,195 @@ landing_html = f"""<!DOCTYPE html>
 </html>
 """
 (project_dir / "demo.html").write_text(landing_html)
-print(f"   ✅ Demo page with price ${game_price} and Solana wallets created")
+print(f"   ✅ Demo page created – viewable at {raw_demo_link}")
 
-# ============ 9. POST TO BLUESKY ============
-print("\n🦋 Posting to Bluesky...")
+# ============ 9. AI-POWERED BLUESKY POST WITH EMBEDDED IMAGE ============
+print("\n🦋 Posting to Bluesky with AI description and embedded image...")
 bluesky_post_url = None
+
+# Generate AI description for Bluesky
+bluesky_description = ""
+if openai_key:
+    try:
+        prompt = f"""Write a short, exciting game description for '{game_name}'.
+Genre: {selected_type}
+Special mechanic: {selected_mechanic}
+Target audience: indie game lovers
+Tone: enthusiastic, professional, engaging
+Keep under 200 characters. Make people want to click."""
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+            json={
+                "model": "gpt-3.5-turbo",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.8,
+                "max_tokens": 80
+            },
+            timeout=15
+        )
+        if response.status_code == 200:
+            bluesky_description = response.json()["choices"][0]["message"]["content"].strip().strip('"')
+            print(f"   🤖 AI description: {bluesky_description[:80]}...")
+    except Exception as e:
+        print(f"   AI description error: {e}")
+
+if not bluesky_description:
+    bluesky_description = f"A {selected_type} where you master the {selected_mechanic}. Unique daily games from DeathRoll Studio!"
+
+# Post to Bluesky with image
 if bluesky_handle and bluesky_password:
     try:
-        session = requests.post("https://bsky.social/xrpc/com.atproto.server.createSession", json={"identifier": bluesky_handle, "password": bluesky_password}, timeout=30)
+        # Login
+        session = requests.post(
+            "https://bsky.social/xrpc/com.atproto.server.createSession",
+            json={"identifier": bluesky_handle, "password": bluesky_password},
+            timeout=30
+        )
         if session.status_code == 200:
             session_data = session.json()
             access_token = session_data.get("accessJwt")
             did = session_data.get("did")
+            
             if access_token and did:
-                post_text = f"🎮 {game_name} - New game from DeathRoll Studio!\n\n{selected_type} with {selected_mechanic}\n\nPrice: ${game_price} SOL\nBuy via Trust/Phantom: {SOLANA_TRUST_WALLET[:8]}...\n\n{repo_link}\n\n#gamedev #indiedev"
-                post_response = requests.post("https://bsky.social/xrpc/com.atproto.repo.createRecord", headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}, json={"repo": did, "collection": "app.bsky.feed.post", "record": {"$type": "app.bsky.feed.post", "text": post_text[:300], "createdAt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")}}, timeout=30)
-                if post_response.status_code == 200:
-                    bluesky_post_url = f"https://bsky.app/profile/{bluesky_handle}"
-                    print(f"   ✅ Posted to Bluesky!")
+                # Upload image to Bluesky
+                with open(sprite_path, "rb") as f:
+                    img_data = f.read()
+                
+                upload_resp = requests.post(
+                    "https://bsky.social/xrpc/com.atproto.repo.uploadBlob",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                    files={"blob": img_data},
+                    timeout=30
+                )
+                
+                if upload_resp.status_code == 200:
+                    blob_ref = upload_resp.json()["blob"]
+                    
+                    # Compose post text
+                    post_text = f"🎮 {game_name}\n\n{bluesky_description}\n\n💰 Price: ${game_price} SOL\n\n{repo_link}\n\n#gamedev #indiedev #{game_name.replace(' ', '')}"
+                    
+                    # Create post with image
+                    post_response = requests.post(
+                        "https://bsky.social/xrpc/com.atproto.repo.createRecord",
+                        headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+                        json={
+                            "repo": did,
+                            "collection": "app.bsky.feed.post",
+                            "record": {
+                                "$type": "app.bsky.feed.post",
+                                "text": post_text[:300],
+                                "createdAt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                                "embed": {
+                                    "$type": "app.bsky.embed.images",
+                                    "images": [{"image": blob_ref, "alt": f"Game art for {game_name}"}]
+                                }
+                            }
+                        },
+                        timeout=30
+                    )
+                    if post_response.status_code == 200:
+                        bluesky_post_url = f"https://bsky.app/profile/{bluesky_handle}"
+                        print(f"   ✅ Posted to Bluesky with image and AI description!")
+                    else:
+                        print(f"   ❌ Post failed: {post_response.status_code}")
+                else:
+                    print("   ❌ Image upload failed, posting without image")
+                    # Fallback to text-only
+                    post_response = requests.post(
+                        "https://bsky.social/xrpc/com.atproto.repo.createRecord",
+                        headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+                        json={
+                            "repo": did,
+                            "collection": "app.bsky.feed.post",
+                            "record": {
+                                "$type": "app.bsky.feed.post",
+                                "text": post_text[:300],
+                                "createdAt": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                            }
+                        },
+                        timeout=30
+                    )
+                    if post_response.status_code == 200:
+                        bluesky_post_url = f"https://bsky.app/profile/{bluesky_handle}"
+                        print(f"   ✅ Posted to Bluesky (text only)")
     except Exception as e:
         print(f"   ❌ Bluesky error: {e}")
 
-# ============ 10. SEND TELEGRAM REPORT ============
-print("\n📱 Sending Telegram report...")
+# ============ 10. TELEGRAM REPORT WITH PHOTO AND AI DESCRIPTION ============
+print("\n📱 Sending Telegram report with photo and AI description...")
+
 if telegram_token and telegram_chat_id:
+    # Generate AI description for Telegram (shorter, punchy)
+    telegram_description = ""
+    if openai_key:
+        try:
+            prompt = f"Write one short sentence (max 120 chars) to promote '{game_name}', a {selected_type} game with {selected_mechanic}. Make it exciting."
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+                json={
+                    "model": "gpt-3.5-turbo",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.8,
+                    "max_tokens": 60
+                },
+                timeout=15
+            )
+            if response.status_code == 200:
+                telegram_description = response.json()["choices"][0]["message"]["content"].strip().strip('"')
+        except:
+            pass
+    if not telegram_description:
+        telegram_description = bluesky_description if bluesky_description else f"Master the {selected_mechanic} in this {selected_type}!"
+    
+    # Send the game art as a photo
+    try:
+        with open(sprite_path, "rb") as photo:
+            files = {"photo": photo}
+            data = {"chat_id": telegram_chat_id, "caption": f"🎮 {game_name} – {telegram_description}"}
+            photo_resp = requests.post(
+                f"https://api.telegram.org/bot{telegram_token}/sendPhoto",
+                files=files,
+                data=data,
+                timeout=30
+            )
+            if photo_resp.status_code == 200:
+                print("   ✅ Game art sent to Telegram")
+            else:
+                print("   ⚠️ Could not send photo, sending text only")
+    except Exception as e:
+        print(f"   ⚠️ Photo send error: {e}")
+
+    # Send the detailed text message
     message = f"""🎮 *DEATHROLL STUDIO - DAILY GAME* 🎮
 
 *Game:* {game_name}
 *Genre:* {selected_type}
 *Mechanic:* {selected_mechanic}
 *Price:* ${game_price} USD (Solana)
-*Date:* {datetime.now().strftime('%Y-%m-%d')}
 
-📊 *X Trends:* {trending_genres[0] if trending_genres else 'N/A'}
+📝 *Description:* {telegram_description}
 
 🔗 *Links:*
 • GitHub: {repo_link}
-• Demo Page: {repo_link}/demo.html
-• Bluesky: {bluesky_post_url or 'Not posted'}
+• Demo Page: {raw_demo_link}
 
-💰 *Solana Wallets for Payment:*
+💰 *Solana Wallets:*
 Trust: `{SOLANA_TRUST_WALLET[:15]}...`
 Phantom: `{SOLANA_PHANTOM_WALLET[:15]}...`
 
 🏷️ *DeathRoll Studio*
 🤖 *Bot learns and improves daily!* v{BOT_VERSION}"""
+    
     try:
-        response = requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": telegram_chat_id, "text": message, "parse_mode": "Markdown"}, timeout=30)
+        response = requests.post(
+            f"https://api.telegram.org/bot{telegram_token}/sendMessage",
+            json={"chat_id": telegram_chat_id, "text": message, "parse_mode": "Markdown"},
+            timeout=30
+        )
         if response.status_code == 200:
-            print(f"   ✅ Report sent to Telegram!")
+            print(f"   ✅ Report sent to Telegram with AI description!")
     except Exception as e:
         print(f"   ❌ Telegram error: {e}")
 
@@ -632,11 +774,13 @@ print(f"   💰 Price: ${game_price} SOL")
 print(f"   💸 Trust Wallet: {SOLANA_TRUST_WALLET[:15]}...")
 print(f"   💸 Phantom Wallet: {SOLANA_PHANTOM_WALLET[:15]}...")
 print(f"   📦 GitHub: {repo_link}")
+print(f"   🌐 Demo Page: {raw_demo_link}")
 print("=" * 60)
 
 with open("build_info.txt", "w") as f:
-    f.write(f"Game: {game_name}\nGenre: {selected_type}\nMechanic: {selected_mechanic}\nPrice: ${game_price} SOL\nTime: {datetime.now()}\nRepo: {repo_link}\nEmail: {BRAND_EMAIL_PRIMARY}\nTelegram: {BRAND_TELEGRAM}\nTikTok: {BRAND_TIKTOK}\nTrust Wallet: {SOLANA_TRUST_WALLET}\nPhantom Wallet: {SOLANA_PHANTOM_WALLET}\nBot Version: {BOT_VERSION}\n")
+    f.write(f"Game: {game_name}\nGenre: {selected_type}\nMechanic: {selected_mechanic}\nPrice: ${game_price} SOL\nTime: {datetime.now()}\nRepo: {repo_link}\nDemo: {raw_demo_link}\nEmail: {BRAND_EMAIL_PRIMARY}\nTelegram: {BRAND_TELEGRAM}\nTikTok: {BRAND_TIKTOK}\nTrust Wallet: {SOLANA_TRUST_WALLET}\nPhantom Wallet: {SOLANA_PHANTOM_WALLET}\nBot Version: {BOT_VERSION}\n")
 
 print("\n🎉 DEATHROLL STUDIO BOT FINISHED SUCCESSFULLY!")
-print("🧠 Your bot learned, adapted, and created a new game with demo page and Solana payment!")
+print("🧠 Your bot learned, adapted, and created a new game with AI-powered social posts!")
 print("💰 Buyers can send SOL to your Trust or Phantom wallet.")
+print("🖼️ The game art is now embedded in Bluesky posts and sent as a photo in Telegram.")
