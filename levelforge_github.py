@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.5
+LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.6
 - Self-learning AI bot
 - Dynamic cool art (changes daily)
 - AI-powered social media descriptions
 - Embedded images in Bluesky & Telegram
 - Demo page with price & crypto payment (Solana)
+- Fixed HTML preview link (htmlpreview.github.io)
 """
 
 import os
@@ -17,12 +18,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.5")
+print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.6")
 print("✅ AI Descriptions | Embedded Images | Solana Payments")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "3.5.0"
+BOT_VERSION = "3.6.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR REAL CONTACT INFO ============
@@ -354,11 +355,11 @@ if github_token:
 
 repo_link = repo_url or f"https://github.com/{github_owner}/{repo_name}"
 
-# ============ 8. DEMO PAGE WITH CORRECT RAW LINK ============
+# ============ 8. DEMO PAGE WITH FIXED HTML PREVIEW LINK ============
 print("\n🌐 Creating demo landing page with price and Solana addresses...")
 
-# Generate a raw link that renders the HTML directly (using raw.githack.com)
-raw_demo_link = f"https://raw.githack.com/{github_owner}/{repo_name}/main/demo.html"
+# FIXED: Use htmlpreview.github.io for reliable rendering
+raw_demo_link = f"https://htmlpreview.github.io/?https://github.com/{github_owner}/{repo_name}/blob/main/demo.html"
 
 donation_section = ""
 if monetization_url and monetization_url != "":
@@ -784,3 +785,4 @@ print("\n🎉 DEATHROLL STUDIO BOT FINISHED SUCCESSFULLY!")
 print("🧠 Your bot learned, adapted, and created a new game with AI-powered social posts!")
 print("💰 Buyers can send SOL to your Trust or Phantom wallet.")
 print("🖼️ The game art is now embedded in Bluesky posts and sent as a photo in Telegram.")
+print("🌐 The demo page uses a reliable HTML preview service (htmlpreview.github.io).")
