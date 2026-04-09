@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.3
+LevelForge+ ULTRA - COMPLETE PRODUCTION SYSTEM v3.4
 - Self-learning AI bot
 - Dynamic cool art (changes daily)
 - Demo page with price & crypto payment (Solana)
-- Full DeathRoll branding
+- Fixed repo_link error
+- Trust Wallet website as monetization link
 """
 
 import os
@@ -16,12 +17,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.3")
+print("🎮 LEVELFORGE+ ULTRA - DEATHROLL STUDIO v3.4")
 print("✅ Demo Page | Solana Payments | Dynamic Art")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "3.3.0"
+BOT_VERSION = "3.4.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR REAL CONTACT INFO ============
@@ -36,6 +37,9 @@ BRAND_GITHUB = "favouradeleke246-maker"
 # Solana wallet addresses (crypto payments)
 SOLANA_TRUST_WALLET = "6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3"
 SOLANA_PHANTOM_WALLET = "Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb"
+
+# Monetization link – Trust Wallet website (or any other)
+MONETIZATION_LINK = "https://trustwallet.com"  # You can change this
 
 print(f"🏷️ Brand: {BRAND_NAME}")
 print(f"📧 Email: {BRAND_EMAIL_PRIMARY}")
@@ -78,7 +82,7 @@ def analyze_and_improve():
     for mechanic in all_mechanics:
         if mechanic not in mechanic_scores:
             mechanic_scores[mechanic] = 50
-    if trending_genres:
+    if 'trending_genres' in globals() and trending_genres:
         if "action" in trending_genres:
             mechanic_scores["dash ability"] = min(mechanic_scores.get("dash ability", 50) + 5, 100)
             mechanic_scores["time slow"] = min(mechanic_scores.get("time slow", 50) + 3, 100)
@@ -333,7 +337,25 @@ Created by **DeathRoll Studio**, this game features:
 (project_dir / "README.md").write_text(readme_content)
 print(f"   ✅ Created README with DeathRoll branding")
 
-# ============ 7. DEMO PAGE WITH PRICE & CRYPTO PAYMENT ============
+# ============ 7. CREATE GITHUB REPO (BEFORE DEMO PAGE) ============
+print("\n📦 Creating GitHub repository...")
+repo_url = None
+github_owner = BRAND_GITHUB
+if github_token:
+    try:
+        response = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} - A {selected_type} game by DeathRoll Studio | Price ${game_price}", "private": False, "auto_init": True}, timeout=30)
+        if response.status_code == 201:
+            repo_url = response.json()["html_url"]
+            print(f"   ✅ Repo created: {repo_url}")
+        else:
+            print(f"   ⚠️ Repo creation: {response.status_code}")
+    except Exception as e:
+        print(f"   ⚠️ GitHub error: {e}")
+
+# Define repo_link after repo creation (or fallback)
+repo_link = repo_url or f"https://github.com/{github_owner}/{repo_name}"
+
+# ============ 8. DEMO PAGE WITH PRICE & CRYPTO PAYMENT (NOW repo_link exists) ============
 print("\n🌐 Creating demo landing page with price and Solana addresses...")
 
 donation_section = ""
@@ -461,6 +483,7 @@ landing_html = f"""<!DOCTYPE html>
     <div>
         <a href="{repo_link}" class="btn">⬇️ Download Demo</a>
         <a href="mailto:{BRAND_EMAIL_PRIMARY}?subject=Purchase%20{game_name}" class="btn btn-secondary">💰 Contact to Buy</a>
+        <a href="{MONETIZATION_LINK}" class="btn btn-secondary" target="_blank">🔐 Trust Wallet</a>
         {donation_section}
     </div>
     <div class="contact">
@@ -486,25 +509,9 @@ landing_html = f"""<!DOCTYPE html>
 (project_dir / "demo.html").write_text(landing_html)
 print(f"   ✅ Demo page with price ${game_price} and Solana wallets created")
 
-# ============ 8. CREATE GITHUB REPO ============
-print("\n📦 Creating GitHub repository...")
-repo_url = None
-github_owner = BRAND_GITHUB
-if github_token:
-    try:
-        response = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} - A {selected_type} game by DeathRoll Studio | Price ${game_price}", "private": False, "auto_init": True}, timeout=30)
-        if response.status_code == 201:
-            repo_url = response.json()["html_url"]
-            print(f"   ✅ Repo created: {repo_url}")
-        else:
-            print(f"   ⚠️ Repo creation: {response.status_code}")
-    except Exception as e:
-        print(f"   ⚠️ GitHub error: {e}")
-
 # ============ 9. POST TO BLUESKY ============
 print("\n🦋 Posting to Bluesky...")
 bluesky_post_url = None
-repo_link = repo_url or f"https://github.com/{github_owner}/{repo_name}"
 if bluesky_handle and bluesky_password:
     try:
         session = requests.post("https://bsky.social/xrpc/com.atproto.server.createSession", json={"identifier": bluesky_handle, "password": bluesky_password}, timeout=30)
