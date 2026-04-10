@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v14.1
-- FIXED Hugging Face API (working models)
-- SAR System (Study, Analysis, Reprogram)
-- Smart Art Generation (3-tier fallback)
-- Fully functional
+LevelForge+ ULTRA – DEATHROLL STUDIO v15.0
+- SIMPLIFIED & WORKING
+- Pollinations.ai primary + Fallback
+- SAR System learning
+- All features working
 """
 
 import os
@@ -18,12 +18,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🧠 DEATHROLL STUDIO v14.1 – FULLY FUNCTIONAL")
-print("✅ SAR System | Smart Art | All Features Working")
+print("🔥 DEATHROLL STUDIO v15.0 – SIMPLIFIED & WORKING")
+print("✅ Pollinations.ai + Fallback | SAR System | Viral Marketing")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "14.1.0"
+BOT_VERSION = "15.0.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -52,13 +52,11 @@ telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
 github_token = os.getenv("GH_TOKEN")
-huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 game_price = os.getenv("GAME_PRICE", "5")
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
 print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
-print(f"✅ Hugging Face: {'OK' if huggingface_token else 'NO'}")
 print(f"💰 Game Price: ${game_price}")
 
 # ============ SAR SYSTEM ============
@@ -123,77 +121,38 @@ sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
-# ============ SMART ART GENERATION ============
-print("\n🎨 Initializing Smart Art System...")
+# ============ SIMPLE ART GENERATION ============
+print("\n🎨 Initializing Art System...")
 sprite_path = Path("sprite.png")
-art_stats = {"hf": 0, "poll": 0, "fallback": 0, "total": 0}
+art_stats = {"pollinations": 0, "fallback": 0, "total": 0}
 
-# FIXED: Working Hugging Face models
-HF_MODELS = [
-    "stabilityai/stable-diffusion-2-1",
-    "runwayml/stable-diffusion-v1-5",
-    "CompVis/stable-diffusion-v1-4"
-]
-
-def generate_smart_art():
+def generate_art():
     art_stats["total"] += 1
     
-    # Attempt 1: Hugging Face (FREE, RELIABLE)
-    if huggingface_token:
-        print("   🎨 Attempt 1: Hugging Face")
-        for model in HF_MODELS:
-            result = generate_huggingface_art(model)
-            if result:
-                art_stats["hf"] += 1
-                return True
-            time.sleep(2)
-        print("   ⚠️ All HF models failed, trying Pollinations...")
-    
-    # Attempt 2: Pollinations.ai (Backup)
-    print("   🎨 Attempt 2: Pollinations.ai")
+    # Attempt 1: Pollinations.ai
+    print("   🎨 Attempt 1: Pollinations.ai")
     result = generate_pollinations_art()
     if result:
-        art_stats["poll"] += 1
+        art_stats["pollinations"] += 1
         return True
     
-    # Attempt 3: Fallback (Always works)
-    print("   🎨 Attempt 3: Fallback art")
+    # Attempt 2: Fallback (Always works)
+    print("   🎨 Attempt 2: Fallback art")
     art_stats["fallback"] += 1
     return generate_fallback_art()
 
-def generate_huggingface_art(model):
-    try:
-        prompt = f"pixel art game sprite, {game_name} character, {selected_type} game, {selected_mechanic} ability, centered, vibrant colors, game asset, 512x512"
-        API_URL = f"https://api-inference.huggingface.co/models/{model}"
-        headers = {"Authorization": f"Bearer {huggingface_token}"}
-        
-        response = requests.post(API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
-        
-        if response.status_code == 200:
-            with open(sprite_path, "wb") as f:
-                f.write(response.content)
-            print(f"      ✅ HF {model.split('/')[-1]} succeeded!")
-            return True
-        elif response.status_code == 503:
-            print(f"      ⏳ Model loading, waiting...")
-            time.sleep(10)
-            response = requests.post(API_URL, headers=headers, json={"inputs": prompt}, timeout=30)
-            if response.status_code == 200:
-                with open(sprite_path, "wb") as f:
-                    f.write(response.content)
-                print(f"      ✅ HF {model.split('/')[-1]} succeeded after wait!")
-                return True
-        else:
-            print(f"      ⚠️ HF {model.split('/')[-1]} error: {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"      ⚠️ HF error: {str(e)[:50]}")
-        return False
-
 def generate_pollinations_art():
+    """Generate art using Pollinations.ai (free)"""
     try:
-        prompt = f"8K pixel art game sprite for '{game_name}', {selected_type} game character using {selected_mechanic}, detailed, vibrant colors, game asset"
-        url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '+')}?width=512&height=512&model=flux"
+        # Different prompts for variety
+        prompts = [
+            f"pixel+art+game+sprite+{game_name.replace(' ', '+')}+{selected_type}+character+hero+glowing+detailed",
+            f"8K+pixel+art+{game_name.replace(' ', '+')}+game+character+{selected_mechanic}+ability+centered",
+            f"game+sprite+{game_name.replace(' ', '+')}+{selected_type}+character+cute+but+cool+detailed"
+        ]
+        selected_prompt = random.choice(prompts)
+        url = f"https://image.pollinations.ai/prompt/{selected_prompt}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
+        
         response = requests.get(url, timeout=45)
         if response.status_code == 200 and len(response.content) > 5000:
             with open(sprite_path, "wb") as f:
@@ -208,6 +167,7 @@ def generate_pollinations_art():
         return False
 
 def generate_fallback_art():
+    """Always works fallback art"""
     print("      Creating algorithmic art...")
     img = Image.new('RGB', (512, 512), color=(20, 20, 40))
     draw = ImageDraw.Draw(img)
@@ -383,7 +343,7 @@ print(f"   #️⃣ {hashtag_string[:60]}...")
 # ============ GENERATE ART ============
 print("\n🎨 Generating art...")
 art_start = time.time()
-art_success = generate_smart_art()
+art_success = generate_art()
 art_time = time.time() - art_start
 print(f"   ✅ Art completed in {art_time:.1f}s")
 
@@ -561,8 +521,7 @@ print("=" * 60)
 
 # ============ ART METRICS ============
 print("\n📊 Art Generation Stats:")
-print(f"   Hugging Face: {art_stats['hf']}/{art_stats['total']}")
-print(f"   Pollinations: {art_stats['poll']}/{art_stats['total']}")
+print(f"   Pollinations: {art_stats['pollinations']}/{art_stats['total']}")
 print(f"   Fallback: {art_stats['fallback']}/{art_stats['total']}")
 
 # ============ VERIFICATION ============
@@ -582,7 +541,8 @@ print(f"   🧠 SAR: {sar.data['study']['total_runs']} games analyzed")
 print(f"   📦 {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v14.1 FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v15.0 FINISHED!")
+print("✅ Simplified: Pollinations.ai + Fallback only")
 print("🧠 SAR System is learning from every run!")
 print("📱 Check Telegram for your viral posts!")
 print("🎵 TikTok caption ready above!")
