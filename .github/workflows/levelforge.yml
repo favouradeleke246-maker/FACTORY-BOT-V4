@@ -27,7 +27,9 @@ jobs:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
+        MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+        MASTODON_INSTANCE: ${{ secrets.MASTODON_INSTANCE }}
+        GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
     - name: Upload results
@@ -38,6 +40,6 @@ jobs:
           sprite.png
           portfolio.json
           build_info.txt
-          ai_brain.json
           learning_data.json
+          ai_brain.json
           workspace/
