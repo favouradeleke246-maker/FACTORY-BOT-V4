@@ -1,4 +1,4 @@
-name: Test Twitter Only
+name: Test Buffer
 
 on: workflow_dispatch
 
@@ -6,21 +6,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Test Twitter
+      - name: Test Buffer API
         env:
-          API_KEY: ${{ secrets.TWITTER_API_KEY }}
-          API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
-          ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          BUFFER_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
         run: |
-          pip install tweepy
-          python -c "
-          import tweepy
-          auth = tweepy.OAuth1UserHandler(
-            '$API_KEY', '$API_SECRET', 
-            '$ACCESS_TOKEN', '$ACCESS_SECRET'
-          )
-          api = tweepy.API(auth)
-          user = api.verify_credentials()
-          print(f'✅ Working! Logged in as: @{user.screen_name}')
-          "
+          curl -X GET "https://api.bufferapp.com/1/profiles.json" \
+            -H "Authorization: Bearer $BUFFER_TOKEN"
