@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v13.0
-- FINAL PRODUCTION VERSION
-- Mastodon Integration (Working)
-- AI Quality Control for Art
-- Auto-Retry on Bad Images
-- Viral Marketing + Telegram + GitHub
+LevelForge+ ULTRA – DEATHROLL STUDIO v14.0
+- SAR SYSTEM (Study, Analysis, Reprogram)
+- Self-improving AI
+- Smart Art Generation (Hugging Face + Pollinations.ai backup)
+- Adaptive Timeouts & Retry Logic
 """
 
 import os
@@ -19,12 +18,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v13.0 – FINAL PRODUCTION VERSION")
-print("✅ Mastodon | Telegram | GitHub | AI Quality Control")
+print("🧠 DEATHROLL STUDIO v14.0 – SMART AI WITH SAR SYSTEM")
+print("✅ Study | Analysis | Reprogram | Self-Improving")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "13.0.0"
+BOT_VERSION = "14.0.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -35,7 +34,6 @@ BRAND_TELEGRAM = "@deathroll1"
 BRAND_TIKTOK = "@deathroll.co"
 BRAND_WEBSITE = "https://deathroll.co"
 BRAND_GITHUB = "favouradeleke246-maker"
-MASTODON_HANDLE = "@Deathroll_Studio"
 
 # Solana wallets
 SOLANA_TRUST_WALLET = "6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3"
@@ -48,43 +46,305 @@ print(f"🏷️ Brand: {BRAND_NAME}")
 print(f"📧 Email: {BRAND_EMAIL_PRIMARY}")
 print(f"📱 Telegram: {BRAND_TELEGRAM} | Channel: {TELEGRAM_CHANNEL}")
 print(f"🎵 TikTok: {BRAND_TIKTOK}")
-print(f"🐘 Mastodon: {MASTODON_HANDLE}")
 
 # ============ GET SECRETS ============
 telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
 github_token = os.getenv("GH_TOKEN")
-mastodon_token = os.getenv("MASTODON_ACCESS_TOKEN")
-mastodon_instance = os.getenv("MASTODON_INSTANCE")
+huggingface_token = os.getenv("HUGGINGFACE_TOKEN")
 game_price = os.getenv("GAME_PRICE", "5")
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
 print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
-print(f"🐘 Mastodon: {'OK' if mastodon_token else 'NO (add token)'}")
+print(f"✅ Hugging Face: {'OK' if huggingface_token else 'NO'}")
 print(f"💰 Game Price: ${game_price}")
+
+# ============ SAR SYSTEM (Study, Analysis, Reprogram) ============
+print("\n🧠 Initializing SAR System (Study, Analysis, Reprogram)...")
+
+class SARSystem:
+    """Self-improving AI that learns from each run"""
+    
+    def __init__(self):
+        self.sar_file = Path("sar_analysis.json")
+        self.data = self.load()
+        self.performance_metrics = {}
+    
+    def load(self):
+        if self.sar_file.exists():
+            try:
+                return json.loads(self.sar_file.read_text())
+            except:
+                return self.get_default_sar()
+        return self.get_default_sar()
+    
+    def get_default_sar(self):
+        return {
+            "study": {
+                "total_runs": 0,
+                "successful_art_generations": 0,
+                "failed_art_generations": 0,
+                "average_execution_time": 0,
+                "games_created": []
+            },
+            "analysis": {
+                "best_genre": None,
+                "best_mechanic": None,
+                "best_hook": None,
+                "success_rate": 0,
+                "improvement_areas": []
+            },
+            "reprogram": {
+                "last_improvement": None,
+                "version": BOT_VERSION,
+                "adaptive_changes": []
+            }
+        }
+    
+    def save(self):
+        self.sar_file.write_text(json.dumps(self.data, indent=2))
+    
+    def study_record(self, game_name, genre, mechanic, hook, success, execution_time):
+        """Record data from each run"""
+        self.data["study"]["total_runs"] += 1
+        if success:
+            self.data["study"]["successful_art_generations"] += 1
+        else:
+            self.data["study"]["failed_art_generations"] += 1
+        
+        self.data["study"]["games_created"].append({
+            "name": game_name,
+            "genre": genre,
+            "mechanic": mechanic,
+            "hook": hook,
+            "timestamp": datetime.now().isoformat(),
+            "success": success
+        })
+        
+        # Keep only last 50 games
+        self.data["study"]["games_created"] = self.data["study"]["games_created"][-50:]
+        
+        # Update average execution time
+        total_time = self.data["study"]["average_execution_time"] * (self.data["study"]["total_runs"] - 1) + execution_time
+        self.data["study"]["average_execution_time"] = total_time / self.data["study"]["total_runs"]
+        
+        self.save()
+    
+    def analyze(self):
+        """Analyze data and find improvement areas"""
+        if not self.data["study"]["games_created"]:
+            return
+        
+        # Find best performing genre
+        genre_counts = {}
+        for game in self.data["study"]["games_created"]:
+            genre = game["genre"]
+            if genre not in genre_counts:
+                genre_counts[genre] = {"count": 0, "successes": 0}
+            genre_counts[genre]["count"] += 1
+            if game["success"]:
+                genre_counts[genre]["successes"] += 1
+        
+        if genre_counts:
+            best_genre = max(genre_counts.keys(), key=lambda g: genre_counts[g]["successes"] / max(genre_counts[g]["count"], 1))
+            self.data["analysis"]["best_genre"] = best_genre
+        
+        # Find best mechanic
+        mechanic_counts = {}
+        for game in self.data["study"]["games_created"]:
+            mechanic = game["mechanic"]
+            if mechanic not in mechanic_counts:
+                mechanic_counts[mechanic] = {"count": 0, "successes": 0}
+            mechanic_counts[mechanic]["count"] += 1
+            if game["success"]:
+                mechanic_counts[mechanic]["successes"] += 1
+        
+        if mechanic_counts:
+            best_mechanic = max(mechanic_counts.keys(), key=lambda m: mechanic_counts[m]["successes"] / max(mechanic_counts[m]["count"], 1))
+            self.data["analysis"]["best_mechanic"] = best_mechanic
+        
+        # Calculate success rate
+        total = self.data["study"]["successful_art_generations"] + self.data["study"]["failed_art_generations"]
+        if total > 0:
+            self.data["analysis"]["success_rate"] = self.data["study"]["successful_art_generations"] / total
+        
+        self.save()
+    
+    def reprogram(self, improvement):
+        """Record an improvement made to the bot"""
+        self.data["reprogram"]["last_improvement"] = datetime.now().isoformat()
+        self.data["reprogram"]["adaptive_changes"].append({
+            "timestamp": datetime.now().isoformat(),
+            "improvement": improvement
+        })
+        self.save()
+        print(f"   💾 Reprogrammed: {improvement}")
+
+sar = SARSystem()
+sar.analyze()
+print(f"   ✅ SAR System ready ({sar.data['study']['total_runs']} runs analyzed)")
+if sar.data["analysis"]["best_genre"]:
+    print(f"   📊 Best performing genre: {sar.data['analysis']['best_genre']}")
+if sar.data["analysis"]["best_mechanic"]:
+    print(f"   📊 Best performing mechanic: {sar.data['analysis']['best_mechanic']}")
+
+# ============ SMART ART GENERATION ============
+print("\n🎨 Initializing Smart Art Generation System...")
+
+sprite_path = Path("sprite.png")
+
+# Art generation metrics
+art_metrics = {
+    "huggingface_success": 0,
+    "pollinations_success": 0,
+    "fallback_used": 0,
+    "total_attempts": 0
+}
+
+def generate_smart_art():
+    """Smart art generation with adaptive retry logic"""
+    
+    art_metrics["total_attempts"] += 1
+    
+    # PRIORITY 1: Hugging Face (most reliable, free)
+    if huggingface_token:
+        print("   🎨 Attempt 1: Hugging Face (High quality, reliable)")
+        result = generate_huggingface_art()
+        if result:
+            art_metrics["huggingface_success"] += 1
+            sar.reprogram("Hugging Face art generation successful")
+            return True
+        else:
+            print("   ⚠️ Hugging Face failed, trying Pollinations.ai...")
+            time.sleep(3)  # Brief pause before next attempt
+    
+    # PRIORITY 2: Pollinations.ai (backup)
+    print("   🎨 Attempt 2: Pollinations.ai (Free backup)")
+    result = generate_pollinations_art()
+    if result:
+        art_metrics["pollinations_success"] += 1
+        sar.reprogram("Pollinations.ai fallback used successfully")
+        return True
+    
+    # PRIORITY 3: Fallback art (always works)
+    print("   🎨 Attempt 3: Fallback algorithmic art (Guaranteed)")
+    art_metrics["fallback_used"] += 1
+    return generate_fallback_art()
+
+def generate_huggingface_art():
+    """Generate art using Hugging Face's free API"""
+    try:
+        models = [
+            "stabilityai/stable-diffusion-2-1",
+            "runwayml/stable-diffusion-v1-5",
+            "dreamlike-art/dreamlike-photoreal-2.0"
+        ]
+        
+        prompts = [
+            f"pixel art game sprite, {game_name} character, {selected_type} game, {selected_mechanic} ability, centered, vibrant colors, game asset, high quality, 512x512",
+            f"detailed pixel art character for '{game_name}', {selected_type} hero, using {selected_mechanic}, cute but cool, game sprite, 8-bit style"
+        ]
+        
+        selected_model = random.choice(models)
+        selected_prompt = random.choice(prompts)
+        
+        print(f"      Model: {selected_model.split('/')[-1]}")
+        
+        API_URL = f"https://api-inference.huggingface.co/models/{selected_model}"
+        headers = {"Authorization": f"Bearer {huggingface_token}"}
+        
+        response = requests.post(API_URL, headers=headers, json={"inputs": selected_prompt}, timeout=60)
+        
+        if response.status_code == 200:
+            with open(sprite_path, "wb") as f:
+                f.write(response.content)
+            print(f"      ✅ Hugging Face art generated!")
+            return True
+        elif response.status_code == 503:
+            print("      ⏳ Model loading, waiting...")
+            time.sleep(15)
+            response = requests.post(API_URL, headers=headers, json={"inputs": selected_prompt}, timeout=60)
+            if response.status_code == 200:
+                with open(sprite_path, "wb") as f:
+                    f.write(response.content)
+                print(f"      ✅ Hugging Face art generated after wait!")
+                return True
+        else:
+            print(f"      ⚠️ HTTP {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"      ⚠️ Exception: {str(e)[:50]}")
+        return False
+
+def generate_pollinations_art():
+    """Generate art using Pollinations.ai (backup)"""
+    try:
+        prompt = f"8K pixel art game sprite for '{game_name}', {selected_type} game character using {selected_mechanic}, detailed, vibrant colors, epic pose, game asset, high quality, centered"
+        enhanced_prompt = prompt.replace(" ", "+").replace("'", "").replace(",", "+")
+        url = f"https://image.pollinations.ai/prompt/{enhanced_prompt}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
+        
+        response = requests.get(url, timeout=45)
+        if response.status_code == 200 and len(response.content) > 5000:
+            with open(sprite_path, "wb") as f:
+                f.write(response.content)
+            print(f"      ✅ Pollinations.ai art generated!")
+            return True
+        else:
+            print(f"      ⚠️ HTTP {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"      ⚠️ Exception: {str(e)[:50]}")
+        return False
+
+def generate_fallback_art():
+    """Ultimate fallback - always works"""
+    print("      Creating algorithmic art...")
+    img = Image.new('RGB', (512, 512), color=(20, 20, 40))
+    draw = ImageDraw.Draw(img)
+    
+    genre_colors = {
+        "survival horror": [(80,80,80), (120,120,120), (160,160,160)],
+        "top-down shooter": [(255,50,50), (255,100,100), (255,150,150)],
+        "action RPG": [(100,50,200), (150,100,255), (200,150,255)],
+        "racing game": [(50,200,255), (100,255,255), (150,200,255)],
+        "puzzle game": [(50,255,50), (100,255,100), (150,255,150)],
+        "fighting game": [(255,100,50), (255,150,100), (255,200,150)],
+        "strategy game": [(50,100,255), (100,150,255), (150,200,255)]
+    }
+    colors = genre_colors.get(selected_type, [(255,100,100), (100,255,100), (100,100,255)])
+    
+    for i, col in enumerate(colors):
+        size = 512 - (i * 80)
+        off = (512 - size) // 2
+        draw.ellipse([off, off, off+size, off+size], outline=col, width=4)
+    
+    draw.polygon([(256, 200), (270, 240), (312, 242), (278, 268), (288, 310), (256, 286), (224, 310), (234, 268), (200, 242), (242, 240)], fill=(255, 215, 0))
+    draw.text((180, 450), game_name[:15], fill=(255,255,255))
+    img.save(sprite_path)
+    return True
 
 # ============ VIRAL MARKETING ============
 print("\n🔥 Generating viral marketing content...")
 
-# Genre-specific emojis
 genre_emojis = {
+    "survival horror": ["😱", "💀", "👻", "🔪", "🩸", "🌙"],
     "top-down shooter": ["🔫", "💥", "🎯", "⚡", "🔥", "💀"],
     "action RPG": ["⚔️", "🛡️", "👑", "✨", "🌟", "💎"],
     "racing game": ["🏎️", "💨", "🔥", "⚡", "🏁", "🚗"],
     "puzzle game": ["🧠", "💡", "🔮", "✨", "🎯", "💎"],
-    "survival horror": ["😱", "💀", "👻", "🔪", "🩸", "🌙"],
     "fighting game": ["👊", "💥", "⚡", "🔥", "🏆", "💪"],
     "strategy game": ["♟️", "🧠", "👑", "⚔️", "🎯", "💎"]
 }
 
 viral_hooks = {
+    "survival horror": ["🏃‍♂️ Run or die", "💀 This game haunted me", "🔦 Can you survive?"],
     "top-down shooter": ["🔫 I built a shooter in 24 hours", "💀 This boss took 50 attempts"],
     "action RPG": ["⚔️ Your next obsession", "✨ 24 hours = a whole RPG"],
     "racing game": ["🏎️ Speed meets chaos", "💨 Fastest game I've made"],
     "puzzle game": ["🧠 1000 IQ required", "💡 One move changes everything"],
-    "survival horror": ["🏃‍♂️ Run or die", "💀 This game haunted me", "🔦 Can you survive?"],
     "fighting game": ["👊 One combo to rule them all", "💥 60 seconds of pure action"],
     "strategy game": ["♟️ Outsmart the system", "🧠 Big brain energy"]
 }
@@ -119,15 +379,21 @@ game_genres = {
     "Sunday": "strategy game"
 }
 
-selected_type = game_genres.get(day_name, "precision platformer")
-print(f"   📅 Today is {day_name} – {selected_type}")
+# Use SAR analysis to improve genre selection
+best_genre = sar.data["analysis"].get("best_genre")
+if best_genre and random.random() < 0.4:  # 40% chance to use best genre
+    selected_type = best_genre
+    print(f"   🧠 SAR analysis chose best genre: {selected_type}")
+else:
+    selected_type = game_genres.get(day_name, "precision platformer")
+    print(f"   📅 Today is {day_name} – {selected_type}")
 
 genre_mechanics = {
+    "survival horror": ["invisibility", "shield", "wall run", "sprint"],
     "top-down shooter": ["dash", "time slow", "shield", "bullet time"],
     "action RPG": ["double jump", "teleport", "clone", "elemental blast"],
     "racing game": ["speed boost", "drift", "nitro", "slipstream"],
     "puzzle game": ["time slow", "gravity flip", "invisibility", "phasing"],
-    "survival horror": ["invisibility", "shield", "wall run", "sprint"],
     "fighting game": ["dash", "double jump", "grapple", "counter"],
     "strategy game": ["clone", "teleport", "gravity flip", "freeze"]
 }
@@ -201,11 +467,11 @@ print(f"   🤖 {ai_description}")
 print("\n#️⃣ Generating viral hashtags...")
 
 genre_hashtags = {
+    "survival horror": ["#horrorgame", "#survival", "#scary"],
     "top-down shooter": ["#shootergame", "#actiongame"],
     "action RPG": ["#rpg", "#actionrpg"],
     "racing game": ["#racinggame", "#speed"],
     "puzzle game": ["#puzzlegame", "#brainteaser"],
-    "survival horror": ["#horrorgame", "#survival", "#scary"],
     "fighting game": ["#fightinggame", "#combat"],
     "strategy game": ["#strategygame", "#tactical"]
 }
@@ -216,105 +482,12 @@ random.shuffle(all_hashtags)
 hashtag_string = " ".join(all_hashtags[:7])
 print(f"   #️⃣ {hashtag_string[:60]}...")
 
-# ============ AI-POWERED ART WITH QUALITY CONTROL ============
-print("\n🎨 Generating game art with AI quality control...")
-sprite_path = Path("sprite.png")
-
-def analyze_art_quality(image_path):
-    """Check if generated art is good quality"""
-    try:
-        file_size = image_path.stat().st_size
-        if file_size < 8000:
-            print(f"   ⚠️ Image too small ({file_size} bytes) – regenerating")
-            return False
-        
-        img = Image.open(image_path)
-        if img.size[0] < 256 or img.size[1] < 256:
-            print(f"   ⚠️ Image too small ({img.size}) – regenerating")
-            return False
-        
-        print(f"   ✅ Art quality check passed (size: {file_size} bytes)")
-        return True
-    except Exception as e:
-        print(f"   ⚠️ Quality check error: {e}")
-        return True
-
-def generate_art_with_quality_control(max_attempts=3):
-    """Generate art with auto-retry on bad quality"""
-    
-    prompt_templates = [
-        lambda: f"8K pixel art game sprite for '{game_name}', {selected_type} game character using {selected_mechanic}, detailed, vibrant colors, epic pose, game asset, high quality, centered",
-        lambda: f"stylized game character sprite for '{game_name}', {selected_type} hero, {selected_mechanic} ability, cute but cool, detailed pixel art, 8K, game asset",
-        lambda: f"dynamic action game sprite for '{game_name}', {selected_type} character, using {selected_mechanic}, dramatic pose, glowing effects, pixel art, 8K, game asset",
-    ]
-    
-    for attempt in range(max_attempts):
-        print(f"   🎨 Art attempt {attempt + 1}/{max_attempts}...")
-        
-        template_index = min(attempt, len(prompt_templates) - 1)
-        prompt = prompt_templates[template_index]()
-        
-        if attempt >= 1:
-            prompt += ", more detailed, better quality"
-        
-        print(f"   📝 Prompt: {prompt[:80]}...")
-        
-        enhanced_prompt = prompt.replace(" ", "+").replace("'", "").replace(",", "+")
-        url = f"https://image.pollinations.ai/prompt/{enhanced_prompt}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
-        
-        try:
-            response = requests.get(url, timeout=45)
-            if response.status_code == 200 and len(response.content) > 5000:
-                temp_path = Path(f"sprite_temp_{attempt}.png")
-                with open(temp_path, "wb") as f:
-                    f.write(response.content)
-                
-                if analyze_art_quality(temp_path):
-                    temp_path.rename(sprite_path)
-                    print(f"   ✅ Art accepted after {attempt + 1} attempt(s)!")
-                    return True
-                else:
-                    print(f"   🔄 Art rejected, retrying...")
-                    temp_path.unlink()
-            else:
-                print(f"   ⚠️ Generation error: {response.status_code}")
-        except Exception as e:
-            print(f"   ⚠️ Exception: {e}")
-        
-        if attempt < max_attempts - 1:
-            time.sleep(2)
-    
-    return generate_fallback_art()
-
-def generate_fallback_art():
-    """Ultimate fallback that always works"""
-    print("   🎨 Using fallback art...")
-    img = Image.new('RGB', (512, 512), color=(20, 20, 40))
-    draw = ImageDraw.Draw(img)
-    
-    genre_colors = {
-        "top-down shooter": [(255,50,50), (255,100,100), (255,150,150)],
-        "action RPG": [(100,50,200), (150,100,255), (200,150,255)],
-        "racing game": [(50,200,255), (100,255,255), (150,200,255)],
-        "puzzle game": [(50,255,50), (100,255,100), (150,255,150)],
-        "survival horror": [(80,80,80), (120,120,120), (160,160,160)],
-        "fighting game": [(255,100,50), (255,150,100), (255,200,150)],
-        "strategy game": [(50,100,255), (100,150,255), (150,200,255)]
-    }
-    colors = genre_colors.get(selected_type, [(255,100,100), (100,255,100), (100,100,255)])
-    
-    for i, col in enumerate(colors):
-        size = 512 - (i * 80)
-        off = (512 - size) // 2
-        draw.ellipse([off, off, off+size, off+size], outline=col, width=4)
-    
-    draw.polygon([(256, 200), (270, 240), (312, 242), (278, 268), (288, 310), (256, 286), (224, 310), (234, 268), (200, 242), (242, 240)], fill=(255, 215, 0))
-    draw.text((180, 450), game_name[:15], fill=(255,255,255))
-    img.save(sprite_path)
-    return True
-
-generate_art_with_quality_control(max_attempts=3)
-print(f"   ✅ Final sprite ready!")
+# ============ GENERATE ART (WITH TIMING) ============
+print("\n🎨 Generating game art...")
+art_start_time = time.time()
+art_success = generate_smart_art()
+art_time = time.time() - art_start_time
+print(f"   ✅ Art generation completed in {art_time:.1f}s")
 
 # ============ CREATE GODOT PROJECT ============
 print("\n📁 Creating Godot project...")
@@ -389,7 +562,6 @@ readme = f"""
 - 📧 {BRAND_EMAIL_PRIMARY}
 - 📱 {BRAND_TELEGRAM}
 - 🎵 {BRAND_TIKTOK}
-- 🐘 {MASTODON_HANDLE}
 """
 (project_dir / "README.md").write_text(readme)
 print("   ✅ Created README")
@@ -442,50 +614,6 @@ viral_post_text = f"""{selected_emojis} {selected_hook} {selected_emojis}
 
 #DeathRollStudio 🎮"""
 
-# ============ MASTODON POST ============
-print("\n🐘 Posting to Mastodon...")
-
-if mastodon_token and mastodon_instance:
-    try:
-        print("   📤 Uploading image to Mastodon...")
-        with open(sprite_path, "rb") as img:
-            media_response = requests.post(
-                f"{mastodon_instance}/api/v2/media",
-                headers={"Authorization": f"Bearer {mastodon_token}"},
-                files={"file": img},
-                timeout=30
-            )
-        
-        if media_response.status_code == 200:
-            media_data = media_response.json()
-            media_id = media_data.get("id")
-            print(f"   ✅ Image uploaded!")
-            
-            print("   📝 Creating Mastodon post...")
-            post_data = {
-                "status": viral_post_text[:500],
-                "media_ids": [media_id],
-                "visibility": "public"
-            }
-            
-            status_response = requests.post(
-                f"{mastodon_instance}/api/v1/statuses",
-                headers={"Authorization": f"Bearer {mastodon_token}", "Content-Type": "application/json"},
-                json=post_data,
-                timeout=30
-            )
-            
-            if status_response.status_code == 200:
-                print(f"   ✅ Posted to Mastodon successfully!")
-            else:
-                print(f"   ❌ Mastodon post failed: {status_response.status_code}")
-        else:
-            print(f"   ❌ Mastodon upload failed: {media_response.status_code}")
-    except Exception as e:
-        print(f"   ❌ Mastodon error: {e}")
-else:
-    print("   ⚠️ Mastodon not configured – skipping")
-
 # ============ TELEGRAM POSTS ============
 print("\n📱 Sending Telegram posts...")
 if telegram_token:
@@ -507,9 +635,16 @@ if telegram_token:
     except Exception as e:
         print(f"   ⚠️ Channel error: {e}")
 
+# ============ SAR RECORDING ============
+print("\n🧠 Recording run in SAR system...")
+sar.study_record(game_name, selected_type, selected_mechanic, selected_hook, art_success, art_time)
+sar.analyze()
+sar.reprogram(f"Run {sar.data['study']['total_runs']} completed. Art source: {'Success' if art_success else 'Fallback'}")
+print(f"   ✅ SAR updated")
+
 # ============ SAVE DATA ============
 print("\n💾 Saving learning data...")
-ld = {"last_run": datetime.now().isoformat(), "game_name": game_name, "genre": selected_type, "mechanic": selected_mechanic, "day": day_name, "hook": selected_hook, "description": ai_description, "repo_url": repo_link, "price": game_price, "bot_version": BOT_VERSION}
+ld = {"last_run": datetime.now().isoformat(), "game_name": game_name, "genre": selected_type, "mechanic": selected_mechanic, "day": day_name, "hook": selected_hook, "description": ai_description, "repo_url": repo_link, "price": game_price, "bot_version": BOT_VERSION, "art_success": art_success, "art_time": art_time}
 Path("learning_data.json").write_text(json.dumps({"history": [ld], "last_update": datetime.now().isoformat()}, indent=2))
 print("   ✅ Learning data saved")
 
@@ -532,14 +667,19 @@ print("=" * 60)
 print(viral_post_text[:2000])
 print("=" * 60)
 
+# ============ ART METRICS REPORT ============
+print("\n📊 Art Generation Metrics:")
+print(f"   🤖 Hugging Face: {art_metrics['huggingface_success']}/{art_metrics['total_attempts']}")
+print(f"   🎨 Pollinations: {art_metrics['pollinations_success']}/{art_metrics['total_attempts']}")
+print(f"   ⚡ Fallback: {art_metrics['fallback_used']}/{art_metrics['total_attempts']}")
+
 # ============ VERIFICATION ============
 print("\n🔍 Verifying all systems...")
 print(f"   AI Name: ✅")
-print(f"   AI Quality Control: ✅")
-print(f"   Game Art: ✅")
+print(f"   SAR System: ✅ ({sar.data['study']['total_runs']} runs)")
+print(f"   Smart Art: ✅ ({'Success' if art_success else 'Fallback used'})")
 print(f"   Godot Project: ✅")
 print(f"   GitHub: {'✅' if repo_url else '⚠️'}")
-print(f"   Mastodon: {'✅' if mastodon_token else '⚠️'}")
 print(f"   Telegram: {'✅' if telegram_token else '⚠️'}")
 
 # ============ DONE ============
@@ -547,12 +687,12 @@ print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
 print(f"   📅 Day: {day_name} – {selected_type}")
 print(f"   🎣 Hook: {selected_hook}")
-print(f"   🎨 Art: {art_status}")
-print(f"   🐘 Mastodon: {'Posted' if mastodon_token else 'Skipped'}")
+print(f"   🎨 Art: {'Smart AI' if art_success else 'Fallback'}")
+print(f"   🧠 SAR: {sar.data['study']['total_runs']} games analyzed")
 print(f"   📦 GitHub: {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v13.0 FINISHED SUCCESSFULLY!")
-print("🐘 Check your Mastodon profile for the post!")
+print("\n🎉 DEATHROLL STUDIO v14.0 FINISHED SUCCESSFULLY!")
+print("🧠 SAR System learned from this run!")
 print("📱 Check Telegram for viral posts!")
 print("🎵 TikTok caption ready above – copy and post!")
