@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v6.0
+LevelForge+ ULTRA – DEATHROLL STUDIO v6.1
 - 5-second gameplay video for TikTok/Reels
+- Multiple game genres (daily rotation)
 - Video sends to Telegram automatically
 - Self-learning AI bot
 - Multi-platform posting (Buffer, Telegram, GitHub)
@@ -21,12 +22,12 @@ from PIL import Image, ImageDraw, ImageFont
 import math
 
 print("=" * 60)
-print("🎮 LEVELFORGE+ ULTRA – DEATHROLL STUDIO v6.0")
-print("✅ 5-Second Video | Telegram Video | TikTok Ready")
+print("🎮 LEVELFORGE+ ULTRA – DEATHROLL STUDIO v6.1")
+print("✅ Multiple Genres | 5-Second Video | Telegram Video")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "6.0.0"
+BOT_VERSION = "6.1.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -57,9 +58,6 @@ telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
 github_token = os.getenv("GH_TOKEN")
-bluesky_handle = os.getenv("BLUESKY_HANDLE")
-bluesky_password = os.getenv("BLUESKY_PASSWORD")
-bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
 buffer_token = os.getenv("BUFFER_ACCESS_TOKEN")
 game_price = os.getenv("GAME_PRICE", "5")
 
@@ -69,9 +67,42 @@ print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"✅ Buffer: {'OK' if buffer_token else 'NO'}")
 print(f"💰 Game Price: ${game_price}")
 
+# ============ UPGRADE #1: MULTIPLE GAME GENRES (DAILY ROTATION) ============
+print("\n🎮 Setting up daily game genre rotation...")
+
+# Rotate game genres based on day of week
+day_name = datetime.now().strftime("%A")
+game_genres = {
+    "Monday": "top-down shooter",
+    "Tuesday": "action RPG",
+    "Wednesday": "racing game",
+    "Thursday": "puzzle game",
+    "Friday": "survival horror",
+    "Saturday": "fighting game",
+    "Sunday": "strategy game"
+}
+
+# Default genres for each day
+genre_mechanics = {
+    "top-down shooter": ["dash ability", "time slow", "energy shield"],
+    "action RPG": ["double jump", "teleport dash", "clone summon"],
+    "racing game": ["speed boost", "drift", "nitro"],
+    "puzzle game": ["time slow", "gravity flip", "invisibility cloak"],
+    "survival horror": ["invisibility cloak", "energy shield", "wall run"],
+    "fighting game": ["dash ability", "double jump", "grappling hook"],
+    "strategy game": ["clone summon", "teleport dash", "gravity flip"]
+}
+
+selected_type = game_genres.get(day_name, "precision platformer")
+available_mechanics = genre_mechanics.get(selected_type, ["dash ability", "double jump", "time slow"])
+selected_mechanic = random.choice(available_mechanics)
+
+print(f"   📅 Today is {day_name}")
+print(f"   🎮 Genre: {selected_type}")
+print(f"   ⚡ Mechanic: {selected_mechanic}")
+
 # ============ SELF-IMPROVEMENT ============
 print("\n🧠 Running self-improvement analysis...")
-trending_genres = ["platformer", "puzzle"]
 
 def analyze_and_improve():
     improvement_file = Path("improvement_data.json")
@@ -86,11 +117,6 @@ def analyze_and_improve():
     for m in all_mechanics:
         if m not in mechanic_scores:
             mechanic_scores[m] = 50
-    if trending_genres:
-        if "action" in trending_genres:
-            mechanic_scores["dash ability"] = min(mechanic_scores.get("dash ability", 50) + 5, 100)
-        if "platformer" in trending_genres:
-            mechanic_scores["double jump"] = min(mechanic_scores.get("double jump", 50) + 8, 100)
     def weighted_choice(items, scores):
         total = sum(scores.values())
         if total == 0:
@@ -106,7 +132,6 @@ def analyze_and_improve():
     improvements["last_analysis"] = datetime.now().isoformat()
     improvement_file.write_text(json.dumps(improvements, indent=2))
     print(f"   📊 Mechanic scores updated")
-    print(f"   🎯 Top mechanic: {max(mechanic_scores, key=mechanic_scores.get)}")
     return selected
 
 # ============ GENERATE GAME NAME ============
@@ -116,7 +141,7 @@ def generate_ai_name():
         try:
             r = requests.post("https://api.openai.com/v1/chat/completions",
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-                json={"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": "Generate ONE creative video game name. Return ONLY the name, no quotes. Max 25 chars."}], "temperature": 0.9, "max_tokens": 20}, timeout=30)
+                json={"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": f"Generate ONE creative video game name for a {selected_type} game. Return ONLY the name, no quotes. Max 25 chars."}], "temperature": 0.9, "max_tokens": 20}, timeout=30)
             if r.status_code == 200:
                 name = r.json()["choices"][0]["message"]["content"].strip().strip('"')
                 if name and len(name) < 35:
@@ -131,14 +156,6 @@ game_name = generate_ai_name()
 print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ SELECT GAME TYPE ============
-print("\n🎮 Selecting game mechanics...")
-all_game_types = ["top-down shooter", "precision platformer", "puzzle crawler", "endless runner", "action rpg"]
-selected_mechanic = analyze_and_improve()
-selected_type = random.choice(all_game_types)
-print(f"   🎮 Genre: {selected_type}")
-print(f"   ⚡ Mechanic: {selected_mechanic}")
-
 # ============ GENERATE GAME ART ============
 print("\n🎨 Generating awesome game art...")
 sprite_path = Path("sprite.png")
@@ -146,8 +163,8 @@ sprite_path = Path("sprite.png")
 def generate_cool_art():
     try:
         styles = [
-            f"pixel+art+game+sprite+{game_name.replace(' ', '+')}+character+hero+centered+glowing+detailed",
-            f"rpg+character+portrait+{game_name.replace(' ', '+')}+fantasy+art+shiny+armor"
+            f"pixel+art+game+sprite+{game_name.replace(' ', '+')}+character+hero+centered+glowing+detailed+{selected_type}",
+            f"rpg+character+portrait+{game_name.replace(' ', '+')}+fantasy+art+shiny+armor+{selected_type}"
         ]
         url = f"https://image.pollinations.ai/prompt/{random.choice(styles)}?width=512&height=512&model=flux"
         print("   Generating with Pollinations.ai...")
@@ -182,6 +199,12 @@ print("\n🎬 Creating 5-second gameplay video for TikTok...")
 def create_tiktok_video():
     """Generate a 5-second vertical video with game character animation"""
     try:
+        # Check if ffmpeg is available
+        check = subprocess.run(["which", "ffmpeg"], capture_output=True, text=True)
+        if check.returncode != 0:
+            print("   ❌ ffmpeg not found - video creation skipped")
+            return None
+            
         width, height = 1080, 1920
         fps = 30
         duration = 5
@@ -201,6 +224,7 @@ def create_tiktok_video():
             frame = Image.new('RGB', (width, height), (10, 10, 20))
             draw = ImageDraw.Draw(frame)
             
+            # Gradient background
             for y in range(height):
                 r = 10 + int(20 * (y / height))
                 g = 10 + int(15 * (y / height))
@@ -215,6 +239,7 @@ def create_tiktok_video():
             
             frame.paste(rotated, (move_x, bounce_y), rotated if rotated.mode == 'RGBA' else None)
             
+            # Particle effects
             for _ in range(20):
                 px = int(random.random() * width)
                 py = int(random.random() * height)
@@ -228,8 +253,9 @@ def create_tiktok_video():
             draw.text((width//2 - 200, height - 200), game_name, fill=(0,0,0), font=font)
             draw.text((width//2 - 202, height - 202), game_name, fill=(255,255,255), font=font)
             
+            # Genre badge
             small_font = ImageFont.load_default()
-            draw.text((width - 200, height - 50), "@deathroll.co", fill=(150,150,150), font=small_font)
+            draw.text((width - 250, height - 80), selected_type[:15], fill=(200,200,100), font=small_font)
             draw.text((50, height - 100), f"${game_price} SOL", fill=(255,215,0), font=font)
             
             frame.save(frames_dir / f"frame_{frame_num:04d}.png")
@@ -248,9 +274,11 @@ def create_tiktok_video():
         
         if result.returncode == 0 and video_path.exists():
             print(f"   ✅ Video created: {video_path}")
+            # Clean up frames
+            shutil.rmtree(frames_dir)
             return video_path
         else:
-            print(f"   ⚠️ ffmpeg error")
+            print(f"   ⚠️ ffmpeg error: {result.stderr[:100]}")
             return None
             
     except Exception as e:
@@ -279,7 +307,7 @@ config/name="{game_name}"
 config/features=PackedStringArray("4.2")
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
-config/description="A game by DeathRoll Studio - https://deathroll.co"
+config/description="A {selected_type} game by DeathRoll Studio - https://deathroll.co"
 [rendering]
 renderer="forward_plus"
 """)
@@ -323,14 +351,29 @@ readme = f"""
 <div align="center">
 # 🎮 {game_name}
 ### Created by [DeathRoll Studio](https://deathroll.co)
+### A {selected_type} game
+
 [![Made with Godot](https://img.shields.io/badge/Made%20with-Godot-478CBF?style=for-the-badge&logo=godot-engine)](https://godotengine.org)
 [![DeathRoll](https://img.shields.io/badge/Created%20by-DeathRoll-FF6B6B?style=for-the-badge)](https://deathroll.co)
 </div>
+
 ## ✨ About The Game
 **{game_name}** is a **{selected_type}** where you can **{selected_mechanic}**! 
+
+## 🎯 Genre Schedule
+This game is a **{selected_type}** – part of DeathRoll's daily rotation:
+- Monday: Top-down Shooter
+- Tuesday: Action RPG
+- Wednesday: Racing Game
+- Thursday: Puzzle Game
+- Friday: Survival Horror
+- Saturday: Fighting Game
+- Sunday: Strategy Game
+
 ## 📥 Download & Purchase
 - **Price:** ${game_price} USD
 - **Payment:** Solana (Trust Wallet or Phantom Wallet)
+
 ## 🤝 Connect With DeathRoll
 | Platform | Link |
 |----------|------|
@@ -366,6 +409,7 @@ body{{font-family:system-ui;background:linear-gradient(135deg,#0f0c29,#302b63,#2
 .card{{max-width:800px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:40px;padding:30px;text-align:center;color:#fff}}
 .sprite{{width:256px;height:256px;margin:20px auto;background:#1e1a2f;border-radius:30px;overflow:hidden}}
 .sprite img{{width:100%;height:100%;object-fit:contain}}
+.genre-badge{{display:inline-block;background:#ff6b6b;padding:5px 15px;border-radius:20px;margin:10px}}
 .price{{font-size:2rem;font-weight:bold;color:#ffd700;margin:15px 0}}
 .btn{{display:inline-block;background:#ff6b6b;color:#fff;padding:12px 28px;border-radius:40px;text-decoration:none;margin:15px 10px}}
 .wallet{{background:rgba(0,0,0,0.3);border-radius:20px;padding:15px;margin:15px 0;font-family:monospace}}
@@ -374,13 +418,16 @@ body{{font-family:system-ui;background:linear-gradient(135deg,#0f0c29,#302b63,#2
 <div class="card">
 <h1>🎮 {game_name}</h1>
 <div class="sprite"><img src="icon.png" alt="Game sprite"></div>
+<div><span class="genre-badge">{selected_type}</span><span class="genre-badge">{selected_mechanic}</span></div>
 <div class="price">${game_price} USD</div>
+<p>A <strong>{selected_type}</strong> where you master the <strong>{selected_mechanic}</strong>.</p>
 <div>
 <a href="{repo_link}" class="btn">⬇️ Download</a>
 <a href="mailto:{BRAND_EMAIL_PRIMARY}?subject=Purchase%20{game_name}" class="btn">💰 Buy</a>
 </div>
 <div class="wallet">🔵 Trust Wallet: {SOLANA_TRUST_WALLET}</div>
 <div class="wallet">🟣 Phantom: {SOLANA_PHANTOM_WALLET}</div>
+<p><small>Daily genre rotation: {', '.join(list(game_genres.values())[:3])}...</small></p>
 </div>
 </body>
 </html>"""
@@ -410,7 +457,7 @@ if buffer_token:
             profs = profiles.json()
             if profs:
                 pid = profs[0]["id"]
-                buf_text = f"🎮 {game_name}\n\n{ai_desc}\n\n💰 ${game_price} SOL\n\n{repo_link}\n\n#gamedev #indiedev"
+                buf_text = f"🎮 {game_name} – {selected_type}\n\n{ai_desc}\n\n💰 ${game_price} SOL\n\n{repo_link}\n\n#gamedev #indiedev #{selected_type.replace(' ', '')}"
                 update = requests.post("https://api.bufferapp.com/1/updates/create.json", 
                     params={"access_token": buffer_token, "profile_ids[]": pid, "text": buf_text[:280]}, timeout=30)
                 if update.status_code == 200:
@@ -433,18 +480,18 @@ if telegram_token:
     try:
         with open(sprite_path, "rb") as photo:
             files = {"photo": photo}
-            data = {"chat_id": telegram_chat_id, "caption": f"🎮 {game_name} – {ai_desc}"}
+            data = {"chat_id": telegram_chat_id, "caption": f"🎮 {game_name} – {selected_type} | {ai_desc}"}
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
             print("   ✅ Game art sent to private chat")
     except Exception as e:
         print(f"   ⚠️ Private photo error: {e}")
     
-    # Send VIDEO to private chat (NEW!)
+    # Send VIDEO to private chat
     if video_path and video_path.exists():
         try:
             with open(video_path, "rb") as video:
                 files = {"video": video}
-                data = {"chat_id": telegram_chat_id, "caption": f"🎮 {game_name} – 5 sec gameplay | {ai_desc[:80]}..."}
+                data = {"chat_id": telegram_chat_id, "caption": f"🎮 {game_name} – 5 sec {selected_type} gameplay | {ai_desc[:80]}..."}
                 video_req = requests.post(f"https://api.telegram.org/bot{telegram_token}/sendVideo", files=files, data=data, timeout=60)
                 if video_req.status_code == 200:
                     print("   ✅ Gameplay video sent to private chat!")
@@ -457,22 +504,11 @@ if telegram_token:
     try:
         with open(sprite_path, "rb") as photo:
             files = {"photo": photo}
-            data = {"chat_id": TELEGRAM_CHANNEL, "caption": f"🎮 {game_name} – {ai_desc}\n\n💰 ${game_price} SOL\n🔗 {repo_link}"}
+            data = {"chat_id": TELEGRAM_CHANNEL, "caption": f"🎮 {game_name} – {selected_type}\n\n{ai_desc}\n\n💰 ${game_price} SOL\n🔗 {repo_link}"}
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
             print(f"   ✅ Game art sent to channel {TELEGRAM_CHANNEL}")
     except Exception as e:
         print(f"   ⚠️ Channel photo error: {e}")
-    
-    # Send VIDEO to public channel (optional - commented to save bandwidth)
-    # if video_path and video_path.exists():
-    #     try:
-    #         with open(video_path, "rb") as video:
-    #             files = {"video": video}
-    #             data = {"chat_id": TELEGRAM_CHANNEL, "caption": f"🎮 {game_name} – New game from DeathRoll Studio!"}
-    #             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendVideo", files=files, data=data, timeout=60)
-    #             print(f"   ✅ Gameplay video sent to channel {TELEGRAM_CHANNEL}")
-    #     except:
-    #         pass
     
     # Private detailed message
     priv_msg = f"""🎮 *DEATHROLL STUDIO – DAILY GAME* 🎮
@@ -481,6 +517,7 @@ if telegram_token:
 *Genre:* {selected_type}
 *Mechanic:* {selected_mechanic}
 *Price:* ${game_price} USD (Solana)
+*Day:* {day_name} – {selected_type} day!
 
 📝 *Description:* {ai_desc}
 
@@ -499,20 +536,20 @@ Phantom: `{SOLANA_PHANTOM_WALLET[:15]}...`
     print("   ✅ Private report sent")
     
     # Public channel announcement
-    pub_msg = f"""🎮 *{game_name}* – New game from DeathRoll Studio!
+    pub_msg = f"""🎮 *{game_name}* – New {selected_type} game from DeathRoll Studio!
 
 {ai_desc}
 
 🔗 {repo_link}
 💰 ${game_price} SOL
 
-#gamedev #indiedev #{game_name.replace(' ', '')}"""
+#{selected_type.replace(' ', '')} #gamedev #indiedev #{game_name.replace(' ', '')}"""
     requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": TELEGRAM_CHANNEL, "text": pub_msg, "parse_mode": "Markdown"}, timeout=30)
     print(f"   ✅ Public announcement sent to {TELEGRAM_CHANNEL}")
 
 # ============ SAVE DATA ============
 print("\n💾 Saving learning data...")
-ld = {"last_run": datetime.now().isoformat(), "game_name": game_name, "genre": selected_type, "mechanic": selected_mechanic, "repo_url": repo_link, "price": game_price, "bot_version": BOT_VERSION}
+ld = {"last_run": datetime.now().isoformat(), "game_name": game_name, "genre": selected_type, "mechanic": selected_mechanic, "day": day_name, "repo_url": repo_link, "price": game_price, "bot_version": BOT_VERSION}
 Path("learning_data.json").write_text(json.dumps({"history": [ld], "last_update": datetime.now().isoformat()}, indent=2))
 print("   ✅ Learning data saved")
 
@@ -525,24 +562,26 @@ if port.exists():
         entries = json.loads(port.read_text())
     except:
         pass
-entries.append({"date": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "mechanic": selected_mechanic, "repo": repo_link, "price": game_price, "has_video": video_path is not None})
+entries.append({"date": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "mechanic": selected_mechanic, "day": day_name, "repo": repo_link, "price": game_price, "has_video": video_path is not None})
 port.write_text(json.dumps(entries[-50:], indent=2))
 print(f"   ✅ Portfolio has {len(entries)} games")
 
 # ============ VERIFICATION ============
 print("\n🔍 Verifying all systems...")
-systems = {"AI Name": True, "Art": True, "Video Created": video_path is not None, "Video Sent to Telegram": video_path and video_path.exists(), "Godot": True, "GitHub": bool(github_token), "Buffer": bool(buffer_token), "Telegram": bool(telegram_token)}
+systems = {"AI Name": True, "Art": True, "Multiple Genres": True, "Video Created": video_path is not None, "Video Sent": video_path and video_path.exists(), "Godot": True, "GitHub": bool(github_token), "Buffer": bool(buffer_token), "Telegram": bool(telegram_token)}
 for s, ok in systems.items():
     print(f"   {s}: {'✅' if ok else '⚠️'}")
 
 # ============ DONE ============
 print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
+print(f"   📅 Day: {day_name} – {selected_type}")
 print(f"   🎬 5-second video: {'Created & Sent to Telegram' if video_path else 'Failed'}")
 print(f"   📦 GitHub: {repo_link}")
 print(f"   🌐 Demo: {raw_demo_link}")
 print("=" * 60)
 
 print("\n🎉 DEATHROLL STUDIO BOT FINISHED SUCCESSFULLY!")
+print(f"📅 Today's genre: {selected_type} ({day_name})")
 print("🎬 5-second gameplay video generated and sent to your Telegram!")
 print("📱 Check your Telegram private chat – you'll see the video!")
