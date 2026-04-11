@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v15.0
-- SIMPLIFIED & WORKING
-- Pollinations.ai primary + Fallback
-- SAR System learning
-- All features working
+LevelForge+ ULTRA – DEATHROLL STUDIO v15.2
+- Learns from Reddit + X (Twitter) trends
+- SAR system enhanced with multi‑source external data
+- No data loss – existing learning preserved
 """
 
 import os
@@ -18,12 +17,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v15.0 – SIMPLIFIED & WORKING")
-print("✅ Pollinations.ai + Fallback | SAR System | Viral Marketing")
+print("🔥 DEATHROLL STUDIO v15.2 – REAL‑WORLD LEARNING (Reddit + X)")
+print("✅ SAR | Reddit Trends | X Trends | Self‑Improving")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "15.0.0"
+BOT_VERSION = "15.2.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -35,32 +34,29 @@ BRAND_TIKTOK = "@deathroll.co"
 BRAND_WEBSITE = "https://deathroll.co"
 BRAND_GITHUB = "favouradeleke246-maker"
 
-# Solana wallets
 SOLANA_TRUST_WALLET = "6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3"
 SOLANA_PHANTOM_WALLET = "Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb"
-
-# Telegram channel
 TELEGRAM_CHANNEL = "@drolltech"
 
 print(f"🏷️ Brand: {BRAND_NAME}")
 print(f"📧 Email: {BRAND_EMAIL_PRIMARY}")
 print(f"📱 Telegram: {BRAND_TELEGRAM} | Channel: {TELEGRAM_CHANNEL}")
-print(f"🎵 TikTok: {BRAND_TIKTOK}")
 
 # ============ GET SECRETS ============
 telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
 github_token = os.getenv("GH_TOKEN")
+bearer_token = os.getenv("TWITTER_BEARER_TOKEN")   # for X reading (free)
 game_price = os.getenv("GAME_PRICE", "5")
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
 print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
-print(f"💰 Game Price: ${game_price}")
+print(f"🐦 X (Twitter) reading: {'OK (free)' if bearer_token else 'NO (add token)'}")
 
-# ============ SAR SYSTEM ============
-print("\n🧠 Initializing SAR System...")
+# ============ SAR SYSTEM (ENHANCED) ============
+print("\n🧠 Initializing SAR System (with external trends)...")
 
 class SARSystem:
     def __init__(self):
@@ -78,122 +74,207 @@ class SARSystem:
     def get_default(self):
         return {
             "study": {"total_runs": 0, "successful_art": 0, "failed_art": 0, "games": []},
-            "analysis": {"best_genre": None, "best_mechanic": None, "success_rate": 0},
+            "analysis": {
+                "best_genre": None,
+                "best_mechanic": None,
+                "best_external_trend": None,
+                "success_rate": 0
+            },
             "reprogram": {"last_improvement": None, "changes": []}
         }
     
     def save(self):
         self.sar_file.write_text(json.dumps(self.data, indent=2))
     
-    def record(self, game_name, genre, mechanic, hook, art_success, exec_time):
+    def record(self, game_name, genre, mechanic, hook, art_success, exec_time, external_trends=None):
         self.data["study"]["total_runs"] += 1
         if art_success:
             self.data["study"]["successful_art"] += 1
         else:
             self.data["study"]["failed_art"] += 1
-        self.data["study"]["games"].append({
-            "name": game_name, "genre": genre, "mechanic": mechanic,
-            "hook": hook, "timestamp": datetime.now().isoformat(), "success": art_success
-        })
+        
+        game_entry = {
+            "name": game_name,
+            "genre": genre,
+            "mechanic": mechanic,
+            "hook": hook,
+            "timestamp": datetime.now().isoformat(),
+            "success": art_success
+        }
+        if external_trends:
+            game_entry["external_trends"] = external_trends
+        
+        self.data["study"]["games"].append(game_entry)
         self.data["study"]["games"] = self.data["study"]["games"][-50:]
-        self.save()
-    
-    def analyze(self):
-        if not self.data["study"]["games"]:
-            return
+        
+        # Update best genre
         genre_counts = {}
         for g in self.data["study"]["games"]:
-            genre = g["genre"]
-            if genre not in genre_counts:
-                genre_counts[genre] = {"count": 0, "success": 0}
-            genre_counts[genre]["count"] += 1
+            ggenre = g["genre"]
+            if ggenre not in genre_counts:
+                genre_counts[ggenre] = {"count": 0, "success": 0}
+            genre_counts[ggenre]["count"] += 1
             if g["success"]:
-                genre_counts[genre]["success"] += 1
+                genre_counts[ggenre]["success"] += 1
         if genre_counts:
             best = max(genre_counts.keys(), key=lambda x: genre_counts[x]["success"] / max(genre_counts[x]["count"], 1))
             self.data["analysis"]["best_genre"] = best
+        
+        # Update best external trend
+        if external_trends:
+            trend_counts = {}
+            for g in self.data["study"]["games"]:
+                trends = g.get("external_trends", [])
+                for t in trends:
+                    if t not in trend_counts:
+                        trend_counts[t] = {"count": 0, "success": 0}
+                    trend_counts[t]["count"] += 1
+                    if g["success"]:
+                        trend_counts[t]["success"] += 1
+            if trend_counts:
+                best_trend = max(trend_counts.keys(), key=lambda x: trend_counts[x]["success"] / max(trend_counts[x]["count"], 1))
+                self.data["analysis"]["best_external_trend"] = best_trend
+        
         total = self.data["study"]["successful_art"] + self.data["study"]["failed_art"]
         if total > 0:
             self.data["analysis"]["success_rate"] = self.data["study"]["successful_art"] / total
+        
         self.save()
+    
+    def analyze(self):
+        pass
 
 sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
+if sar.data["analysis"]["best_external_trend"]:
+    print(f"   🌍 Best external trend so far: {sar.data['analysis']['best_external_trend']}")
 
-# ============ SIMPLE ART GENERATION ============
-print("\n🎨 Initializing Art System...")
-sprite_path = Path("sprite.png")
-art_stats = {"pollinations": 0, "fallback": 0, "total": 0}
+# ============ REAL‑WORLD DATA: REDDIT + X TRENDS ============
+print("\n🌍 Fetching real‑world gaming trends (Reddit + X)...")
 
-def generate_art():
-    art_stats["total"] += 1
-    
-    # Attempt 1: Pollinations.ai
-    print("   🎨 Attempt 1: Pollinations.ai")
-    result = generate_pollinations_art()
-    if result:
-        art_stats["pollinations"] += 1
-        return True
-    
-    # Attempt 2: Fallback (Always works)
-    print("   🎨 Attempt 2: Fallback art")
-    art_stats["fallback"] += 1
-    return generate_fallback_art()
-
-def generate_pollinations_art():
-    """Generate art using Pollinations.ai (free)"""
+def fetch_reddit_trends():
     try:
-        # Different prompts for variety
-        prompts = [
-            f"pixel+art+game+sprite+{game_name.replace(' ', '+')}+{selected_type}+character+hero+glowing+detailed",
-            f"8K+pixel+art+{game_name.replace(' ', '+')}+game+character+{selected_mechanic}+ability+centered",
-            f"game+sprite+{game_name.replace(' ', '+')}+{selected_type}+character+cute+but+cool+detailed"
-        ]
-        selected_prompt = random.choice(prompts)
-        url = f"https://image.pollinations.ai/prompt/{selected_prompt}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
-        
-        response = requests.get(url, timeout=45)
-        if response.status_code == 200 and len(response.content) > 5000:
-            with open(sprite_path, "wb") as f:
-                f.write(response.content)
-            print(f"      ✅ Pollinations.ai succeeded!")
-            return True
-        else:
-            print(f"      ⚠️ Pollinations error: {response.status_code}")
-            return False
+        url = "https://www.reddit.com/r/gamedev/top.json?limit=25&t=day"
+        headers = {"User-Agent": "DeathRollStudio/1.0"}
+        response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            posts = data.get("data", {}).get("children", [])
+            all_text = " ".join([p["data"]["title"].lower() for p in posts])
+            genres = {
+                "action": all_text.count("action"),
+                "platformer": all_text.count("platformer"),
+                "puzzle": all_text.count("puzzle"),
+                "rpg": all_text.count("rpg"),
+                "strategy": all_text.count("strategy"),
+                "horror": all_text.count("horror"),
+                "shooter": all_text.count("shooter")
+            }
+            sorted_genres = sorted(genres.items(), key=lambda x: x[1], reverse=True)
+            top_genres = [g for g, count in sorted_genres if count > 0][:2]
+            if top_genres:
+                print(f"   🔥 Reddit trending: {', '.join(top_genres)}")
+                return top_genres
     except Exception as e:
-        print(f"      ⚠️ Pollinations exception: {str(e)[:50]}")
-        return False
+        print(f"   ⚠️ Reddit fetch error: {e}")
+    return None
 
-def generate_fallback_art():
-    """Always works fallback art"""
-    print("      Creating algorithmic art...")
-    img = Image.new('RGB', (512, 512), color=(20, 20, 40))
-    draw = ImageDraw.Draw(img)
-    
-    genre_colors = {
-        "survival horror": [(80,80,80), (120,120,120), (160,160,160)],
-        "top-down shooter": [(255,50,50), (255,100,100), (255,150,150)],
-        "action RPG": [(100,50,200), (150,100,255), (200,150,255)],
-        "racing game": [(50,200,255), (100,255,255), (150,200,255)],
-        "puzzle game": [(50,255,50), (100,255,100), (150,255,150)],
-        "fighting game": [(255,100,50), (255,150,100), (255,200,150)],
-        "strategy game": [(50,100,255), (100,150,255), (150,200,255)]
-    }
-    colors = genre_colors.get(selected_type, [(255,100,100), (100,255,100), (100,100,255)])
-    
-    for i, col in enumerate(colors):
-        size = 512 - (i * 80)
-        off = (512 - size) // 2
-        draw.ellipse([off, off, off+size, off+size], outline=col, width=4)
-    
-    draw.polygon([(256, 200), (270, 240), (312, 242), (278, 268), (288, 310), (256, 286), (224, 310), (234, 268), (200, 242), (242, 240)], fill=(255, 215, 0))
-    draw.text((180, 450), game_name[:15], fill=(255,255,255))
-    img.save(sprite_path)
-    return True
+def fetch_x_trends():
+    if not bearer_token:
+        print("   ⚠️ No X bearer token – skipping X trends")
+        return None
+    try:
+        headers = {"Authorization": f"Bearer {bearer_token}"}
+        params = {
+            "query": "gamedev OR indie game OR game release -filter:retweets",
+            "max_results": 30,
+            "tweet.fields": "public_metrics"
+        }
+        response = requests.get("https://api.twitter.com/2/tweets/search/recent", headers=headers, params=params, timeout=15)
+        if response.status_code == 200:
+            tweets = response.json().get("data", [])
+            if tweets:
+                all_text = " ".join([t.get("text", "").lower() for t in tweets])
+                genres = {
+                    "action": all_text.count("action"),
+                    "platformer": all_text.count("platformer"),
+                    "puzzle": all_text.count("puzzle"),
+                    "rpg": all_text.count("rpg"),
+                    "strategy": all_text.count("strategy"),
+                    "horror": all_text.count("horror"),
+                    "shooter": all_text.count("shooter")
+                }
+                sorted_genres = sorted(genres.items(), key=lambda x: x[1], reverse=True)
+                top_genres = [g for g, count in sorted_genres if count > 0][:2]
+                if top_genres:
+                    print(f"   🐦 X trending: {', '.join(top_genres)}")
+                    return top_genres
+        else:
+            print(f"   ⚠️ X API error: {response.status_code}")
+    except Exception as e:
+        print(f"   ⚠️ X fetch error: {e}")
+    return None
 
-# ============ VIRAL MARKETING ============
+reddit_trends = fetch_reddit_trends()
+x_trends = fetch_x_trends()
+
+# Combine trends (prioritise X if both exist, but keep both for SAR)
+all_external_trends = []
+if reddit_trends:
+    all_external_trends.extend(reddit_trends)
+if x_trends:
+    all_external_trends.extend(x_trends)
+# Remove duplicates while preserving order
+unique_trends = []
+for t in all_external_trends:
+    if t not in unique_trends:
+        unique_trends.append(t)
+
+print(f"   🌍 Combined external trends: {unique_trends if unique_trends else 'none'}")
+
+# ============ GAME GENRES (with SAR + external trends) ============
+print("\n🎮 Setting up genre rotation...")
+
+day_name = datetime.now().strftime("%A")
+game_genres = {
+    "Monday": "top-down shooter", "Tuesday": "action RPG", "Wednesday": "racing game",
+    "Thursday": "puzzle game", "Friday": "survival horror", "Saturday": "fighting game", "Sunday": "strategy game"
+}
+
+best_genre = sar.data["analysis"].get("best_genre")
+best_external_trend = sar.data["analysis"].get("best_external_trend")
+
+# Decision logic (prioritises SAR best genre, then best external trend, then current Reddit/X, then day)
+if best_genre and random.random() < 0.4:
+    selected_type = best_genre
+    print(f"   🧠 SAR chose best genre: {selected_type}")
+elif best_external_trend and best_external_trend != best_genre and random.random() < 0.3:
+    selected_type = best_external_trend
+    print(f"   🌍 SAR chose best external trend: {selected_type}")
+elif unique_trends and random.random() < 0.3:
+    selected_type = random.choice(unique_trends)
+    print(f"   📈 Using current external trend: {selected_type}")
+else:
+    selected_type = game_genres.get(day_name, "precision platformer")
+    print(f"   📅 Today is {day_name} – {selected_type}")
+
+genre_mechanics = {
+    "survival horror": ["invisibility", "shield", "wall run", "sprint"],
+    "top-down shooter": ["dash", "time slow", "shield", "bullet time"],
+    "action RPG": ["double jump", "teleport", "clone", "elemental blast"],
+    "racing game": ["speed boost", "drift", "nitro", "slipstream"],
+    "puzzle game": ["time slow", "gravity flip", "invisibility", "phasing"],
+    "fighting game": ["dash", "double jump", "grapple", "counter"],
+    "strategy game": ["clone", "teleport", "gravity flip", "freeze"]
+}
+available_mechanics = genre_mechanics.get(selected_type, ["dash", "double jump", "time slow"])
+selected_mechanic = random.choice(available_mechanics)
+
+print(f"   🎮 Genre: {selected_type}")
+print(f"   ⚡ Mechanic: {selected_mechanic}")
+
+# ============ VIRAL MARKETING (unchanged) ============
 print("\n🔥 Generating viral content...")
 
 genre_emojis = {
@@ -230,47 +311,13 @@ viral_cta = [
     "Double tap if you'd play this! ❤️"
 ]
 
-# ============ GAME GENRES ============
-print("\n🎮 Setting up genre rotation...")
-
-day_name = datetime.now().strftime("%A")
-game_genres = {
-    "Monday": "top-down shooter", "Tuesday": "action RPG", "Wednesday": "racing game",
-    "Thursday": "puzzle game", "Friday": "survival horror", "Saturday": "fighting game", "Sunday": "strategy game"
-}
-
-best_genre = sar.data["analysis"].get("best_genre")
-if best_genre and random.random() < 0.4:
-    selected_type = best_genre
-    print(f"   🧠 SAR chose best genre: {selected_type}")
-else:
-    selected_type = game_genres.get(day_name, "precision platformer")
-    print(f"   📅 Today is {day_name} – {selected_type}")
-
-genre_mechanics = {
-    "survival horror": ["invisibility", "shield", "wall run", "sprint"],
-    "top-down shooter": ["dash", "time slow", "shield", "bullet time"],
-    "action RPG": ["double jump", "teleport", "clone", "elemental blast"],
-    "racing game": ["speed boost", "drift", "nitro", "slipstream"],
-    "puzzle game": ["time slow", "gravity flip", "invisibility", "phasing"],
-    "fighting game": ["dash", "double jump", "grapple", "counter"],
-    "strategy game": ["clone", "teleport", "gravity flip", "freeze"]
-}
-
-available_mechanics = genre_mechanics.get(selected_type, ["dash", "double jump", "time slow"])
-selected_mechanic = random.choice(available_mechanics)
-
-game_emojis = random.sample(genre_emojis.get(selected_type, ["🎮", "🔥", "⚡"]), 3)
-selected_emojis = " ".join(game_emojis)
-
-print(f"   🎮 Genre: {selected_type}")
-print(f"   ⚡ Mechanic: {selected_mechanic}")
-
-# ============ VIRAL HOOK ============
 hook_list = viral_hooks.get(selected_type, ["🎮 New game just dropped"])
 selected_hook = random.choice(hook_list)
 selected_question = random.choice(engagement_questions)
 selected_cta = random.choice(viral_cta)
+
+game_emojis = random.sample(genre_emojis.get(selected_type, ["🎮", "🔥", "⚡"]), 3)
+selected_emojis = " ".join(game_emojis)
 
 print(f"   🎣 Hook: {selected_hook}")
 print(f"   ❓ Question: {selected_question}")
@@ -322,7 +369,6 @@ print(f"   🤖 {ai_description}")
 
 # ============ HASHTAGS ============
 print("\n#️⃣ Generating hashtags...")
-
 genre_hashtags = {
     "survival horror": ["#horrorgame", "#survival", "#scary"],
     "top-down shooter": ["#shootergame", "#actiongame"],
@@ -332,7 +378,6 @@ genre_hashtags = {
     "fighting game": ["#fightinggame", "#combat"],
     "strategy game": ["#strategygame", "#tactical"]
 }
-
 base_hashtags = ["#gamedev", "#indiegame", "#indiedev", "#gaming", "#solana"]
 specific = genre_hashtags.get(selected_type, ["#indiegame"])
 all_tags = base_hashtags + specific + [f"#{game_name.replace(' ', '')}"]
@@ -340,14 +385,73 @@ random.shuffle(all_tags)
 hashtag_string = " ".join(all_tags[:7])
 print(f"   #️⃣ {hashtag_string[:60]}...")
 
-# ============ GENERATE ART ============
+# ============ ART GENERATION ============
 print("\n🎨 Generating art...")
+sprite_path = Path("sprite.png")
+art_stats = {"pollinations": 0, "fallback": 0, "total": 0}
+
+def generate_art():
+    art_stats["total"] += 1
+    print("   🎨 Attempt 1: Pollinations.ai")
+    result = generate_pollinations_art()
+    if result:
+        art_stats["pollinations"] += 1
+        return True
+    print("   🎨 Attempt 2: Fallback art")
+    art_stats["fallback"] += 1
+    return generate_fallback_art()
+
+def generate_pollinations_art():
+    try:
+        prompts = [
+            f"pixel+art+game+sprite+{game_name.replace(' ', '+')}+{selected_type}+character+hero+glowing+detailed",
+            f"8K+pixel+art+{game_name.replace(' ', '+')}+game+character+{selected_mechanic}+ability+centered",
+            f"game+sprite+{game_name.replace(' ', '+')}+{selected_type}+character+cute+but+cool+detailed"
+        ]
+        selected_prompt = random.choice(prompts)
+        url = f"https://image.pollinations.ai/prompt/{selected_prompt}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
+        response = requests.get(url, timeout=45)
+        if response.status_code == 200 and len(response.content) > 5000:
+            with open(sprite_path, "wb") as f:
+                f.write(response.content)
+            print(f"      ✅ Pollinations.ai succeeded!")
+            return True
+        else:
+            print(f"      ⚠️ Pollinations error: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"      ⚠️ Pollinations exception: {str(e)[:50]}")
+        return False
+
+def generate_fallback_art():
+    print("      Creating algorithmic art...")
+    img = Image.new('RGB', (512, 512), color=(20, 20, 40))
+    draw = ImageDraw.Draw(img)
+    genre_colors = {
+        "survival horror": [(80,80,80), (120,120,120), (160,160,160)],
+        "top-down shooter": [(255,50,50), (255,100,100), (255,150,150)],
+        "action RPG": [(100,50,200), (150,100,255), (200,150,255)],
+        "racing game": [(50,200,255), (100,255,255), (150,200,255)],
+        "puzzle game": [(50,255,50), (100,255,100), (150,255,150)],
+        "fighting game": [(255,100,50), (255,150,100), (255,200,150)],
+        "strategy game": [(50,100,255), (100,150,255), (150,200,255)]
+    }
+    colors = genre_colors.get(selected_type, [(255,100,100), (100,255,100), (100,100,255)])
+    for i, col in enumerate(colors):
+        size = 512 - (i * 80)
+        off = (512 - size) // 2
+        draw.ellipse([off, off, off+size, off+size], outline=col, width=4)
+    draw.polygon([(256, 200), (270, 240), (312, 242), (278, 268), (288, 310), (256, 286), (224, 310), (234, 268), (200, 242), (242, 240)], fill=(255, 215, 0))
+    draw.text((180, 450), game_name[:15], fill=(255,255,255))
+    img.save(sprite_path)
+    return True
+
 art_start = time.time()
 art_success = generate_art()
 art_time = time.time() - art_start
 print(f"   ✅ Art completed in {art_time:.1f}s")
 
-# ============ GODOT PROJECT ============
+# ============ CREATE GODOT PROJECT ============
 print("\n📁 Creating Godot project...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
@@ -489,15 +593,18 @@ if telegram_token:
     except:
         print("   ⚠️ Channel error")
 
-# ============ SAR RECORD ============
-print("\n🧠 Recording run...")
-sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, art_time)
+# ============ SAR RECORD (with external trends) ============
+print("\n🧠 Recording run with external trends...")
+external_trends = unique_trends if unique_trends else []
+sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, art_time, external_trends)
 sar.analyze()
 print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} total runs)")
+if external_trends:
+    print(f"   🌍 Recorded external trends: {external_trends}")
 
 # ============ SAVE DATA ============
 print("\n💾 Saving data...")
-Path("learning_data.json").write_text(json.dumps({"last_run": datetime.now().isoformat(), "game": game_name, "genre": selected_type}, indent=2))
+Path("learning_data.json").write_text(json.dumps({"last_run": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "external_trends": external_trends}, indent=2))
 print("   ✅ Learning data saved")
 
 # ============ PORTFOLIO ============
@@ -528,9 +635,12 @@ print(f"   Fallback: {art_stats['fallback']}/{art_stats['total']}")
 print("\n🔍 Verification:")
 print(f"   AI Name: ✅")
 print(f"   SAR System: ✅ ({sar.data['study']['total_runs']} runs)")
+if sar.data["analysis"]["best_external_trend"]:
+    print(f"   🌍 Best external trend learned: {sar.data['analysis']['best_external_trend']}")
 print(f"   Smart Art: ✅")
 print(f"   GitHub: {'✅' if repo_url else '⚠️'}")
 print(f"   Telegram: {'✅' if telegram_token else '⚠️'}")
+print(f"   X (Twitter) reading: {'✅ (free)' if bearer_token else '⚠️ (add token)'}")
 
 # ============ DONE ============
 print("\n" + "=" * 60)
@@ -538,11 +648,12 @@ print(f"✅ {game_name} is READY!")
 print(f"   📅 {day_name} – {selected_type}")
 print(f"   🎣 {selected_hook}")
 print(f"   🧠 SAR: {sar.data['study']['total_runs']} games analyzed")
+print(f"   🌍 External trends used: {external_trends if external_trends else 'none'}")
 print(f"   📦 {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v15.0 FINISHED!")
-print("✅ Simplified: Pollinations.ai + Fallback only")
-print("🧠 SAR System is learning from every run!")
+print("\n🎉 DEATHROLL STUDIO v15.2 FINISHED!")
+print("✅ Now learning from Reddit + X (Twitter) trends")
+print("🧠 SAR stores all external trends for future improvement")
 print("📱 Check Telegram for your viral posts!")
 print("🎵 TikTok caption ready above!")
