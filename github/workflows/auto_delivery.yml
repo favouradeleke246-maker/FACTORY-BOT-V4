@@ -2,8 +2,8 @@ name: Auto Delivery
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # runs every 5 minutes
-  workflow_dispatch:          # also manual trigger
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   deliver:
@@ -22,8 +22,8 @@ jobs:
 
       - name: Run auto-delivery script
         env:
-          SOLANA_WALLET: ${{ secrets.SOLANA_WALLET }}          # your public wallet address
+          SOLANA_WALLET: ${{ secrets.SOLANA_WALLET }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}        # free from helius.dev
-          GAME_ZIP_PATH: ${{ secrets.GAME_ZIP_PATH }}          # optional, default is workspace/latest/game.zip
+          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
+          GAME_ZIP_PATH: ${{ secrets.GAME_ZIP_PATH }}
         run: python auto_delivery.py
