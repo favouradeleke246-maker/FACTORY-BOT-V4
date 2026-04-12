@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v15.5
-- COMPLETE & FULLY UPGRADED
+LevelForge+ ULTRA – DEATHROLL STUDIO v15.5.2
+- COMPLETE & FULLY UPGRADED (syntax fixed)
 - True AI‑invented mechanics (no generic fallbacks)
 - gpt-4o-mini for creativity + lower cost
 - Adaptive art prompts
@@ -20,12 +20,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v15.5 – COMPLETE & FULLY UPGRADED")
+print("🔥 DEATHROLL STUDIO v15.5.2 – COMPLETE & FULLY UPGRADED")
 print("✅ True AI Mechanics | Adaptive Art | Multi‑Source Trends")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "15.5.0"
+BOT_VERSION = "15.5.2"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -354,7 +354,7 @@ Return EXACTLY in this format (nothing else):
 MECHANIC: <short name, 2-4 words>
 DESCRIPTION: <one sentence explaining what it does>
 
-Example: "MECHANIC: Phase Shift\nDESCRIPTION: Briefly turn intangible to pass through enemies and lasers.""""
+Example: 'MECHANIC: Phase Shift\nDESCRIPTION: Briefly turn intangible to pass through enemies and lasers.'"""
     
     try:
         response = requests.post(
@@ -875,7 +875,7 @@ print(f"   🌍 External trends used: {external_trends if external_trends else '
 print(f"   📦 {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v15.5 FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v15.5.2 FINISHED!")
 print("✅ AI invented a brand new, UNIQUE game mechanic!")
 print("✅ No generic mechanics – forced creativity!")
 print("✅ Art prompt adaptively generated for this specific game!")
