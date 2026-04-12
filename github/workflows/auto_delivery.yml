@@ -1,0 +1,29 @@
+name: Auto Delivery
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # runs every 5 minutes
+  workflow_dispatch:          # also manual trigger
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run auto-delivery script
+        env:
+          SOLANA_WALLET: ${{ secrets.SOLANA_WALLET }}          # your public wallet address
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}        # free from helius.dev
+          GAME_ZIP_PATH: ${{ secrets.GAME_ZIP_PATH }}          # optional, default is workspace/latest/game.zip
+        run: python auto_delivery.py
