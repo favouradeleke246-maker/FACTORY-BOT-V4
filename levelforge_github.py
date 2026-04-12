@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v15.5.2
-- COMPLETE & FULLY UPGRADED (syntax fixed)
-- True AI‑invented mechanics (no generic fallbacks)
-- gpt-4o-mini for creativity + lower cost
+LevelForge+ ULTRA – DEATHROLL STUDIO v15.6
+- STYLISH SALES POSTS (no free downloads)
+- True AI‑invented mechanics
 - Adaptive art prompts
-- Multi‑source trend learning
-- SAR system learns everything
+- Multi‑source trends (Reddit, HN, Lobsters, X)
+- SAR system (Study, Analysis, Reprogram)
 """
 
 import os
@@ -20,12 +19,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v15.5.2 – COMPLETE & FULLY UPGRADED")
+print("🔥 DEATHROLL STUDIO v15.6 – STYLISH SALES POSTS")
 print("✅ True AI Mechanics | Adaptive Art | Multi‑Source Trends")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "15.5.2"
+BOT_VERSION = "15.6.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -312,13 +311,11 @@ else:
     selected_type = game_genres.get(day_name, "precision platformer")
     print(f"   📅 Today is {day_name} – {selected_type}")
 
-# ============ TRUE AI‑INVENTED MECHANIC (NO GENERIC FALLBACKS) ============
+# ============ TRUE AI‑INVENTED MECHANIC ============
 print("\n⚙️ AI is inventing a completely new mechanic...")
 
 def generate_true_ai_mechanic():
-    """Force AI to invent a unique mechanic – never returns generic ones."""
     if not openai_key:
-        # Creative fallbacks (still novel, not generic)
         creative_fallbacks = [
             ("Phase Echo", "leave behind a short-lived decoy that distracts enemies"),
             ("Chrono Fracture", "create a time bubble that slows everything except you"),
@@ -337,8 +334,6 @@ def generate_true_ai_mechanic():
     past_mechanics = list(set(past_mechanics))[-5:]
     
     trends_context = ", ".join(unique_trends) if unique_trends else "action, platformer, puzzle"
-    
-    # Blacklist of generic mechanics
     blacklist = ["dash", "double jump", "time slow", "shield", "grapple", "invisibility", "wall run", "teleport", "gravity flip", "clone"]
     
     prompt = f"""You are a game designer. Invent a completely new, unique game mechanic for a {selected_type} game.
@@ -379,13 +374,12 @@ Example: 'MECHANIC: Phase Shift\nDESCRIPTION: Briefly turn intangible to pass th
                 elif line.startswith("DESCRIPTION:"):
                     mechanic_desc = line.replace("DESCRIPTION:", "").strip()
             if mechanic_name and mechanic_desc and len(mechanic_name) > 3:
-                # Verify it's not in blacklist
                 if mechanic_name.lower() not in blacklist:
                     return mechanic_name, mechanic_desc
     except Exception as e:
         print(f"   ⚠️ AI mechanic error: {e}")
     
-    # Second attempt with a different prompt if first fails
+    # Second attempt
     try:
         response = requests.post(
             "https://api.openai.com/v1/chat/completions",
@@ -414,7 +408,6 @@ Example: 'MECHANIC: Phase Shift\nDESCRIPTION: Briefly turn intangible to pass th
     except:
         pass
     
-    # Ultimate creative fallback (still novel, not generic)
     creative_fallbacks = [
         ("Phase Echo", "leave behind a short-lived decoy that distracts enemies"),
         ("Chrono Fracture", "create a time bubble that slows everything except you"),
@@ -503,7 +496,6 @@ Past successful prompts: {' | '.join(past_prompts) if past_prompts else 'none'}"
     except Exception as e:
         print(f"   ⚠️ Adaptive prompt error: {e}")
     
-    # Fallback – still good
     fallback = f"pixel art game sprite for '{game_name}', {selected_type} character using {selected_mechanic}, detailed, vibrant colors, 8K"
     print(f"   📋 Using fallback prompt: {fallback[:80]}...")
     return fallback
@@ -659,8 +651,8 @@ art_success = generate_art()
 art_time = time.time() - art_start
 print(f"   ✅ Art completed in {art_time:.1f}s")
 
-# ============ CREATE GODOT PROJECT ============
-print("\n📁 Creating Godot project...")
+# ============ CREATE GODOT PROJECT (internal, no public download) ============
+print("\n📁 Creating Godot project (internal use only)...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
 shutil.copy(sprite_path, project_dir / "icon.png")
@@ -715,10 +707,10 @@ shape = SubResource("RectangleShape2D")
 [sub_resource type="RectangleShape2D" id=1]
 size = Vector2(32, 32)
 """)
-print(f"   ✅ Project created")
+print(f"   ✅ Project created (internal)")
 
-# ============ README ============
-print("\n📢 Creating README...")
+# ============ README (no download link) ============
+print("\n📢 Creating README (preview only)...")
 readme = f"""
 <div align="center">
 # 🎮 {game_name}
@@ -733,8 +725,10 @@ readme = f"""
 
 {ai_description}
 
-## 📥 Download & Purchase
+## 💰 Purchase Information
 - **Price:** ${game_price} USD (Solana)
+- **Wallet:** `{SOLANA_TRUST_WALLET}`
+- **Contact:** {BRAND_TELEGRAM} after payment
 
 ## 🤝 Connect
 - 📧 {BRAND_EMAIL_PRIMARY}
@@ -742,23 +736,23 @@ readme = f"""
 - 🎵 {BRAND_TIKTOK}
 """
 (project_dir / "README.md").write_text(readme)
-print("   ✅ Created README")
+print("   ✅ Created README (no download link)")
 
-# ============ GITHUB REPO ============
-print("\n📦 Creating GitHub repository...")
+# ============ GITHUB REPO (private, not shared) ============
+print("\n📦 Creating GitHub repository (private/backup)...")
 repo_url = None
 if github_token:
     try:
         r = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} – {selected_type} with {selected_mechanic}", "private": False, "auto_init": True}, timeout=30)
         if r.status_code == 201:
             repo_url = r.json()["html_url"]
-            print(f"   ✅ Repo created: {repo_url}")
+            print(f"   ✅ Repo created (backup only): {repo_url}")
     except:
         pass
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
 
-# ============ DEMO PAGE ============
-print("\n🌐 Creating demo page...")
+# ============ DEMO PAGE (preview only, no download) ============
+print("\n🌐 Creating demo page (preview only)...")
 demo_html = f"""<!DOCTYPE html>
 <html>
 <head><title>{game_name}</title></head>
@@ -767,51 +761,100 @@ demo_html = f"""<!DOCTYPE html>
 <img src="icon.png" width="256">
 <p>{ai_description}</p>
 <p>✨ Mechanic: {selected_mechanic}</p>
-<p>💰 ${game_price} SOL</p>
+<p>💰 Price: ${game_price} SOL</p>
 <p>{selected_hook}</p>
-<a href="{repo_link}">Download on GitHub</a>
+<p>📩 To purchase, contact {BRAND_TELEGRAM}</p>
 </body>
 </html>"""
 (project_dir / "demo.html").write_text(demo_html)
-print(f"   ✅ Demo page created")
+print(f"   ✅ Demo page created (preview only)")
 
-# ============ VIRAL POST TEXT ============
-viral_post_text = f"""{selected_emojis} {selected_hook} {selected_emojis}
+# ============ STYLISH TELEGRAM SALES POSTS ============
+print("\n📱 Sending stylish Telegram sales posts...")
+if telegram_token:
+    # --- Stylish viral post text (with photo) ---
+    viral_post_text = f"""
+{selected_emojis}  *🔥 {selected_hook} 🔥*  {selected_emojis}
 
-{ai_description}
+✨ *{game_name}* ✨
+┌─────────────────────┐
+│ {ai_description}   │
+└─────────────────────┘
 
-✨ New mechanic: {selected_mechanic}!
+⚡ *Special Mechanic:* `{selected_mechanic}`
+
 {selected_question}
 
-💰 ${game_price} SOL
-🔗 {repo_link}
+💎 ─── *PURCHASE INFO* ─── 💎
+💰 *Price:* `${game_price} SOL`
+💸 *Wallet:* `{SOLANA_TRUST_WALLET}`
+
+📩 *How to buy:*
+1️⃣ Send exact amount to the wallet above
+2️⃣ Message @deathroll1 with your TX ID
+3️⃣ Receive your game instantly (within 24h)
 
 {hashtag_string}
 
 {selected_cta}
 
-#DeathRollStudio 🎮"""
+#DeathRollStudio 🎮
+"""
 
-# ============ TELEGRAM POSTS ============
-print("\n📱 Sending Telegram posts...")
-if telegram_token:
+    # Send photo + stylish caption to private chat
     try:
         with open(sprite_path, "rb") as photo:
             files = {"photo": photo}
-            data = {"chat_id": telegram_chat_id, "caption": viral_post_text[:900]}
+            data = {"chat_id": telegram_chat_id, "caption": viral_post_text[:1000]}
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
-            print("   ✅ Sent to private chat")
-    except:
-        print("   ⚠️ Private error")
-    
+            print("   ✅ Stylish sales post sent to private chat")
+    except Exception as e:
+        print(f"   ⚠️ Private error: {e}")
+
+    # Send photo + stylish caption to public channel
     try:
         with open(sprite_path, "rb") as photo:
             files = {"photo": photo}
-            data = {"chat_id": TELEGRAM_CHANNEL, "caption": viral_post_text[:900]}
+            data = {"chat_id": TELEGRAM_CHANNEL, "caption": viral_post_text[:1000]}
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
-            print(f"   ✅ Sent to {TELEGRAM_CHANNEL}")
-    except:
-        print("   ⚠️ Channel error")
+            print(f"   ✅ Stylish sales post sent to channel {TELEGRAM_CHANNEL}")
+    except Exception as e:
+        print(f"   ⚠️ Channel error: {e}")
+
+    # --- Detailed text message (no photo, for extra visibility) ---
+    detail_msg = f"""
+🔥 *{selected_hook.upper()}* 🔥
+
+🎮 *GAME:* `{game_name}`
+📂 *GENRE:* {selected_type}
+⚙️ *MECHANIC:* `{selected_mechanic}`
+
+📝 *DESCRIPTION:*  
+_{ai_description}_
+
+💎 ─── *BUY NOW* ─── 💎
+💰 *Price:* `${game_price} SOL`
+💸 *Solana Wallet:*  
+`{SOLANA_TRUST_WALLET}`
+
+📌 *How to purchase:*
+`1.` Send `${game_price} SOL` to the wallet above
+`2.` Forward the transaction ID to @deathroll1
+`3.` Get your game file immediately
+
+{hashtag_string}
+
+👉 *Limited daily game – only today!* 👈
+
+{selected_cta}
+
+#DeathRollStudio #NFT #Solana
+"""
+    try:
+        requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": TELEGRAM_CHANNEL, "text": detail_msg, "parse_mode": "Markdown"}, timeout=30)
+        print(f"   ✅ Stylish detail message sent to {TELEGRAM_CHANNEL}")
+    except Exception as e:
+        print(f"   ⚠️ Detail message error: {e}")
 
 # ============ SAR RECORD ============
 print("\n🧠 Recording run with external trends and adaptive prompt...")
@@ -872,13 +915,13 @@ print(f"   ⚙️ New mechanic: {selected_mechanic}")
 print(f"   🎨 Adaptive prompt used")
 print(f"   🧠 SAR: {sar.data['study']['total_runs']} games analyzed")
 print(f"   🌍 External trends used: {external_trends if external_trends else 'none'}")
-print(f"   📦 {repo_link}")
+print(f"   📦 GitHub (backup): {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v15.5.2 FINISHED!")
-print("✅ AI invented a brand new, UNIQUE game mechanic!")
-print("✅ No generic mechanics – forced creativity!")
-print("✅ Art prompt adaptively generated for this specific game!")
+print("\n🎉 DEATHROLL STUDIO v15.6 FINISHED!")
+print("✅ Stylish sales posts sent to Telegram (no free downloads)")
+print("✅ AI invented a unique game mechanic")
+print("✅ Art prompt adaptively generated")
 print("🧠 SAR stores everything for future improvement")
-print("📱 Check Telegram for your viral posts!")
+print("📱 Check your Telegram channel for the stylish sales post!")
 print("🎵 TikTok caption ready above!")
