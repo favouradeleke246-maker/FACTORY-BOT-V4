@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v15.6
-- STYLISH SALES POSTS (no free downloads)
+LevelForge+ ULTRA – DEATHROLL STUDIO v15.7
+- FINAL: Stylish sales posts with full wallet addresses
 - True AI‑invented mechanics
 - Adaptive art prompts
 - Multi‑source trends (Reddit, HN, Lobsters, X)
-- SAR system (Study, Analysis, Reprogram)
+- SAR system
 """
 
 import os
@@ -19,12 +19,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v15.6 – STYLISH SALES POSTS")
-print("✅ True AI Mechanics | Adaptive Art | Multi‑Source Trends")
+print("🔥 DEATHROLL STUDIO v15.7 – FINAL SALES VERSION")
+print("✅ Full Wallets | Memo Instruction | Auto‑Delivery Ready")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "15.6.0"
+BOT_VERSION = "15.7.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -651,7 +651,7 @@ art_success = generate_art()
 art_time = time.time() - art_start
 print(f"   ✅ Art completed in {art_time:.1f}s")
 
-# ============ CREATE GODOT PROJECT (internal, no public download) ============
+# ============ CREATE GODOT PROJECT (internal) ============
 print("\n📁 Creating Godot project (internal use only)...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
@@ -687,7 +687,6 @@ func _physics_process(delta):
     vel = vel.normalized() * speed
     move_and_collide(vel * delta)
     
-    # Simple implementation of the generated mechanic (placeholder)
     if Input.is_action_just_pressed("ui_accept"):
         print("Using {selected_mechanic}!")
 """
@@ -709,7 +708,7 @@ size = Vector2(32, 32)
 """)
 print(f"   ✅ Project created (internal)")
 
-# ============ README (no download link) ============
+# ============ README (no download) ============
 print("\n📢 Creating README (preview only)...")
 readme = f"""
 <div align="center">
@@ -727,7 +726,7 @@ readme = f"""
 
 ## 💰 Purchase Information
 - **Price:** ${game_price} USD (Solana)
-- **Wallet:** `{SOLANA_TRUST_WALLET}`
+- **Wallets:** Trust or Phantom (see Telegram post)
 - **Contact:** {BRAND_TELEGRAM} after payment
 
 ## 🤝 Connect
@@ -738,20 +737,20 @@ readme = f"""
 (project_dir / "README.md").write_text(readme)
 print("   ✅ Created README (no download link)")
 
-# ============ GITHUB REPO (private, not shared) ============
-print("\n📦 Creating GitHub repository (private/backup)...")
+# ============ GITHUB REPO (backup only) ============
+print("\n📦 Creating GitHub repository (backup)...")
 repo_url = None
 if github_token:
     try:
         r = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} – {selected_type} with {selected_mechanic}", "private": False, "auto_init": True}, timeout=30)
         if r.status_code == 201:
             repo_url = r.json()["html_url"]
-            print(f"   ✅ Repo created (backup only): {repo_url}")
+            print(f"   ✅ Repo created (backup): {repo_url}")
     except:
         pass
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
 
-# ============ DEMO PAGE (preview only, no download) ============
+# ============ DEMO PAGE (preview only) ============
 print("\n🌐 Creating demo page (preview only)...")
 demo_html = f"""<!DOCTYPE html>
 <html>
@@ -763,7 +762,7 @@ demo_html = f"""<!DOCTYPE html>
 <p>✨ Mechanic: {selected_mechanic}</p>
 <p>💰 Price: ${game_price} SOL</p>
 <p>{selected_hook}</p>
-<p>📩 To purchase, contact {BRAND_TELEGRAM}</p>
+<p>📩 To purchase, see Telegram channel @drolltech</p>
 </body>
 </html>"""
 (project_dir / "demo.html").write_text(demo_html)
@@ -772,7 +771,7 @@ print(f"   ✅ Demo page created (preview only)")
 # ============ STYLISH TELEGRAM SALES POSTS ============
 print("\n📱 Sending stylish Telegram sales posts...")
 if telegram_token:
-    # --- Stylish viral post text (with photo) ---
+    # Stylish viral post text (with photo)
     viral_post_text = f"""
 {selected_emojis}  *🔥 {selected_hook} 🔥*  {selected_emojis}
 
@@ -787,12 +786,19 @@ if telegram_token:
 
 💎 ─── *PURCHASE INFO* ─── 💎
 💰 *Price:* `${game_price} SOL`
-💸 *Wallet:* `{SOLANA_TRUST_WALLET}`
+
+📌 *Send to EITHER wallet below:*
+
+🔵 *Trust Wallet:*  
+`{SOLANA_TRUST_WALLET}`
+
+🟣 *Phantom Wallet:*  
+`{SOLANA_PHANTOM_WALLET}`
 
 📩 *How to buy:*
-1️⃣ Send exact amount to the wallet above
-2️⃣ Message @deathroll1 with your TX ID
-3️⃣ Receive your game instantly (within 24h)
+1️⃣ Send exactly `${game_price} SOL` to one of the wallets above
+2️⃣ **In the memo field, write your Telegram username (e.g., @deathroll1)**
+3️⃣ The game will be sent to you automatically within 5 minutes
 
 {hashtag_string}
 
@@ -800,16 +806,6 @@ if telegram_token:
 
 #DeathRollStudio 🎮
 """
-
-    # Send photo + stylish caption to private chat
-    try:
-        with open(sprite_path, "rb") as photo:
-            files = {"photo": photo}
-            data = {"chat_id": telegram_chat_id, "caption": viral_post_text[:1000]}
-            requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
-            print("   ✅ Stylish sales post sent to private chat")
-    except Exception as e:
-        print(f"   ⚠️ Private error: {e}")
 
     # Send photo + stylish caption to public channel
     try:
@@ -821,7 +817,7 @@ if telegram_token:
     except Exception as e:
         print(f"   ⚠️ Channel error: {e}")
 
-    # --- Detailed text message (no photo, for extra visibility) ---
+    # Detailed text message (no photo)
     detail_msg = f"""
 🔥 *{selected_hook.upper()}* 🔥
 
@@ -834,13 +830,17 @@ _{ai_description}_
 
 💎 ─── *BUY NOW* ─── 💎
 💰 *Price:* `${game_price} SOL`
-💸 *Solana Wallet:*  
+
+🔵 *Trust Wallet:*  
 `{SOLANA_TRUST_WALLET}`
 
+🟣 *Phantom Wallet:*  
+`{SOLANA_PHANTOM_WALLET}`
+
 📌 *How to purchase:*
-`1.` Send `${game_price} SOL` to the wallet above
-`2.` Forward the transaction ID to @deathroll1
-`3.` Get your game file immediately
+`1.` Send `${game_price} SOL` to either wallet above
+`2.` **Put your Telegram username in the memo (e.g., @deathroll1)**
+`3.` You will receive the game automatically
 
 {hashtag_string}
 
@@ -857,13 +857,11 @@ _{ai_description}_
         print(f"   ⚠️ Detail message error: {e}")
 
 # ============ SAR RECORD ============
-print("\n🧠 Recording run with external trends and adaptive prompt...")
+print("\n🧠 Recording run...")
 external_trends = unique_trends if unique_trends else []
 sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, art_time, external_trends, adaptive_prompt)
 sar.analyze()
 print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} total runs)")
-if external_trends:
-    print(f"   🌍 Recorded external trends: {external_trends}")
 
 # ============ SAVE DATA ============
 print("\n💾 Saving data...")
@@ -918,10 +916,9 @@ print(f"   🌍 External trends used: {external_trends if external_trends else '
 print(f"   📦 GitHub (backup): {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v15.6 FINISHED!")
-print("✅ Stylish sales posts sent to Telegram (no free downloads)")
-print("✅ AI invented a unique game mechanic")
-print("✅ Art prompt adaptively generated")
-print("🧠 SAR stores everything for future improvement")
-print("📱 Check your Telegram channel for the stylish sales post!")
+print("\n🎉 DEATHROLL STUDIO v15.7 FINISHED!")
+print("✅ Stylish sales posts with full wallet addresses sent to Telegram")
+print("✅ Memo instruction included (buyers must put @username)")
+print("✅ Auto‑delivery ready (run separate workflow)")
+print("📱 Check your Telegram channel @drolltech")
 print("🎵 TikTok caption ready above!")
