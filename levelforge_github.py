@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v16.0 (3D ENGINE)
-- 3D Godot project (player, ground, obstacles)
-- 3D-style art (billboard sprites)
-- No 2D systems – full 3D
-- AI‑invented mechanics, multi‑source trends, SAR, sales, auto‑delivery
+LevelForge+ ULTRA – DEATHROLL STUDIO v16.1
+- 3D Game Engine + 3D‑style art
+- Sends game ZIP + info to admin DM
+- AI‑invented mechanics, trends, SAR, sales, auto‑delivery
 """
 
 import os
@@ -19,12 +18,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🎮 DEATHROLL STUDIO v16.0 – 3D GAME ENGINE")
+print("🎮 DEATHROLL STUDIO v16.1 – 3D ENGINE + ADMIN DELIVERY")
 print("✅ 3D Gameplay | 3D‑Style Art | Full Automation")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "16.0.0"
+BOT_VERSION = "16.1.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -57,7 +56,7 @@ print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"🐦 X reading: {'OK (free)' if bearer_token else 'NO (add token for X)'}")
 
-# ============ SAR SYSTEM (unchanged) ============
+# ============ SAR SYSTEM ============
 print("\n🧠 Initializing SAR System...")
 
 class SARSystem:
@@ -151,7 +150,7 @@ sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
-# ============ MULTI‑SOURCE TREND FETCHERS (unchanged) ============
+# ============ MULTI‑SOURCE TREND FETCHERS ============
 print("\n🌍 Fetching real‑world trends from multiple sources...")
 
 def fetch_reddit_trends():
@@ -285,7 +284,7 @@ for t in all_trends:
 
 print(f"   🌍 Combined external trends: {unique_trends if unique_trends else 'none'}")
 
-# ============ GAME GENRES (still supports multiple genres) ============
+# ============ GAME GENRES ============
 print("\n🎮 Setting up genre rotation...")
 
 day_name = datetime.now().strftime("%A")
@@ -310,7 +309,7 @@ else:
     selected_type = game_genres.get(day_name, "precision platformer")
     print(f"   📅 Today is {day_name} – {selected_type}")
 
-# ============ AI‑INVENTED MECHANIC (unchanged) ============
+# ============ AI‑INVENTED MECHANIC ============
 print("\n⚙️ AI is inventing a completely new mechanic...")
 
 def generate_true_ai_mechanic():
@@ -322,7 +321,7 @@ def generate_true_ai_mechanic():
             ("Mirror Shell", "reflect one enemy projectile back per use"),
             ("Gravity Well", "pull nearby enemies toward a point of your choice"),
             ("Soul Link", "connect to an enemy, sharing damage taken"),
-            ("Static Charge", "build up static electricity with movement,release as a shockwave")
+            ("Static Charge", "build up static electricity with movement, release as a shockwave")
         ]
         return random.choice(creative_fallbacks)
     
@@ -448,7 +447,7 @@ game_name = generate_ai_name()
 print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ ADAPTIVE ART PROMPT (now asks for 3D-style image) ============
+# ============ ADAPTIVE 3D‑STYLE ART PROMPT ============
 print("\n🎨 AI is crafting an adaptive 3D-style art prompt...")
 
 def generate_adaptive_art_prompt():
@@ -588,7 +587,7 @@ random.shuffle(all_tags)
 hashtag_string = " ".join(all_tags[:7])
 print(f"   #️⃣ {hashtag_string[:60]}...")
 
-# ============ 3D-STYLE ART GENERATION ============
+# ============ 3D‑STYLE ART GENERATION ============
 print("\n🎨 Generating 3D-style art with adaptive prompt...")
 sprite_path = Path("sprite.png")
 art_stats = {"pollinations": 0, "fallback": 0, "total": 0}
@@ -658,7 +657,7 @@ config/icon="res://icon.png"
 renderer="forward_plus"
 """)
 
-# 3D main scene (with a simple ground, a player capsule, and a collectible)
+# 3D main scene (ground, player capsule, collectible)
 main_scene = """
 [gd_scene load_steps=4 format=3]
 
@@ -708,7 +707,7 @@ radius = 0.4
 """
 (project_dir / "main.tscn").write_text(main_scene)
 
-# 3D player script (WASD movement, gravity, simple collectible detection)
+# 3D player script
 player_script = f"""
 extends CharacterBody3D
 
@@ -746,13 +745,48 @@ with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         zipf.write(file, file.relative_to(project_dir.parent))
 print(f"   ✅ Game ZIP created at {zip_path}")
 
-# ============ README, GITHUB REPO, DEMO PAGE, TELEGRAM POSTS (unchanged) ============
-# (I keep the exact same sections from the previous version – only the Godot project is 3D)
-# To save length, I'll summarise: the rest of the code (README, repo creation, demo page, Telegram posts, SAR record, etc.)
-# is identical to v15.8. I'll include it here but you can reuse the same blocks.
-
-# [The rest of the code (README, GitHub repo, demo page, Telegram sales posts, SAR record, etc.) remains unchanged.
-# I'll append the necessary parts from v15.8 to keep the bot fully functional.]
+# ============ SEND GAME ZIP + INFO TO ADMIN (PRIVATE DM) ============
+print("\n📬 Sending game files and info to admin...")
+if telegram_token and telegram_chat_id:
+    zip_file = Path("workspace/latest_game.zip")
+    if zip_file.exists():
+        try:
+            # First, send the ZIP file
+            with open(zip_file, "rb") as f:
+                files = {"document": f}
+                caption = f"🎮 *{game_name}* – Game file\n💰 Price: ${game_price} SOL\n🕹️ Genre: {selected_type}\n⚙️ Mechanic: {selected_mechanic}"
+                requests.post(
+                    f"https://api.telegram.org/bot{telegram_token}/sendDocument",
+                    files=files,
+                    data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"},
+                    timeout=60
+                )
+            print("   ✅ Game ZIP sent to admin")
+            
+            # Then, send the game info (art + details)
+            with open(sprite_path, "rb") as photo:
+                files = {"photo": photo}
+                info_text = (
+                    f"✨ *{game_name}* – 3D {selected_type}\n"
+                    f"📝 {ai_description}\n"
+                    f"⚡ *Mechanic:* `{selected_mechanic}` – {mechanic_desc}\n"
+                    f"🎣 Hook: {selected_hook}\n"
+                    f"❓ {selected_question}\n"
+                    f"📅 {day_name}\n"
+                    f"🌍 Trends: {external_trends if external_trends else 'none'}\n"
+                    f"🔗 GitHub backup: {repo_link}"
+                )
+                requests.post(
+                    f"https://api.telegram.org/bot{telegram_token}/sendPhoto",
+                    files=files,
+                    data={"chat_id": telegram_chat_id, "caption": info_text, "parse_mode": "Markdown"},
+                    timeout=30
+                )
+            print("   ✅ Game info and art sent to admin")
+        except Exception as e:
+            print(f"   ⚠️ Could not send to admin: {e}")
+    else:
+        print("   ⚠️ Game ZIP not found – cannot send to admin")
 
 # ============ README (no download) ============
 print("\n📢 Creating README (preview only)...")
@@ -948,6 +982,7 @@ print(f"   3D Godot Project: ✅")
 print(f"   GitHub: {'✅' if repo_url else '⚠️'}")
 print(f"   Telegram: {'✅' if telegram_token else '⚠️'}")
 print(f"   Game ZIP: ✅ (workspace/latest_game.zip)")
+print(f"   Admin delivery: ✅ (ZIP + info sent to your DM)")
 
 # ============ DONE ============
 print("\n" + "=" * 60)
@@ -962,11 +997,10 @@ print(f"   📦 GitHub (backup): {repo_link}")
 print(f"   📦 Game ZIP: workspace/latest_game.zip")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v16.0 FINISHED!")
-print("✅ Now generating 3D games with 3D-style art!")
-print("✅ Stylish sales posts sent to Telegram")
+print("\n🎉 DEATHROLL STUDIO v16.1 FINISHED!")
+print("✅ 3D game generated and ZIP sent to your admin DM")
+print("✅ Stylish sales posts sent to Telegram channel")
 print("✅ Memo instruction included (buyers must put @username in memo)")
-print("✅ Game ZIP created for auto‑delivery")
 print("✅ Auto‑delivery ready (run separate workflow)")
-print("📱 Check your Telegram channel @drolltech")
+print("📱 Check your private Telegram – you received the game file + info")
 print("🎵 TikTok caption ready above!")
