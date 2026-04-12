@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v15.7
-- FINAL: Stylish sales posts with full wallet addresses
+LevelForge+ ULTRA – DEATHROLL STUDIO v15.8
+- FINAL: Full wallets + memo instruction + ZIP creation
 - True AI‑invented mechanics
 - Adaptive art prompts
 - Multi‑source trends (Reddit, HN, Lobsters, X)
 - SAR system
+- Game ZIP for auto‑delivery
 """
 
 import os
@@ -14,17 +15,18 @@ import random
 import requests
 import time
 import shutil
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v15.7 – FINAL SALES VERSION")
+print("🔥 DEATHROLL STUDIO v15.8 – FINAL (with ZIP creation)")
 print("✅ Full Wallets | Memo Instruction | Auto‑Delivery Ready")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "15.7.0"
+BOT_VERSION = "15.8.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -708,6 +710,14 @@ size = Vector2(32, 32)
 """)
 print(f"   ✅ Project created (internal)")
 
+# ============ CREATE GAME ZIP FOR DELIVERY ============
+print("\n📦 Creating game ZIP for delivery...")
+zip_path = Path("workspace/latest_game.zip")
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    for file in project_dir.rglob("*"):
+        zipf.write(file, file.relative_to(project_dir.parent))
+print(f"   ✅ Game ZIP created at {zip_path}")
+
 # ============ README (no download) ============
 print("\n📢 Creating README (preview only)...")
 readme = f"""
@@ -903,6 +913,7 @@ if sar.data["analysis"]["best_external_trend"]:
 print(f"   Smart Art: ✅")
 print(f"   GitHub: {'✅' if repo_url else '⚠️'}")
 print(f"   Telegram: {'✅' if telegram_token else '⚠️'}")
+print(f"   Game ZIP: ✅ (workspace/latest_game.zip)")
 
 # ============ DONE ============
 print("\n" + "=" * 60)
@@ -914,11 +925,13 @@ print(f"   🎨 Adaptive prompt used")
 print(f"   🧠 SAR: {sar.data['study']['total_runs']} games analyzed")
 print(f"   🌍 External trends used: {external_trends if external_trends else 'none'}")
 print(f"   📦 GitHub (backup): {repo_link}")
+print(f"   📦 Game ZIP: workspace/latest_game.zip")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v15.7 FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v15.8 FINISHED!")
 print("✅ Stylish sales posts with full wallet addresses sent to Telegram")
-print("✅ Memo instruction included (buyers must put @username)")
+print("✅ Memo instruction included (buyers must put @username in memo)")
+print("✅ Game ZIP created for auto‑delivery")
 print("✅ Auto‑delivery ready (run separate workflow)")
 print("📱 Check your Telegram channel @drolltech")
 print("🎵 TikTok caption ready above!")
