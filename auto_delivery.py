@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """
-Auto‑Delivery Bot – Monitors Solana wallet, reads memo, sends game file.
+Auto‑Delivery Bot – Monitors two Solana wallets, reads memo, sends game file.
 """
 
 import os
 import json
-import time
 import requests
 from pathlib import Path
 
 # ============ CONFIG ============
-WALLET = os.getenv("SOLANA_WALLET")
+WALLETS = [
+    os.getenv("SOLANA_WALLET_TRUST"),
+    os.getenv("SOLANA_WALLET_PHANTOM")
+]
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 HELIUS_API_KEY = os.getenv("HELIUS_API_KEY")
 GAME_ZIP_PATH = os.getenv("GAME_ZIP_PATH", "workspace/latest_game.zip")
 
 PROCESSED_FILE = Path("delivered_tx.json")
 EXPECTED_AMOUNT_SOL = 5.0
-
-HELIUS_URL = f"https://api.helius.xyz/v0/addresses/{WALLET}/transactions?apiKey={HELIUS_API_KEY}"
 
 def load_processed():
     if PROCESSED_FILE.exists():
@@ -30,23 +30,23 @@ def save_processed(processed_set):
     with open(PROCESSED_FILE, "w") as f:
         json.dump(list(processed_set), f)
 
-def get_recent_transactions():
+def get_transactions_for_wallet(wallet):
+    url = f"https://api.helius.xyz/v0/addresses/{wallet}/transactions?apiKey={HELIUS_API_KEY}"
     try:
-        response = requests.get(HELIUS_URL, timeout=15)
+        response = requests.get(url, timeout=15)
         if response.status_code == 200:
             return response.json()
         else:
-            print(f"Helius error: {response.status_code}")
+            print(f"Helius error for {wallet}: {response.status_code}")
             return []
     except Exception as e:
-        print(f"Error fetching transactions: {e}")
+        print(f"Error fetching transactions for {wallet}: {e}")
         return []
 
-def extract_payment_and_memo(tx):
-    # Check for SOL transfer to our wallet
+def extract_payment_and_memo(tx, wallet):
     if "tokenTransfers" in tx:
         for transfer in tx["tokenTransfers"]:
-            if (transfer.get("toUserAccount") == WALLET and
+            if (transfer.get("toUserAccount") == wallet and
                 transfer.get("amount") == EXPECTED_AMOUNT_SOL * 1e9):
                 memo = tx.get("memo", "")
                 if memo.startswith("@"):
@@ -68,24 +68,33 @@ def send_game_file(telegram_username, tx_signature):
 
 def main():
     processed = load_processed()
-    transactions = get_recent_transactions()
+    all_transactions = []
 
-    for tx in transactions[:10]:
+    for wallet in WALLETS:
+        if not wallet:
+            continue
+        txs = get_transactions_for_wallet(wallet)
+        all_transactions.extend(txs)
+
+    # Sort by blocktime (newest first) if available, else keep order
+    for tx in all_transactions[:20]:  # check recent 20 across both wallets
         sig = tx.get("signature")
         if sig in processed:
             continue
 
-        username, tx_sig = extract_payment_and_memo(tx)
-        if username and tx_sig:
-            success = send_game_file(username, tx_sig)
-            if success:
-                processed.add(sig)
-                print(f"✅ Delivered game to {username} for tx {sig}")
-            else:
-                print(f"❌ Failed to deliver to {username}")
-        else:
-            # No relevant payment or no memo
-            pass
+        # Determine which wallet this transaction belongs to
+        for wallet in WALLETS:
+            if not wallet:
+                continue
+            username, tx_sig = extract_payment_and_memo(tx, wallet)
+            if username and tx_sig:
+                success = send_game_file(username, tx_sig)
+                if success:
+                    processed.add(sig)
+                    print(f"✅ Delivered game to {username} for tx {sig} (wallet: {wallet[:8]}...)")
+                else:
+                    print(f"❌ Failed to deliver to {username}")
+                break  # stop checking other wallets for this tx
 
     save_processed(processed)
 
