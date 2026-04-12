@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v15.4
-- AI‑generated mechanics (OpenAI)
-- Adaptive art prompts (OpenAI)
+LevelForge+ ULTRA – DEATHROLL STUDIO v15.4.1
+- AI‑generated mechanics + adaptive art prompts
+- Fixed NameError (game_name defined before use)
 - Multi‑source trend learning (Reddit, Hacker News, Lobsters, X)
-- SAR system learns from everything
 """
 
 import os
@@ -18,12 +17,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v15.4 – AI‑GENERATED MECHANICS + ADAPTIVE ART")
+print("🔥 DEATHROLL STUDIO v15.4.1 – AI‑GENERATED MECHANICS + ADAPTIVE ART")
 print("✅ Self‑improving | Learns from trends | Creates new mechanics")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "15.4.0"
+BOT_VERSION = "15.4.1"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -48,7 +47,7 @@ telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID")
 openai_key = os.getenv("OPENAI_API_KEY")
 github_token = os.getenv("GH_TOKEN")
-bearer_token = os.getenv("TWITTER_BEARER_TOKEN")   # optional
+bearer_token = os.getenv("TWITTER_BEARER_TOKEN")
 game_price = os.getenv("GAME_PRICE", "5")
 
 print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
@@ -56,7 +55,7 @@ print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"🐦 X reading: {'OK (free)' if bearer_token else 'NO (add token for X)'}")
 
-# ============ SAR SYSTEM (ENHANCED) ============
+# ============ SAR SYSTEM ============
 print("\n🧠 Initializing SAR System...")
 
 class SARSystem:
@@ -150,7 +149,7 @@ sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
-# ============ MULTI‑SOURCE TREND FETCHERS (NO API KEYS) ============
+# ============ MULTI‑SOURCE TREND FETCHERS ============
 print("\n🌍 Fetching real‑world trends from multiple sources...")
 
 def fetch_reddit_trends():
@@ -285,7 +284,7 @@ for t in all_trends:
 
 print(f"   🌍 Combined external trends: {unique_trends if unique_trends else 'none'}")
 
-# ============ GAME GENRES (with SAR + external trends) ============
+# ============ GAME GENRES ============
 print("\n🎮 Setting up genre rotation...")
 
 day_name = datetime.now().strftime("%A")
@@ -310,20 +309,18 @@ else:
     selected_type = game_genres.get(day_name, "precision platformer")
     print(f"   📅 Today is {day_name} – {selected_type}")
 
-# ============ AI‑GENERATED MECHANIC (instead of static list) ============
+# ============ AI‑GENERATED MECHANIC ============
 print("\n⚙️ AI is inventing a new mechanic...")
 
 def generate_ai_mechanic():
-    """Use OpenAI to create a unique mechanic name and description."""
     if not openai_key:
         return "double jump", "perform an extra jump in mid-air"
     
-    # Build context from SAR best mechanics and external trends
     past_mechanics = []
     for game in sar.data["study"]["games"]:
         if game.get("success") and game.get("mechanic"):
             past_mechanics.append(game["mechanic"])
-    past_mechanics = list(set(past_mechanics))[-5:]  # last 5 unique successful mechanics
+    past_mechanics = list(set(past_mechanics))[-5:]
     
     trends_context = ", ".join(unique_trends) if unique_trends else "action, platformer, puzzle"
     
@@ -365,7 +362,6 @@ Make it creative, fun, and different from existing mechanics."""
     except Exception as e:
         print(f"   ⚠️ AI mechanic generation error: {e}")
     
-    # Fallback to a random mechanic from a diverse list
     fallback_mechanics = [
         ("dash", "quick forward burst"),
         ("double jump", "extra mid-air jump"),
@@ -384,11 +380,34 @@ mechanic_name, mechanic_desc = generate_ai_mechanic()
 selected_mechanic = mechanic_name
 print(f"   ✨ New mechanic invented: {selected_mechanic} – {mechanic_desc}")
 
-# ============ AI‑GENERATED ADAPTIVE ART PROMPT ============
+# ============ GENERATE GAME NAME ============
+print("\n🎮 Generating game name...")
+
+def generate_ai_name():
+    if openai_key:
+        try:
+            prompt = f"Generate ONE creative video game name for a {selected_type} game with the mechanic '{selected_mechanic}'. Return ONLY the name."
+            r = requests.post("https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+                json={"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": prompt}], "temperature": 0.9, "max_tokens": 20}, timeout=30)
+            if r.status_code == 200:
+                name = r.json()["choices"][0]["message"]["content"].strip().strip('"')
+                if name:
+                    return name
+        except:
+            pass
+    prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue"]
+    suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge"]
+    return f"{random.choice(prefixes)} {random.choice(suffixes)}"
+
+game_name = generate_ai_name()
+print(f"   ✅ {game_name}")
+repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
+
+# ============ AI‑GENERATED ADAPTIVE ART PROMPT (NOW game_name exists) ============
 print("\n🎨 AI is crafting an adaptive art prompt...")
 
 def generate_adaptive_art_prompt():
-    """Use OpenAI to create a detailed, game‑specific prompt for Pollinations.ai."""
     if not openai_key:
         return f"pixel art game sprite, {selected_type} character using {selected_mechanic}, detailed, vibrant colors"
     
@@ -397,7 +416,7 @@ def generate_adaptive_art_prompt():
     for game in sar.data["study"]["games"]:
         if game.get("success") and game.get("art_prompt"):
             past_prompts.append(game["art_prompt"])
-    past_prompts = past_prompts[-3:]  # last 3 successful prompts
+    past_prompts = past_prompts[-3:]
     
     prompt_instruction = f"""You are a prompt engineer for AI image generation. Create a detailed, high‑quality prompt for Pollinations.ai to generate a game sprite.
 
@@ -432,7 +451,6 @@ Examples of good prompts: "pixel art game sprite for 'Neon Runner', platformer c
     except Exception as e:
         print(f"   ⚠️ Adaptive prompt error: {e}")
     
-    # Fallback to a generic but varied prompt
     fallbacks = [
         f"pixel art game sprite for '{game_name}', {selected_type} character using {selected_mechanic}, detailed, vibrant colors, 8K",
         f"8-bit game sprite, {selected_type} hero, {selected_mechanic} ability, centered, glowing, high quality",
@@ -442,30 +460,6 @@ Examples of good prompts: "pixel art game sprite for 'Neon Runner', platformer c
 
 adaptive_prompt = generate_adaptive_art_prompt()
 print(f"   ✅ Adaptive prompt ready: {adaptive_prompt[:80]}...")
-
-# ============ GENERATE GAME NAME ============
-print("\n🎮 Generating game name...")
-
-def generate_ai_name():
-    if openai_key:
-        try:
-            prompt = f"Generate ONE creative video game name for a {selected_type} game with the mechanic '{selected_mechanic}'. Return ONLY the name."
-            r = requests.post("https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-                json={"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": prompt}], "temperature": 0.9, "max_tokens": 20}, timeout=30)
-            if r.status_code == 200:
-                name = r.json()["choices"][0]["message"]["content"].strip().strip('"')
-                if name:
-                    return name
-        except:
-            pass
-    prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue"]
-    suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge"]
-    return f"{random.choice(prefixes)} {random.choice(suffixes)}"
-
-game_name = generate_ai_name()
-print(f"   ✅ {game_name}")
-repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
 # ============ AI DESCRIPTION ============
 print("\n📝 Generating AI description...")
@@ -488,7 +482,7 @@ def generate_ai_description():
 ai_description = generate_ai_description()
 print(f"   🤖 {ai_description}")
 
-# ============ VIRAL CONTENT (unchanged) ============
+# ============ VIRAL CONTENT ============
 print("\n🔥 Generating viral content...")
 
 genre_emojis = {
@@ -554,7 +548,7 @@ random.shuffle(all_tags)
 hashtag_string = " ".join(all_tags[:7])
 print(f"   #️⃣ {hashtag_string[:60]}...")
 
-# ============ ART GENERATION (USING ADAPTIVE PROMPT) ============
+# ============ ART GENERATION ============
 print("\n🎨 Generating art with adaptive prompt...")
 sprite_path = Path("sprite.png")
 art_stats = {"pollinations": 0, "fallback": 0, "total": 0}
@@ -572,8 +566,6 @@ def generate_art():
 
 def generate_pollinations_art():
     try:
-        # Use the adaptive prompt generated earlier
-        # Replace spaces with + for URL
         prompt_url = adaptive_prompt.replace(" ", "+").replace("'", "").replace(",", "+")
         url = f"https://image.pollinations.ai/prompt/{prompt_url}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
         response = requests.get(url, timeout=45)
@@ -656,7 +648,6 @@ func _physics_process(delta):
     # Simple implementation of the generated mechanic (placeholder)
     if Input.is_action_just_pressed("ui_accept"):
         print("Using {selected_mechanic}!")
-        # Here you could add actual effect logic
 """
 (project_dir / "player.gd").write_text(player_script)
 
@@ -772,7 +763,7 @@ if telegram_token:
     except:
         print("   ⚠️ Channel error")
 
-# ============ SAR RECORD (with external trends and art prompt) ============
+# ============ SAR RECORD ============
 print("\n🧠 Recording run with external trends and adaptive prompt...")
 external_trends = unique_trends if unique_trends else []
 sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, art_time, external_trends, adaptive_prompt)
@@ -780,8 +771,6 @@ sar.analyze()
 print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} total runs)")
 if external_trends:
     print(f"   🌍 Recorded external trends: {external_trends}")
-if adaptive_prompt:
-    print(f"   🎨 Recorded adaptive prompt")
 
 # ============ SAVE DATA ============
 print("\n💾 Saving data...")
@@ -836,7 +825,7 @@ print(f"   🌍 External trends used: {external_trends if external_trends else '
 print(f"   📦 {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v15.4 FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v15.4.1 FINISHED!")
 print("✅ AI invented a brand new game mechanic!")
 print("✅ Art prompt was adaptively generated for this specific game!")
 print("🧠 SAR stores everything for future improvement")
