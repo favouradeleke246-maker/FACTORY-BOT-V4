@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v16.3
-- Fixed external_trends error, wallet breaks, feature list missing
-- AI‑generated professional description & hashtags
-- AI‑crafted Pollinations prompt for better 3D art
-- README fixed
+LevelForge+ ULTRA – DEATHROLL STUDIO v16.4
+- Fixed admin delivery order (repo_link error)
+- AI description, hashtags, art prompt
+- Enhanced 3D game (enemies, coins, companion, health, goal)
 - Memory‑safe (SAR, portfolio untouched)
 """
 
@@ -20,12 +19,12 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🎮 DEATHROLL STUDIO v16.3 – FIXED & IMPROVED")
-print("✅ AI Description | AI Hashtags | AI Art Prompt | Fixed Bugs")
+print("🎮 DEATHROLL STUDIO v16.4 – FULLY FIXED")
+print("✅ AI Description | AI Hashtags | AI Art Prompt | Enhanced 3D")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "16.3.0"
+BOT_VERSION = "16.4.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -62,7 +61,6 @@ print(f"🐦 X reading: {'OK (free)' if bearer_token else 'NO (add token for X)'
 print("\n🧠 Initializing SAR System...")
 
 class SARSystem:
-    # ... (same as before, no changes)
     def __init__(self):
         self.sar_file = Path("sar_analysis.json")
         self.data = self.load()
@@ -142,7 +140,7 @@ sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
-# ============ MULTI‑SOURCE TREND FETCHERS (unchanged) ============
+# ============ MULTI‑SOURCE TREND FETCHERS ============
 print("\n🌍 Fetching real‑world trends from multiple sources...")
 
 def fetch_reddit_trends():
@@ -274,7 +272,7 @@ for t in all_trends:
     if t not in unique_trends:
         unique_trends.append(t)
 
-external_trends = unique_trends if unique_trends else []   # <-- define here for later use
+external_trends = unique_trends if unique_trends else []
 print(f"   🌍 Combined external trends: {external_trends if external_trends else 'none'}")
 
 # ============ GAME GENRES ============
@@ -601,7 +599,7 @@ art_success = generate_art()
 art_time = time.time() - art_start
 print(f"   ✅ Art completed in {art_time:.1f}s")
 
-# ============ ENHANCED 3D GODOT PROJECT (unchanged) ============
+# ============ ENHANCED 3D GODOT PROJECT ============
 print("\n📁 Creating enhanced 3D Godot project...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
@@ -621,7 +619,7 @@ config/icon="res://icon.png"
 renderer="forward_plus"
 """)
 
-# 3D scene (same as before, with enemies, coins, companion, health, goal)
+# 3D scene with enemies, coins, companion, health, goal
 main_scene = """
 [gd_scene load_steps=12 format=3]
 
@@ -852,48 +850,7 @@ with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         zipf.write(file, file.relative_to(project_dir.parent))
 print(f"   ✅ Game ZIP created at {zip_path}")
 
-# ============ SEND GAME ZIP + INFO TO ADMIN (PRIVATE DM) ============
-print("\n📬 Sending game files and info to admin...")
-if telegram_token and telegram_chat_id:
-    zip_file = Path("workspace/latest_game.zip")
-    if zip_file.exists():
-        try:
-            with open(zip_file, "rb") as f:
-                files = {"document": f}
-                caption = f"🎮 *{game_name}* – Enhanced 3D Game\n💰 Price: ${game_price} SOL\n🕹️ Genre: {selected_type}\n⚙️ Mechanic: {selected_mechanic}"
-                requests.post(
-                    f"https://api.telegram.org/bot{telegram_token}/sendDocument",
-                    files=files,
-                    data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"},
-                    timeout=60
-                )
-            print("   ✅ Game ZIP sent to admin")
-            
-            with open(sprite_path, "rb") as photo:
-                files = {"photo": photo}
-                info_text = (
-                    f"✨ *{game_name}* – 3D {selected_type}\n"
-                    f"📝 {ai_description}\n"
-                    f"⚡ *Mechanic:* `{selected_mechanic}` – {mechanic_desc}\n"
-                    f"🎣 Hook: {selected_hook}\n"
-                    f"❓ {selected_question}\n"
-                    f"📅 {day_name}\n"
-                    f"🌍 Trends: {external_trends if external_trends else 'none'}\n"
-                    f"🔗 GitHub backup: {repo_link}"
-                )
-                requests.post(
-                    f"https://api.telegram.org/bot{telegram_token}/sendPhoto",
-                    files=files,
-                    data={"chat_id": telegram_chat_id, "caption": info_text, "parse_mode": "Markdown"},
-                    timeout=30
-                )
-            print("   ✅ Game info and art sent to admin")
-        except Exception as e:
-            print(f"   ⚠️ Could not send to admin: {e}")
-    else:
-        print("   ⚠️ Game ZIP not found – cannot send to admin")
-
-# ============ README (fixed) ============
+# ============ README (preview only) ============
 print("\n📢 Creating README (preview only)...")
 readme = f"""
 <div align="center">
@@ -934,6 +891,48 @@ if github_token:
     except:
         pass
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
+
+# ============ SEND GAME ZIP + INFO TO ADMIN (PRIVATE DM) ============
+# This block is placed AFTER repo_link is defined
+print("\n📬 Sending game files and info to admin...")
+if telegram_token and telegram_chat_id:
+    zip_file = Path("workspace/latest_game.zip")
+    if zip_file.exists():
+        try:
+            with open(zip_file, "rb") as f:
+                files = {"document": f}
+                caption = f"🎮 *{game_name}* – Enhanced 3D Game\n💰 Price: ${game_price} SOL\n🕹️ Genre: {selected_type}\n⚙️ Mechanic: {selected_mechanic}"
+                requests.post(
+                    f"https://api.telegram.org/bot{telegram_token}/sendDocument",
+                    files=files,
+                    data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"},
+                    timeout=60
+                )
+            print("   ✅ Game ZIP sent to admin")
+            
+            with open(sprite_path, "rb") as photo:
+                files = {"photo": photo}
+                info_text = (
+                    f"✨ *{game_name}* – 3D {selected_type}\n"
+                    f"📝 {ai_description}\n"
+                    f"⚡ *Mechanic:* `{selected_mechanic}` – {mechanic_desc}\n"
+                    f"🎣 Hook: {selected_hook}\n"
+                    f"❓ {selected_question}\n"
+                    f"📅 {day_name}\n"
+                    f"🌍 Trends: {external_trends if external_trends else 'none'}\n"
+                    f"🔗 GitHub backup: {repo_link}"
+                )
+                requests.post(
+                    f"https://api.telegram.org/bot{telegram_token}/sendPhoto",
+                    files=files,
+                    data={"chat_id": telegram_chat_id, "caption": info_text, "parse_mode": "Markdown"},
+                    timeout=30
+                )
+            print("   ✅ Game info and art sent to admin")
+        except Exception as e:
+            print(f"   ⚠️ Could not send to admin: {e}")
+    else:
+        print("   ⚠️ Game ZIP not found – cannot send to admin")
 
 # ============ DEMO PAGE (preview only) ============
 print("\n🌐 Creating demo page (preview only)...")
@@ -1097,8 +1096,8 @@ print(f"   📦 GitHub (backup): {repo_link}")
 print(f"   📦 Game ZIP: workspace/latest_game.zip")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v16.3 FINISHED!")
-print("✅ Fixed: external_trends error, wallet breaks, missing feature list")
+print("\n🎉 DEATHROLL STUDIO v16.4 FINISHED!")
+print("✅ Fixed: admin delivery order (repo_link error resolved)")
 print("✅ AI‑generated professional description & hashtags")
 print("✅ AI‑crafted Pollinations prompt for better art")
 print("✅ Feature list sent as separate message (no truncation)")
