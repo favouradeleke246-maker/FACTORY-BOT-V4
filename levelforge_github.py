@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v19.0
+LevelForge+ ULTRA – DEATHROLL STUDIO v19.0 (FIXED)
 - 1-2 sentence game descriptions (short, punchy, varied)
 - Player feedback loop (Telegram polls feed into SAR)
 - Weekly "Best Of" re-release (public channel)
@@ -16,13 +16,13 @@ import time
 import shutil
 import zipfile
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
 from collections import Counter
 
 print("=" * 60)
-print("🎮 DEATHROLL STUDIO v19.0 – SMART & CONCISE")
+print("🎮 DEATHROLL STUDIO v19.0 – SMART & CONCISE (FIXED)")
 print("✅ 1-2 Sentence Descriptions | Feedback Loop | Weekly Best Of | Private Changelog")
 print("=" * 60)
 
@@ -60,7 +60,7 @@ print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"🐦 X reading: {'OK (free)' if bearer_token else 'NO (add token for X)'}")
 
-# ============ SAR SYSTEM (enhanced with feedback) ============
+# ============ SAR SYSTEM ============
 print("\n🧠 Initializing SAR System...")
 
 class SARSystem:
@@ -139,7 +139,6 @@ class SARSystem:
             self.data["analysis"]["success_rate"] = self.data["study"]["successful_art"] / total
         self.save()
     def record_feedback(self, game_name, rating):
-        """Record player feedback (rating 1-5) for a game"""
         if game_name not in self.data["feedback"]:
             self.data["feedback"][game_name] = []
         self.data["feedback"][game_name].append(rating)
@@ -155,7 +154,7 @@ sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
-# ============ REAL‑TIME TRENDING GENRES (Steam + Itch.io) ============
+# ============ REAL‑TIME TRENDING GENRES ============
 print("\n🌍 Fetching real‑time trending genres...")
 
 def fetch_steam_trending_genres():
@@ -424,20 +423,21 @@ genre_emojis = {
 game_emojis = random.sample(genre_emojis.get(selected_type, ["🎮", "🔥", "⚡"]), 3)
 selected_emojis = " ".join(game_emojis)
 
-# ============ AI‑INVENTED MECHANIC ============
+# ============ AI‑INVENTED MECHANIC (FIXED TYPO) ============
 print("\n⚙️ AI is inventing a completely new mechanic...")
+
+creative_fallbacks = [
+    ("Phase Echo", "leave behind a short-lived decoy"),
+    ("Chrono Fracture", "create a time bubble"),
+    ("Void Step", "teleport through short walls"),
+    ("Mirror Shell", "reflect projectiles"),
+    ("Gravity Well", "pull enemies toward you"),
+    ("Soul Link", "share damage with an enemy"),
+    ("Static Charge", "build and release electricity")
+]
 
 def generate_true_ai_mechanic():
     if not openai_key:
-        creative_fallbacks = [
-            ("Phase Echo", "leave behind a short-lived decoy"),
-            ("Chrono Fracture", "create a time bubble"),
-            ("Void Step", "teleport through short walls"),
-            ("Mirror Shell", "reflect projectiles"),
-            ("Gravity Well", "pull enemies toward you"),
-            ("Soul Link", "share damage with an enemy"),
-            ("Static Charge", "build and release electricity")
-        ]
         return random.choice(creative_fallbacks)
     
     past_mechanics = []
@@ -508,7 +508,7 @@ game_name = generate_ai_name()
 print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ 1-2 SENTENCE GAME DESCRIPTION (SHORT, PUNCHY, VARIED) ============
+# ============ 1-2 SENTENCE GAME DESCRIPTION ============
 print("\n📝 Generating short game description (1-2 sentences)...")
 
 description_styles = ["excited", "curious", "urgent", "mysterious", "proud", "challenging"]
@@ -565,7 +565,7 @@ Return ONLY the hashtags separated by spaces."""
 hashtag_string = generate_ai_hashtags()
 print(f"   #️⃣ {hashtag_string[:80]}...")
 
-# ============ ADVANCED ART PROMPT ============
+# ============ ART GENERATION ============
 visual_styles = ["isometric view", "neon cyberpunk", "low‑poly", "cell‑shaded", "voxel art", "pastel gothic", "glitchcore", "glassmorphism"]
 trending_style = random.choice(visual_styles)
 print(f"\n🎨 Trending visual style: {trending_style}")
@@ -594,7 +594,6 @@ Return ONLY the prompt, under 200 characters."""
 adaptive_prompt = generate_advanced_art_prompt()
 print(f"   ✅ Prompt ready")
 
-# ============ GENERATE ART ============
 print("\n🎨 Generating art...")
 sprite_path = Path("sprite.png")
 
@@ -621,7 +620,7 @@ def generate_art():
 art_success = generate_art()
 print(f"   ✅ Art ready")
 
-# ============ CREATE GODOT PROJECT (simplified template) ============
+# ============ CREATE GODOT PROJECT ============
 print(f"\n📁 Creating {selected_type} 3D project...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
@@ -684,7 +683,7 @@ if github_token:
         pass
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
 
-# ============ SEND TO ADMIN DM (game file + info) ============
+# ============ SEND TO ADMIN DM ============
 print("\n📬 Sending game to admin DM...")
 if telegram_token and telegram_chat_id:
     zip_file = Path("workspace/latest_game.zip")
@@ -698,7 +697,7 @@ if telegram_token and telegram_chat_id:
         except Exception as e:
             print(f"   ⚠️ Could not send: {e}")
 
-# ============ TELEGRAM SALES POST (public channel) ============
+# ============ TELEGRAM SALES POST ============
 print("\n📱 Sending Telegram sales post to public channel...")
 if telegram_token:
     viral_post_text = f"""
@@ -723,9 +722,9 @@ if telegram_token:
         requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": TELEGRAM_CHANNEL, "text": viral_post_text, "parse_mode": "Markdown"}, timeout=30)
         print(f"   ✅ Sales post sent to {TELEGRAM_CHANNEL}")
     except Exception as e:
-        print(f"   ⚠️ Error: {e}")
+        print(f"   ⚠️ Sales post error: {e}")
 
-# ============ FEEDBACK POLL (public channel, but results stored) ============
+# ============ FEEDBACK POLL ============
 print("\n📊 Sending feedback poll to public channel...")
 if telegram_token:
     try:
@@ -741,7 +740,7 @@ if telegram_token:
     except Exception as e:
         print(f"   ⚠️ Poll error: {e}")
 
-# ============ WEEKLY "BEST OF" (public channel, Sundays only) ============
+# ============ WEEKLY "BEST OF" (SUNDAY) ============
 if day_name == "Sunday":
     print("\n🏆 Sunday: Selecting Game of the Week...")
     games = sar.data["study"]["games"]
@@ -756,7 +755,7 @@ if day_name == "Sunday":
         except:
             pass
 
-# ============ MONTHLY CHANGELOG (PRIVATE DM ONLY) ============
+# ============ MONTHLY CHANGELOG (PRIVATE DM) ============
 if datetime.now().day == 1:
     print("\n📢 Generating monthly changelog (private DM)...")
     changelog = f"""📅 *DeathRoll Studio – Monthly Changelog*
@@ -784,7 +783,7 @@ Thanks for running DeathRoll Studio! 💪
 
 # ============ SAR RECORD ============
 print("\n🧠 Recording run...")
-sar.record(game_name, selected_type, selected_mechanic, "short hook", art_success, time.time(), real_time_trends, adaptive_prompt, feedback_score=None)
+sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, time.time(), real_time_trends, adaptive_prompt, feedback_score=None)
 sar.analyze()
 print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} total runs)")
 
