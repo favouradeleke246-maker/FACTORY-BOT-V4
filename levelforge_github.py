@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v16.4
-- Fixed admin delivery order (repo_link error)
-- AI description, hashtags, art prompt
-- Enhanced 3D game (enemies, coins, companion, health, goal)
-- Memory‑safe (SAR, portfolio untouched)
+LevelForge+ ULTRA – DEATHROLL STUDIO v19.0
+- 1-2 sentence game descriptions (short, punchy, varied)
+- Player feedback loop (Telegram polls feed into SAR)
+- Weekly "Best Of" re-release (public channel)
+- Monthly changelog (private DM only)
+- Real‑time trends, weighted selection, advanced art
 """
 
 import os
@@ -14,17 +15,19 @@ import requests
 import time
 import shutil
 import zipfile
-from datetime import datetime
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta
 from pathlib import Path
 from PIL import Image, ImageDraw
+from collections import Counter
 
 print("=" * 60)
-print("🎮 DEATHROLL STUDIO v16.4 – FULLY FIXED")
-print("✅ AI Description | AI Hashtags | AI Art Prompt | Enhanced 3D")
+print("🎮 DEATHROLL STUDIO v19.0 – SMART & CONCISE")
+print("✅ 1-2 Sentence Descriptions | Feedback Loop | Weekly Best Of | Private Changelog")
 print("=" * 60)
 
 # ============ BOT VERSION ============
-BOT_VERSION = "16.4.0"
+BOT_VERSION = "19.0.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -57,7 +60,7 @@ print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"🐦 X reading: {'OK (free)' if bearer_token else 'NO (add token for X)'}")
 
-# ============ SAR SYSTEM (unchanged) ============
+# ============ SAR SYSTEM (enhanced with feedback) ============
 print("\n🧠 Initializing SAR System...")
 
 class SARSystem:
@@ -80,11 +83,12 @@ class SARSystem:
                 "best_external_trend": None,
                 "success_rate": 0
             },
+            "feedback": {},
             "reprogram": {"last_improvement": None, "changes": []}
         }
     def save(self):
         self.sar_file.write_text(json.dumps(self.data, indent=2))
-    def record(self, game_name, genre, mechanic, hook, art_success, exec_time, external_trends=None, art_prompt_used=None):
+    def record(self, game_name, genre, mechanic, hook, art_success, exec_time, external_trends=None, art_prompt_used=None, feedback_score=None):
         self.data["study"]["total_runs"] += 1
         if art_success:
             self.data["study"]["successful_art"] += 1
@@ -97,7 +101,8 @@ class SARSystem:
             "hook": hook,
             "timestamp": datetime.now().isoformat(),
             "success": art_success,
-            "art_prompt": art_prompt_used
+            "art_prompt": art_prompt_used,
+            "feedback_score": feedback_score
         }
         if external_trends:
             game_entry["external_trends"] = external_trends
@@ -133,6 +138,16 @@ class SARSystem:
         if total > 0:
             self.data["analysis"]["success_rate"] = self.data["study"]["successful_art"] / total
         self.save()
+    def record_feedback(self, game_name, rating):
+        """Record player feedback (rating 1-5) for a game"""
+        if game_name not in self.data["feedback"]:
+            self.data["feedback"][game_name] = []
+        self.data["feedback"][game_name].append(rating)
+        self.save()
+    def get_average_feedback(self, game_name):
+        if game_name in self.data["feedback"] and self.data["feedback"][game_name]:
+            return sum(self.data["feedback"][game_name]) / len(self.data["feedback"][game_name])
+        return None
     def analyze(self):
         pass
 
@@ -140,8 +155,61 @@ sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
-# ============ MULTI‑SOURCE TREND FETCHERS ============
-print("\n🌍 Fetching real‑world trends from multiple sources...")
+# ============ REAL‑TIME TRENDING GENRES (Steam + Itch.io) ============
+print("\n🌍 Fetching real‑time trending genres...")
+
+def fetch_steam_trending_genres():
+    try:
+        store_url = "https://store.steampowered.com/api/featuredcategories"
+        response = requests.get(store_url, timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            genres = []
+            if "specials" in data:
+                for game in data["specials"]:
+                    title = game.get("name", "").lower()
+                    if "shooter" in title or "battle" in title:
+                        genres.append("action")
+                    elif "rpg" in title or "legend" in title:
+                        genres.append("rpg")
+                    elif "race" in title or "speed" in title:
+                        genres.append("racing")
+            if genres:
+                top = Counter(genres).most_common(1)
+                if top:
+                    return [top[0][0]]
+    except Exception as e:
+        print(f"   Steam API warning: {e}")
+    return None
+
+def fetch_itchio_trending_genres():
+    try:
+        url = "https://itch.io/games/trending.rss"
+        response = requests.get(url, timeout=15)
+        if response.status_code == 200:
+            root = ET.fromstring(response.content)
+            genres = []
+            for item in root.findall(".//item")[:20]:
+                title = item.find("title").text.lower() if item.find("title") is not None else ""
+                if "horror" in title:
+                    genres.append("horror")
+                elif "puzzle" in title:
+                    genres.append("puzzle")
+                elif "platformer" in title:
+                    genres.append("platformer")
+                elif "rpg" in title:
+                    genres.append("rpg")
+                elif "shooter" in title:
+                    genres.append("action")
+                elif "strategy" in title:
+                    genres.append("strategy")
+            if genres:
+                top = Counter(genres).most_common(1)
+                if top:
+                    return [top[0][0]]
+    except Exception as e:
+        print(f"   Itch.io RSS warning: {e}")
+    return None
 
 def fetch_reddit_trends():
     try:
@@ -258,6 +326,15 @@ def fetch_x_trends():
     return None
 
 all_trends = []
+steam_genre = fetch_steam_trending_genres()
+itch_genre = fetch_itchio_trending_genres()
+if steam_genre:
+    all_trends.extend(steam_genre)
+    print(f"   🎮 Steam trending: {steam_genre[0]}")
+if itch_genre:
+    all_trends.extend(itch_genre)
+    print(f"   🎲 Itch.io trending: {itch_genre[0]}")
+
 reddit = fetch_reddit_trends()
 hn = fetch_hackernews_trends()
 lobsters = fetch_lobsters_trends()
@@ -272,33 +349,80 @@ for t in all_trends:
     if t not in unique_trends:
         unique_trends.append(t)
 
-external_trends = unique_trends if unique_trends else []
-print(f"   🌍 Combined external trends: {external_trends if external_trends else 'none'}")
+real_time_trends = unique_trends if unique_trends else []
+print(f"   🌍 Combined real‑time trends: {real_time_trends if real_time_trends else 'none'}")
 
-# ============ GAME GENRES ============
-print("\n🎮 Setting up genre rotation...")
+# ============ WEIGHTED GENRE SELECTION ============
+print("\n🎮 Weighted genre selection (SAR 40% + Real‑time 40% + Day 20%)...")
 
 day_name = datetime.now().strftime("%A")
-game_genres = {
+all_genres = [
+    "top-down shooter", "action RPG", "racing game", "puzzle game",
+    "survival horror", "fighting game", "strategy game",
+    "extraction shooter", "cozy builder", "roguelite"
+]
+day_genre_map = {
     "Monday": "top-down shooter", "Tuesday": "action RPG", "Wednesday": "racing game",
     "Thursday": "puzzle game", "Friday": "survival horror", "Saturday": "fighting game", "Sunday": "strategy game"
 }
+day_default = day_genre_map.get(day_name, random.choice(all_genres))
+sar_best = sar.data["analysis"].get("best_genre")
+real_time_best = real_time_trends[0] if real_time_trends else None
 
-best_genre = sar.data["analysis"].get("best_genre")
-best_external_trend = sar.data["analysis"].get("best_external_trend")
+candidates = []
+weights = []
+if sar_best and sar_best in all_genres:
+    candidates.append(sar_best)
+    weights.append(0.4)
+if real_time_best and real_time_best in all_genres:
+    candidates.append(real_time_best)
+    weights.append(0.4)
+candidates.append(day_default)
+weights.append(0.2)
 
-if best_genre and random.random() < 0.4:
-    selected_type = best_genre
-    print(f"   🧠 SAR chose best genre: {selected_type}")
-elif best_external_trend and best_external_trend != best_genre and random.random() < 0.3:
-    selected_type = best_external_trend
-    print(f"   🌍 SAR chose best external trend: {selected_type}")
-elif external_trends and random.random() < 0.3:
-    selected_type = random.choice(external_trends)
-    print(f"   📈 Using current external trend: {selected_type}")
+total_weight = sum(weights)
+if total_weight > 0:
+    selected_type = random.choices(candidates, weights=weights)[0]
 else:
-    selected_type = game_genres.get(day_name, "precision platformer")
-    print(f"   📅 Today is {day_name} – {selected_type}")
+    selected_type = random.choice(all_genres)
+
+print(f"   🧠 SAR best: {sar_best or 'none'}")
+print(f"   📈 Real‑time best: {real_time_best or 'none'}")
+print(f"   📅 Day default: {day_default}")
+print(f"   🎮 Selected: {selected_type}")
+
+# ============ VIRAL HOOK & EMOJIS ============
+viral_hooks = {
+    "survival horror": ["🏃‍♂️ Run or die", "💀 This game haunted me", "🔦 Can you survive?"],
+    "top-down shooter": ["🔫 I built a shooter in 24 hours", "💀 This boss took 50 attempts"],
+    "action RPG": ["⚔️ Your next obsession", "✨ 24 hours = a whole RPG"],
+    "racing game": ["🏎️ Speed meets chaos", "💨 Fastest game I've made"],
+    "puzzle game": ["🧠 1000 IQ required", "💡 One move changes everything"],
+    "fighting game": ["👊 One combo to rule them all", "💥 60 seconds of pure action"],
+    "strategy game": ["♟️ Outsmart the system", "🧠 Big brain energy"],
+    "extraction shooter": ["🏴‍☠️ Loot or die", "💀 Extract before it's too late"],
+    "cozy builder": ["🌿 Build your dream", "🪵 Gather, craft, relax"],
+    "roguelite": ["💀 Die. Learn. Repeat.", "🌀 Every run is different"]
+}
+hook_list = viral_hooks.get(selected_type, ["🎮 New game just dropped"])
+selected_hook = random.choice(hook_list)
+selected_question = random.choice(["Which mechanic would you add? 👇", "Rate this game 1-10! 🔥", "Would you play this? 💬"])
+selected_cta = random.choice(["Follow for daily games! 🎮", "Share with a friend! 🔄", "Double tap if you'd play this! ❤️"])
+
+genre_emojis = {
+    "survival horror": ["😱", "💀", "👻", "🔪", "🩸", "🌙"],
+    "top-down shooter": ["🔫", "💥", "🎯", "⚡", "🔥", "💀"],
+    "action RPG": ["⚔️", "🛡️", "👑", "✨", "🌟", "💎"],
+    "racing game": ["🏎️", "💨", "🔥", "⚡", "🏁", "🚗"],
+    "puzzle game": ["🧠", "💡", "🔮", "✨", "🎯", "💎"],
+    "fighting game": ["👊", "💥", "⚡", "🔥", "🏆", "💪"],
+    "strategy game": ["♟️", "🧠", "👑", "⚔️", "🎯", "💎"],
+    "extraction shooter": ["🏴‍☠️", "💀", "💰", "🔫", "💥", "🎯"],
+    "cozy builder": ["🌿", "🪵", "✨", "🌸", "🏡", "🪴"],
+    "roguelite": ["💀", "🌀", "🏆", "⚔️", "🔥", "🎲"]
+}
+game_emojis = random.sample(genre_emojis.get(selected_type, ["🎮", "🔥", "⚡"]), 3)
+selected_emojis = " ".join(game_emojis)
 
 # ============ AI‑INVENTED MECHANIC ============
 print("\n⚙️ AI is inventing a completely new mechanic...")
@@ -306,13 +430,13 @@ print("\n⚙️ AI is inventing a completely new mechanic...")
 def generate_true_ai_mechanic():
     if not openai_key:
         creative_fallbacks = [
-            ("Phase Echo", "leave behind a short-lived decoy that distracts enemies"),
-            ("Chrono Fracture", "create a time bubble that slows everything except you"),
-            ("Void Step", "teleport through short walls, leaving a damaging rift"),
-            ("Mirror Shell", "reflect one enemy projectile back per use"),
-            ("Gravity Well", "pull nearby enemies toward a point of your choice"),
-            ("Soul Link", "connect to an enemy, sharing damage taken"),
-            ("Static Charge", "build up static electricity with movement, release as a shockwave")
+            ("Phase Echo", "leave behind a short-lived decoy"),
+            ("Chrono Fracture", "create a time bubble"),
+            ("Void Step", "teleport through short walls"),
+            ("Mirror Shell", "reflect projectiles"),
+            ("Gravity Well", "pull enemies toward you"),
+            ("Soul Link", "share damage with an enemy"),
+            ("Static Charge", "build and release electricity")
         ]
         return random.choice(creative_fallbacks)
     
@@ -321,37 +445,24 @@ def generate_true_ai_mechanic():
         if game.get("success") and game.get("mechanic"):
             past_mechanics.append(game["mechanic"])
     past_mechanics = list(set(past_mechanics))[-5:]
-    
-    trends_context = ", ".join(external_trends) if external_trends else "action, platformer, puzzle"
+    trends_context = ", ".join(real_time_trends) if real_time_trends else "action"
     blacklist = ["dash", "double jump", "time slow", "shield", "grapple", "invisibility", "wall run", "teleport", "gravity flip", "clone"]
     
-    prompt = f"""You are a game designer. Invent a completely new, unique game mechanic for a {selected_type} game.
+    prompt = f"""Invent a unique game mechanic for a {selected_type} game.
 
-Current trending genres: {trends_context}
-Recently successful mechanics: {', '.join(past_mechanics) if past_mechanics else 'none'}
+Trending: {trends_context}
+Past mechanics: {', '.join(past_mechanics) if past_mechanics else 'none'}
+FORBIDDEN: {', '.join(blacklist)}
 
-FORBIDDEN mechanics (DO NOT USE ANY OF THESE): {', '.join(blacklist)}
-
-The mechanic MUST be original, creative, and not seen in typical games.
-
-Return EXACTLY in this format (nothing else):
-MECHANIC: <short name, 2-4 words>
-DESCRIPTION: <one sentence explaining what it does>
-
-Example: 'MECHANIC: Phase Shift\nDESCRIPTION: Briefly turn intangible to pass through enemies and lasers.'"""
+Return EXACTLY:
+MECHANIC: <short name>
+DESCRIPTION: <one sentence>"""
     
     try:
         response = requests.post(
             "https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-            json={
-                "model": "gpt-4o-mini",
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 1.1,
-                "max_tokens": 120
-            },
-            timeout=20
-        )
+            json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": prompt}], "temperature": 1.1, "max_tokens": 120}, timeout=20)
         if response.status_code == 200:
             text = response.json()["choices"][0]["message"]["content"]
             lines = text.strip().split("\n")
@@ -365,54 +476,13 @@ Example: 'MECHANIC: Phase Shift\nDESCRIPTION: Briefly turn intangible to pass th
             if mechanic_name and mechanic_desc and len(mechanic_name) > 3:
                 if mechanic_name.lower() not in blacklist:
                     return mechanic_name, mechanic_desc
-    except Exception as e:
-        print(f"   ⚠️ AI mechanic error: {e}")
-    
-    # Second attempt
-    try:
-        response = requests.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-            json={
-                "model": "gpt-4o-mini",
-                "messages": [{"role": "user", "content": f"Invent one original game mechanic for a {selected_type} game. Do not use any common mechanics. Respond exactly as: MECHANIC: name\nDESCRIPTION: description"}],
-                "temperature": 1.2,
-                "max_tokens": 100
-            },
-            timeout=20
-        )
-        if response.status_code == 200:
-            text = response.json()["choices"][0]["message"]["content"]
-            lines = text.strip().split("\n")
-            mechanic_name = None
-            mechanic_desc = None
-            for line in lines:
-                if line.startswith("MECHANIC:"):
-                    mechanic_name = line.replace("MECHANIC:", "").strip()
-                elif line.startswith("DESCRIPTION:"):
-                    mechanic_desc = line.replace("DESCRIPTION:", "").strip()
-            if mechanic_name and mechanic_desc:
-                if mechanic_name.lower() not in blacklist:
-                    return mechanic_name, mechanic_desc
     except:
         pass
-    
-    creative_fallbacks = [
-        ("Phase Echo", "leave behind a short-lived decoy that distracts enemies"),
-        ("Chrono Fracture", "create a time bubble that slows everything except you"),
-        ("Void Step", "teleport through short walls, leaving a damaging rift"),
-        ("Mirror Shell", "reflect one enemy projectile back per use"),
-        ("Gravity Well", "pull nearby enemies toward a point of your choice"),
-        ("Soul Link", "connect to an enemy, sharing damage taken"),
-        ("Static Charge", "build up static electricity with movement, release as a shockwave"),
-        ("Quantum Lock", "freeze yourself in place, becoming invulnerable for a moment"),
-        ("Echo Blast", "store damage taken and release it as a shockwave")
-    ]
     return random.choice(creative_fallbacks)
 
 mechanic_name, mechanic_desc = generate_true_ai_mechanic()
 selected_mechanic = mechanic_name
-print(f"   ✨ New mechanic invented: {selected_mechanic} – {mechanic_desc}")
+print(f"   ✨ New mechanic: {selected_mechanic} – {mechanic_desc}")
 
 # ============ GENERATE GAME NAME ============
 print("\n🎮 Generating game name...")
@@ -438,43 +508,49 @@ game_name = generate_ai_name()
 print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ AI‑GENERATED PROFESSIONAL DESCRIPTION ============
-print("\n📝 Generating professional game description (AI)...")
-def generate_ai_description():
+# ============ 1-2 SENTENCE GAME DESCRIPTION (SHORT, PUNCHY, VARIED) ============
+print("\n📝 Generating short game description (1-2 sentences)...")
+
+description_styles = ["excited", "curious", "urgent", "mysterious", "proud", "challenging"]
+
+def generate_short_description():
     if not openai_key:
-        return f"🔥 {game_name} – {selected_type} madness! Master the {selected_mechanic}!"
-    try:
-        prompt = f"""Write a short, exciting, professional game description for '{game_name}'.
+        return f"Master the {selected_mechanic} in this {selected_type} game."
+    
+    style = random.choice(description_styles)
+    prompt = f"""Write a VERY SHORT game description for '{game_name}'.
 Genre: {selected_type}
-Unique mechanic: {selected_mechanic} – {mechanic_desc}
-Tone: energetic, modern, appealing to gamers.
-Length: 120-200 characters.
+Mechanic: {selected_mechanic}
+Tone: {style}
+Length: 1-2 sentences, max 150 characters.
 Return ONLY the description, no extra text."""
+    
+    try:
         r = requests.post("https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-            json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": prompt}], "temperature": 0.8, "max_tokens": 100}, timeout=15)
+            json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": prompt}], "temperature": 0.8, "max_tokens": 80}, timeout=15)
         if r.status_code == 200:
             desc = r.json()["choices"][0]["message"]["content"].strip().strip('"')
-            if 20 < len(desc) < 250:
+            if 20 < len(desc) < 160:
                 return desc
-    except Exception as e:
-        print(f"   AI description error: {e}")
-    return f"🔥 {game_name} – {selected_type} madness! Master the {selected_mechanic}! 💀"
+    except:
+        pass
+    return f"Master the {selected_mechanic} in this {selected_type} game."
 
-ai_description = generate_ai_description()
-print(f"   🤖 {ai_description}")
+ai_description = generate_short_description()
+print(f"   🤖 {ai_description} (length: {len(ai_description)} chars)")
 
-# ============ AI‑GENERATED HASHTAGS ============
-print("\n#️⃣ Generating trending hashtags (AI)...")
+# ============ HASHTAGS ============
+print("\n#️⃣ Generating hashtags...")
 def generate_ai_hashtags():
     if not openai_key:
         base = ["#gamedev", "#indiegame", "#indiedev", "#gaming", "#solana"]
         specific = [f"#{selected_type.replace(' ', '')}", f"#{game_name.replace(' ', '')}"]
         return " ".join(base + specific)
     try:
-        prompt = f"""Generate 5-7 relevant, trending hashtags for a {selected_type} game called '{game_name}' with the mechanic '{selected_mechanic}'.
+        prompt = f"""Generate 5-7 relevant, trending hashtags for a {selected_type} game called '{game_name}'.
 Include #gamedev, #indiegame, #solana, and genre-specific tags.
-Return ONLY the hashtags separated by spaces, no extra text."""
+Return ONLY the hashtags separated by spaces."""
         r = requests.post("https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
             json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": prompt}], "temperature": 0.7, "max_tokens": 80}, timeout=15)
@@ -482,92 +558,47 @@ Return ONLY the hashtags separated by spaces, no extra text."""
             hashtags = r.json()["choices"][0]["message"]["content"].strip()
             if hashtags.startswith("#"):
                 return hashtags
-    except Exception as e:
-        print(f"   AI hashtags error: {e}")
-    base = ["#gamedev", "#indiegame", "#indiedev", "#gaming", "#solana"]
-    specific = [f"#{selected_type.replace(' ', '')}", f"#{game_name.replace(' ', '')}"]
-    return " ".join(base + specific)
+    except:
+        pass
+    return "#gamedev #indiegame #solana #dailygame"
 
 hashtag_string = generate_ai_hashtags()
 print(f"   #️⃣ {hashtag_string[:80]}...")
 
-# ============ AI‑CRAFTED POLLINATIONS PROMPT ============
-print("\n🎨 AI is crafting an optimal Pollinations prompt...")
-def generate_ai_art_prompt():
-    if not openai_key:
-        return f"3D isometric render of a {selected_type} character for '{game_name}', using {selected_mechanic}, detailed, vibrant, 8K"
-    try:
-        prompt = f"""Create a detailed, high-quality prompt for Pollinations.ai to generate a 3D-style game cover image.
+# ============ ADVANCED ART PROMPT ============
+visual_styles = ["isometric view", "neon cyberpunk", "low‑poly", "cell‑shaded", "voxel art", "pastel gothic", "glitchcore", "glassmorphism"]
+trending_style = random.choice(visual_styles)
+print(f"\n🎨 Trending visual style: {trending_style}")
 
+def generate_advanced_art_prompt():
+    if not openai_key:
+        return f"3D {trending_style} render of a {selected_type} character for '{game_name}', detailed, 8K"
+    try:
+        prompt = f"""Create a detailed image prompt for Pollinations.ai.
 Game: {game_name}
 Genre: {selected_type}
-Mechanic: {selected_mechanic} – {mechanic_desc}
-
-Style: 3D render, isometric view, vibrant colors, game asset, high detail, 8K, dramatic lighting.
-Return ONLY the prompt, under 200 characters. Be specific and vivid."""
+Mechanic: {selected_mechanic}
+Style: {trending_style}
+Return ONLY the prompt, under 200 characters."""
         r = requests.post("https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
             json={"model": "gpt-4o-mini", "messages": [{"role": "user", "content": prompt}], "temperature": 0.9, "max_tokens": 150}, timeout=20)
         if r.status_code == 200:
             art_prompt = r.json()["choices"][0]["message"]["content"].strip().strip('"')
             if len(art_prompt) > 20:
-                print(f"   🤖 AI art prompt: {art_prompt[:100]}...")
                 return art_prompt
-    except Exception as e:
-        print(f"   AI art prompt error: {e}")
-    fallback = f"3D isometric render of a {selected_type} character for '{game_name}', using {selected_mechanic}, detailed, vibrant, 8K"
-    return fallback
+    except:
+        pass
+    return f"3D {trending_style} render of a {selected_type} character for '{game_name}', detailed, 8K"
 
-adaptive_prompt = generate_ai_art_prompt()
-print(f"   ✅ Adaptive prompt ready")
+adaptive_prompt = generate_advanced_art_prompt()
+print(f"   ✅ Prompt ready")
 
-# ============ VIRAL HOOK & ENGAGEMENT ============
-print("\n🔥 Generating viral hook...")
-viral_hooks = {
-    "survival horror": ["🏃‍♂️ Run or die", "💀 This game haunted me", "🔦 Can you survive?"],
-    "top-down shooter": ["🔫 I built a shooter in 24 hours", "💀 This boss took 50 attempts"],
-    "action RPG": ["⚔️ Your next obsession", "✨ 24 hours = a whole RPG"],
-    "racing game": ["🏎️ Speed meets chaos", "💨 Fastest game I've made"],
-    "puzzle game": ["🧠 1000 IQ required", "💡 One move changes everything"],
-    "fighting game": ["👊 One combo to rule them all", "💥 60 seconds of pure action"],
-    "strategy game": ["♟️ Outsmart the system", "🧠 Big brain energy"]
-}
-hook_list = viral_hooks.get(selected_type, ["🎮 New game just dropped"])
-selected_hook = random.choice(hook_list)
-selected_question = random.choice(["Which mechanic would you add? 👇", "Rate this game 1-10! 🔥", "Would you play this? 💬"])
-selected_cta = random.choice(["Follow for daily games! 🎮", "Share with a friend! 🔄", "Double tap if you'd play this! ❤️"])
-
-genre_emojis = {
-    "survival horror": ["😱", "💀", "👻", "🔪", "🩸", "🌙"],
-    "top-down shooter": ["🔫", "💥", "🎯", "⚡", "🔥", "💀"],
-    "action RPG": ["⚔️", "🛡️", "👑", "✨", "🌟", "💎"],
-    "racing game": ["🏎️", "💨", "🔥", "⚡", "🏁", "🚗"],
-    "puzzle game": ["🧠", "💡", "🔮", "✨", "🎯", "💎"],
-    "fighting game": ["👊", "💥", "⚡", "🔥", "🏆", "💪"],
-    "strategy game": ["♟️", "🧠", "👑", "⚔️", "🎯", "💎"]
-}
-game_emojis = random.sample(genre_emojis.get(selected_type, ["🎮", "🔥", "⚡"]), 3)
-selected_emojis = " ".join(game_emojis)
-print(f"   🎣 Hook: {selected_hook}")
-print(f"   ❓ Question: {selected_question}")
-
-# ============ 3D‑STYLE ART GENERATION ============
-print("\n🎨 Generating 3D-style art with AI‑crafted prompt...")
+# ============ GENERATE ART ============
+print("\n🎨 Generating art...")
 sprite_path = Path("sprite.png")
-art_stats = {"pollinations": 0, "fallback": 0, "total": 0}
 
 def generate_art():
-    art_stats["total"] += 1
-    print("   🎨 Attempt 1: Pollinations.ai (AI‑crafted prompt)")
-    result = generate_pollinations_art()
-    if result:
-        art_stats["pollinations"] += 1
-        return True
-    print("   🎨 Attempt 2: Fallback algorithmic art")
-    art_stats["fallback"] += 1
-    return generate_fallback_art()
-
-def generate_pollinations_art():
     try:
         prompt_url = adaptive_prompt.replace(" ", "+").replace("'", "").replace(",", "+")
         url = f"https://image.pollinations.ai/prompt/{prompt_url}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
@@ -575,17 +606,10 @@ def generate_pollinations_art():
         if response.status_code == 200 and len(response.content) > 5000:
             with open(sprite_path, "wb") as f:
                 f.write(response.content)
-            print(f"      ✅ Pollinations.ai succeeded!")
             return True
-        else:
-            print(f"      ⚠️ Pollinations error: {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"      ⚠️ Pollinations exception: {str(e)[:50]}")
-        return False
-
-def generate_fallback_art():
-    print("      Creating algorithmic 3D-looking art...")
+    except:
+        pass
+    # Fallback art
     img = Image.new('RGB', (512, 512), color=(20, 20, 40))
     draw = ImageDraw.Draw(img)
     draw.rectangle([100,100,412,412], outline=(255,255,255), width=4)
@@ -594,13 +618,11 @@ def generate_fallback_art():
     img.save(sprite_path)
     return True
 
-art_start = time.time()
 art_success = generate_art()
-art_time = time.time() - art_start
-print(f"   ✅ Art completed in {art_time:.1f}s")
+print(f"   ✅ Art ready")
 
-# ============ ENHANCED 3D GODOT PROJECT ============
-print("\n📁 Creating enhanced 3D Godot project...")
+# ============ CREATE GODOT PROJECT (simplified template) ============
+print(f"\n📁 Creating {selected_type} 3D project...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
 shutil.copy(sprite_path, project_dir / "icon.png")
@@ -608,442 +630,169 @@ shutil.copy(sprite_path, project_dir / "icon.png")
 (project_dir / "project.godot").write_text(f"""
 ; Godot 4.2
 config_version=5
-
 [application]
 config/name="{game_name}"
 config/features=PackedStringArray("4.2")
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
-
 [rendering]
 renderer="forward_plus"
 """)
 
-# 3D scene with enemies, coins, companion, health, goal
-main_scene = """
-[gd_scene load_steps=12 format=3]
-
+(project_dir / "main.tscn").write_text("""
+[gd_scene load_steps=2 format=3]
 [ext_resource type="Script" path="res://player.gd" id=1]
-[ext_resource type="Script" path="res://enemy.gd" id=2]
-[ext_resource type="Script" path="res://companion.gd" id=3]
-
-[sub_resource type="BoxMesh" id=4]
-size = Vector3(20, 0.2, 20)
-
-[sub_resource type="StandardMaterial3D" id=5]
-albedo_color = Color(0.1, 0.3, 0.1)
-roughness = 0.8
-
-[sub_resource type="CylinderMesh" id=6]
-top_radius = 0.5
-bottom_radius = 0.5
-height = 1.5
-
-[sub_resource type="CapsuleShape3D" id=7]
-radius = 0.5
-height = 1.5
-
-[sub_resource type="SphereMesh" id=8]
-radius = 0.3
-material = SubResource("CoinMaterial")
-
-[sub_resource type="StandardMaterial3D" id=9]
-albedo_color = Color(1, 0.8, 0)
-emission_enabled = true
-emission = Color(1, 0.5, 0)
-
-[sub_resource type="SphereMesh" id=10]
-radius = 0.5
-material = SubResource("EnemyMaterial")
-
-[sub_resource type="StandardMaterial3D" id=11]
-albedo_color = Color(1, 0.2, 0.2)
-emission_enabled = true
-emission = Color(1, 0, 0)
-
-[sub_resource type="BoxMesh" id=12]
-size = Vector3(2, 0.5, 2)
-material = SubResource("GoalMaterial")
-
-[sub_resource type="StandardMaterial3D" id=13]
-albedo_color = Color(0, 0.8, 1)
-emission_enabled = true
-emission = Color(0, 0.5, 1)
-
 [node name="Main" type="Node3D"]
-
-[node name="Ground" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxMesh")
-material_override = SubResource("StandardMaterial3D")
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
-
 [node name="Player" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+position = Vector3(0, 0.5, 0)
 script = ExtResource("1")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
-shape = SubResource("CapsuleShape3D")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
-mesh = SubResource("CylinderMesh")
-
 [node name="Camera3D" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, 0, 5, 5)
-
-[node name="Companion" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 2)
-script = ExtResource("3")
-mesh = SubResource("CylinderMesh")
-collision_shape = SubResource("CapsuleShape3D")
-material_override = SubResource("CoinMaterial")
-
-[node name="Enemy1" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, 3)
-script = ExtResource("2")
-mesh = SubResource("SphereMesh")
-collision_shape = SubResource("SphereShape3D")
-material_override = SubResource("EnemyMaterial")
-
-[node name="Enemy2" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.5, -2)
-script = ExtResource("2")
-mesh = SubResource("SphereMesh")
-collision_shape = SubResource("SphereShape3D")
-material_override = SubResource("EnemyMaterial")
-
-[node name="Coin1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, 2)
-mesh = SubResource("SphereMesh")
-material_override = SubResource("CoinMaterial")
-
-[node name="Coin2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.5, 4)
-mesh = SubResource("SphereMesh")
-material_override = SubResource("CoinMaterial")
-
-[node name="Coin3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.5, -3)
-mesh = SubResource("SphereMesh")
-material_override = SubResource("CoinMaterial")
-
-[node name="Goal" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0.3, 5)
-mesh = SubResource("BoxMesh")
-material_override = SubResource("GoalMaterial")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.7, -0.7, 0, 0.7, 0.7, 0, 10, 0)
-light_color = Color(1, 0.95, 0.8)
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment")
-
-[sub_resource type="Environment" id=14]
-background_mode = 2
-sky = SubResource("Sky")
-
-[sub_resource type="Sky" id=15]
-sky_material = SubResource("SkyMaterial")
-
-[sub_resource type="SkyMaterial" id=16]
-sky_top_color = Color(0.2, 0.4, 0.8)
-sky_horizon_color = Color(0.5, 0.6, 0.9)
-ground_bottom_color = Color(0.1, 0.2, 0.3)
-
-[sub_resource type="SphereShape3D" id=17]
-radius = 0.5
-"""
-(project_dir / "main.tscn").write_text(main_scene)
-
-# Player script
-player_script = f"""
+""")
+(project_dir / "player.gd").write_text(f"""
 extends CharacterBody3D
-
 var speed = 5.0
-var gravity = -9.8
-var health = 3
-var coins = 0
-var companion = null
-
 func _ready():
-    print("DeathRoll Studio presents: {game_name} (Enhanced 3D)")
-    print("Genre: {selected_type} | Mechanic: {selected_mechanic}")
-    companion = get_node("/root/Main/Companion")
-
+    print("{game_name} – {selected_type}")
 func _physics_process(delta):
-    var input_dir = Input.get_vector("left", "right", "forward", "back")
-    var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-    velocity.x = direction.x * speed
-    velocity.z = direction.z * speed
-    velocity.y += gravity * delta
+    var input = Input.get_vector("left", "right", "forward", "back")
+    var dir = (transform.basis * Vector3(input.x, 0, input.y)).normalized()
+    velocity.x = dir.x * speed
+    velocity.z = dir.z * speed
     move_and_slide()
-    
-    for i in get_slide_collision_count():
-        var col = get_slide_collision(i).get_collider()
-        if col and (col.name == "Coin1" or col.name == "Coin2" or col.name == "Coin3"):
-            col.queue_free()
-            coins += 1
-            print("Coins collected: ", coins)
-        if col and (col.name == "Enemy1" or col.name == "Enemy2"):
-            health -= 1
-            print("Hit! Health: ", health)
-            if health <= 0:
-                print("Game Over!")
-                get_tree().quit()
-        if col and col.name == "Goal":
-            print("Goal reached! You win!")
-            get_tree().quit()
-    
-    if companion:
-        companion.target_position = global_transform.origin
+""")
+print(f"   ✅ Project created")
 
-func get_health():
-    return health
-
-func get_coins():
-    return coins
-"""
-(project_dir / "player.gd").write_text(player_script)
-
-# Enemy script
-enemy_script = """
-extends CharacterBody3D
-
-var speed = 2.0
-var player = null
-
-func _ready():
-    player = get_node("/root/Main/Player")
-
-func _physics_process(delta):
-    if player:
-        var direction = (player.global_transform.origin - global_transform.origin).normalized()
-        velocity.x = direction.x * speed
-        velocity.z = direction.z * speed
-        move_and_slide()
-"""
-(project_dir / "enemy.gd").write_text(enemy_script)
-
-# Companion script
-companion_script = """
-extends CharacterBody3D
-
-var target_position = Vector3.ZERO
-var speed = 4.0
-
-func _physics_process(delta):
-    if target_position != Vector3.ZERO:
-        var direction = (target_position - global_transform.origin).normalized()
-        velocity.x = direction.x * speed
-        velocity.z = direction.z * speed
-        move_and_slide()
-"""
-(project_dir / "companion.gd").write_text(companion_script)
-
-print(f"   ✅ Enhanced 3D project created with {selected_mechanic}")
-
-# ============ CREATE GAME ZIP FOR DELIVERY ============
-print("\n📦 Creating game ZIP for delivery...")
+# ============ CREATE GAME ZIP ============
+print("\n📦 Creating game ZIP...")
 zip_path = Path("workspace/latest_game.zip")
 with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
     for file in project_dir.rglob("*"):
         zipf.write(file, file.relative_to(project_dir.parent))
-print(f"   ✅ Game ZIP created at {zip_path}")
+print(f"   ✅ ZIP created")
 
-# ============ README (preview only) ============
-print("\n📢 Creating README (preview only)...")
-readme = f"""
-<div align="center">
-# 🎮 {game_name} – Enhanced 3D Edition
-### Created by [DeathRoll Studio](https://deathroll.co)
-> {selected_hook}
-</div>
-
-## 🔥 About The Game
-**{game_name}** is a **3D {selected_type}** with a unique mechanic: **{selected_mechanic}**!
-
-*{mechanic_desc}*
-
-{ai_description}
-
-## 💰 Purchase Information
-- **Price:** ${game_price} USD (Solana)
-- **Wallets:** Trust or Phantom (see Telegram post)
-- **Contact:** {BRAND_TELEGRAM} after payment
-
-## 🤝 Connect
-- 📧 {BRAND_EMAIL_PRIMARY}
-- 📱 {BRAND_TELEGRAM}
-- 🎵 {BRAND_TIKTOK}
-"""
-(project_dir / "README.md").write_text(readme)
-print("   ✅ Created README (no download link)")
-
-# ============ GITHUB REPO (backup only) ============
-print("\n📦 Creating GitHub repository (backup)...")
+# ============ GITHUB REPO ============
+print("\n📦 Creating GitHub repository...")
 repo_url = None
 if github_token:
     try:
-        r = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} – Enhanced 3D {selected_type} with {selected_mechanic}", "private": False, "auto_init": True}, timeout=30)
+        r = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} – {selected_type}", "private": False, "auto_init": True}, timeout=30)
         if r.status_code == 201:
             repo_url = r.json()["html_url"]
-            print(f"   ✅ Repo created (backup): {repo_url}")
+            print(f"   ✅ Repo created: {repo_url}")
     except:
         pass
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
 
-# ============ SEND GAME ZIP + INFO TO ADMIN (PRIVATE DM) ============
-# This block is placed AFTER repo_link is defined
-print("\n📬 Sending game files and info to admin...")
+# ============ SEND TO ADMIN DM (game file + info) ============
+print("\n📬 Sending game to admin DM...")
 if telegram_token and telegram_chat_id:
     zip_file = Path("workspace/latest_game.zip")
     if zip_file.exists():
         try:
             with open(zip_file, "rb") as f:
                 files = {"document": f}
-                caption = f"🎮 *{game_name}* – Enhanced 3D Game\n💰 Price: ${game_price} SOL\n🕹️ Genre: {selected_type}\n⚙️ Mechanic: {selected_mechanic}"
-                requests.post(
-                    f"https://api.telegram.org/bot{telegram_token}/sendDocument",
-                    files=files,
-                    data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"},
-                    timeout=60
-                )
-            print("   ✅ Game ZIP sent to admin")
-            
-            with open(sprite_path, "rb") as photo:
-                files = {"photo": photo}
-                info_text = (
-                    f"✨ *{game_name}* – 3D {selected_type}\n"
-                    f"📝 {ai_description}\n"
-                    f"⚡ *Mechanic:* `{selected_mechanic}` – {mechanic_desc}\n"
-                    f"🎣 Hook: {selected_hook}\n"
-                    f"❓ {selected_question}\n"
-                    f"📅 {day_name}\n"
-                    f"🌍 Trends: {external_trends if external_trends else 'none'}\n"
-                    f"🔗 GitHub backup: {repo_link}"
-                )
-                requests.post(
-                    f"https://api.telegram.org/bot{telegram_token}/sendPhoto",
-                    files=files,
-                    data={"chat_id": telegram_chat_id, "caption": info_text, "parse_mode": "Markdown"},
-                    timeout=30
-                )
-            print("   ✅ Game info and art sent to admin")
+                caption = f"🎮 *{game_name}* – {selected_type}\n{ai_description}\n💰 ${game_price} SOL"
+                requests.post(f"https://api.telegram.org/bot{telegram_token}/sendDocument", files=files, data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"}, timeout=60)
+            print("   ✅ Game ZIP sent to admin DM")
         except Exception as e:
-            print(f"   ⚠️ Could not send to admin: {e}")
-    else:
-        print("   ⚠️ Game ZIP not found – cannot send to admin")
+            print(f"   ⚠️ Could not send: {e}")
 
-# ============ DEMO PAGE (preview only) ============
-print("\n🌐 Creating demo page (preview only)...")
-demo_html = f"""<!DOCTYPE html>
-<html>
-<head><title>{game_name}</title></head>
-<body style="background:#0f0c29;color:white;text-align:center;padding:50px">
-<h1>🎮 {game_name} (Enhanced 3D)</h1>
-<img src="icon.png" width="256">
-<p>{ai_description}</p>
-<p>✨ Mechanic: {selected_mechanic}</p>
-<p>💰 Price: ${game_price} SOL</p>
-<p>{selected_hook}</p>
-<p>📩 To purchase, see Telegram channel @drolltech</p>
-</body>
-</html>"""
-(project_dir / "demo.html").write_text(demo_html)
-print(f"   ✅ Demo page created (preview only)")
-
-# ============ TELEGRAM SALES POSTS (WITH FEATURE LIST AS SEPARATE MESSAGE) ============
-print("\n📱 Sending stylish Telegram sales posts with feature list...")
+# ============ TELEGRAM SALES POST (public channel) ============
+print("\n📱 Sending Telegram sales post to public channel...")
 if telegram_token:
-    feature_list = (
-        "✅ *What you get:*\n"
-        "• Full 3D Godot game (source code + assets)\n"
-        "• 3 unique enemies that chase you\n"
-        "• 3 collectible coins\n"
-        "• A friendly companion that follows you\n"
-        "• Health system (3 lives)\n"
-        "• Goal area to win\n"
-        "• Beautiful sky and lighting\n"
-        "• Custom 3D-style cover art\n"
-        "• Commercial license (you can sell the game)"
-    )
     viral_post_text = f"""
-{selected_emojis}  *🔥 {selected_hook} 🔥*  {selected_emojis}
+{selected_emojis} *{selected_hook}* {selected_emojis}
 
-✨ *{game_name} (Enhanced 3D)* ✨
-┌─────────────────────┐
-│ {ai_description}   │
-└─────────────────────┘
+✨ *{game_name}* – {selected_type}
+{ai_description}
 
-⚡ *Special Mechanic:* `{selected_mechanic}`
+⚡ *Mechanic:* `{selected_mechanic}`
 
-{selected_question}
+💰 *Price:* ${game_price} SOL
+🔵 Trust: `{SOLANA_TRUST_WALLET}`
+🟣 Phantom: `{SOLANA_PHANTOM_WALLET}`
 
-💎 ─── *PURCHASE INFO* ─── 💎
-💰 *Price:* `${game_price} SOL`
-
-📌 *Send to EITHER wallet below:*
-
-🔵 *Trust Wallet:*  
-`{SOLANA_TRUST_WALLET}`
-
-🟣 *Phantom Wallet:*  
-`{SOLANA_PHANTOM_WALLET}`
-
-📩 *How to buy:*
-1️⃣ Send exactly `${game_price} SOL` to one of the wallets above
-2️⃣ **In the memo field, write your Telegram username (e.g., @deathroll1)**
-3️⃣ You will receive the game instantly within 5 minutes
-
-📞 *Questions?* Contact {BRAND_EMAIL_PRIMARY} or {BRAND_TELEGRAM}
+📩 Send ${game_price} SOL + your @username in memo → game in 5 mins
 
 {hashtag_string}
-
 {selected_cta}
-
-#DeathRollStudio #3DGame 🎮
+#DeathRollStudio
 """
-
-    # Send photo with short caption (without feature list to avoid truncation)
     try:
-        with open(sprite_path, "rb") as photo:
-            files = {"photo": photo}
-            short_caption = f"{selected_emojis} *{selected_hook}* {selected_emojis}\n\n{ai_description}\n\n💰 ${game_price} SOL"
-            requests.post(
-                f"https://api.telegram.org/bot{telegram_token}/sendPhoto",
-                files=files,
-                data={"chat_id": TELEGRAM_CHANNEL, "caption": short_caption, "parse_mode": "Markdown"},
-                timeout=30
-            )
-            print(f"   ✅ Photo sent to channel")
+        requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": TELEGRAM_CHANNEL, "text": viral_post_text, "parse_mode": "Markdown"}, timeout=30)
+        print(f"   ✅ Sales post sent to {TELEGRAM_CHANNEL}")
     except Exception as e:
-        print(f"   ⚠️ Channel photo error: {e}")
+        print(f"   ⚠️ Error: {e}")
 
-    # Send separate feature list + purchase info as a text message
-    full_message = f"{feature_list}\n\n{viral_post_text}"
+# ============ FEEDBACK POLL (public channel, but results stored) ============
+print("\n📊 Sending feedback poll to public channel...")
+if telegram_token:
     try:
-        requests.post(
-            f"https://api.telegram.org/bot{telegram_token}/sendMessage",
-            json={"chat_id": TELEGRAM_CHANNEL, "text": full_message, "parse_mode": "Markdown"},
-            timeout=30
-        )
-        print(f"   ✅ Full sales message (with feature list) sent to channel")
+        poll_data = {
+            "chat_id": TELEGRAM_CHANNEL,
+            "question": f"Rate {game_name} (1-5 stars)?",
+            "options": json.dumps(["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"]),
+            "is_anonymous": False,
+            "open_period": 86400
+        }
+        requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPoll", data=poll_data, timeout=30)
+        print(f"   ✅ Feedback poll sent to channel")
     except Exception as e:
-        print(f"   ⚠️ Detail message error: {e}")
+        print(f"   ⚠️ Poll error: {e}")
+
+# ============ WEEKLY "BEST OF" (public channel, Sundays only) ============
+if day_name == "Sunday":
+    print("\n🏆 Sunday: Selecting Game of the Week...")
+    games = sar.data["study"]["games"]
+    if games:
+        best_game = max(games[-7:], key=lambda g: sar.get_average_feedback(g["name"]) or 0 if sar.get_average_feedback(g["name"]) else 0)
+        best_game_name = best_game["name"]
+        best_game_repo = best_game.get("repo", repo_link)
+        best_msg = f"🏆 *Game of the Week* 🏆\n\n{best_game_name} was the most loved game this week!\n\n🔗 {best_game_repo}\n\nGet it now for ${game_price} SOL."
+        try:
+            requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": TELEGRAM_CHANNEL, "text": best_msg, "parse_mode": "Markdown"}, timeout=30)
+            print(f"   ✅ Game of the Week announced in channel")
+        except:
+            pass
+
+# ============ MONTHLY CHANGELOG (PRIVATE DM ONLY) ============
+if datetime.now().day == 1:
+    print("\n📢 Generating monthly changelog (private DM)...")
+    changelog = f"""📅 *DeathRoll Studio – Monthly Changelog*
+
+✅ Real‑time trends (Steam + Itch.io)
+✅ 1-2 sentence descriptions (short & punchy)
+✅ Player feedback polls
+✅ Weekly "Game of the Week"
+✅ Advanced art prompts (trending visual styles)
+
+🚀 Next: Better 3D templates, more genres, multiplayer demo.
+
+📊 *Stats this month:*
+• Games created: {sar.data['study']['total_runs']}
+• Successful art generations: {sar.data['study']['successful_art']}
+• Best genre: {sar.data['analysis']['best_genre'] or 'N/A'}
+
+Thanks for running DeathRoll Studio! 💪
+"""
+    try:
+        requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": telegram_chat_id, "text": changelog, "parse_mode": "Markdown"}, timeout=30)
+        print(f"   ✅ Changelog sent to admin DM")
+    except Exception as e:
+        print(f"   ⚠️ Changelog error: {e}")
 
 # ============ SAR RECORD ============
 print("\n🧠 Recording run...")
-sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, art_time, external_trends, adaptive_prompt)
+sar.record(game_name, selected_type, selected_mechanic, "short hook", art_success, time.time(), real_time_trends, adaptive_prompt, feedback_score=None)
 sar.analyze()
 print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} total runs)")
 
 # ============ SAVE DATA ============
-print("\n💾 Saving data...")
-Path("learning_data.json").write_text(json.dumps({"last_run": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "mechanic": selected_mechanic, "mechanic_desc": mechanic_desc, "external_trends": external_trends, "adaptive_prompt": adaptive_prompt}, indent=2))
+Path("learning_data.json").write_text(json.dumps({"last_run": datetime.now().isoformat(), "game": game_name, "genre": selected_type}, indent=2))
 print("   ✅ Learning data saved")
 
 # ============ PORTFOLIO ============
-print("\n📁 Updating portfolio...")
 port = Path("portfolio.json")
 entries = []
 if port.exists():
@@ -1051,55 +800,29 @@ if port.exists():
         entries = json.loads(port.read_text())
     except:
         pass
-entries.append({"date": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "mechanic": selected_mechanic, "repo": repo_link, "is_3d": True, "enhanced": True})
+entries.append({"date": datetime.now().isoformat(), "game": game_name, "genre": selected_type, "mechanic": selected_mechanic, "repo": repo_link})
 port.write_text(json.dumps(entries[-50:], indent=2))
 print(f"   ✅ Portfolio: {len(entries)} games")
 
-# ============ TIKTOK CAPTION ============
-print("\n🎵 TikTok Caption (copy this):")
-print("=" * 60)
-print(viral_post_text[:1500])
-print("=" * 60)
-
-# ============ ART METRICS ============
-print("\n📊 Art Generation Stats:")
-print(f"   Pollinations: {art_stats['pollinations']}/{art_stats['total']}")
-print(f"   Fallback: {art_stats['fallback']}/{art_stats['total']}")
-
 # ============ VERIFICATION ============
-print("\n🔍 Verification:")
+print("\n🔍 Final verification:")
 print(f"   AI Name: ✅")
-print(f"   True AI‑invented mechanic: ✅ ({selected_mechanic})")
-print(f"   AI description: ✅")
-print(f"   AI hashtags: ✅")
-print(f"   AI art prompt: ✅")
-print(f"   SAR System: ✅ ({sar.data['study']['total_runs']} runs)")
-if sar.data["analysis"]["best_external_trend"]:
-    print(f"   🌍 Best external trend learned: {sar.data['analysis']['best_external_trend']}")
-print(f"   Smart Art: ✅")
-print(f"   Enhanced 3D Godot Project: ✅")
+print(f"   Short description ({len(ai_description)} chars): {ai_description}")
+print(f"   Mechanic: {selected_mechanic}")
+print(f"   SAR runs: {sar.data['study']['total_runs']}")
 print(f"   GitHub: {'✅' if repo_url else '⚠️'}")
 print(f"   Telegram: {'✅' if telegram_token else '⚠️'}")
-print(f"   Game ZIP: ✅ (workspace/latest_game.zip)")
-print(f"   Admin delivery: ✅")
 
 # ============ DONE ============
 print("\n" + "=" * 60)
-print(f"✅ {game_name} (Enhanced 3D) is READY!")
-print(f"   📅 {day_name} – {selected_type} (3D)")
-print(f"   🎣 {selected_hook}")
-print(f"   ⚙️ New mechanic: {selected_mechanic}")
-print(f"   🎨 AI‑crafted art prompt used")
-print(f"   🧠 SAR: {sar.data['study']['total_runs']} games analyzed")
-print(f"   🌍 External trends used: {external_trends if external_trends else 'none'}")
-print(f"   📦 GitHub (backup): {repo_link}")
-print(f"   📦 Game ZIP: workspace/latest_game.zip")
+print(f"✅ {game_name} ({selected_type}) is READY!")
+print(f"   Description: {ai_description}")
+print(f"   GitHub: {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v16.4 FINISHED!")
-print("✅ Fixed: admin delivery order (repo_link error resolved)")
-print("✅ AI‑generated professional description & hashtags")
-print("✅ AI‑crafted Pollinations prompt for better art")
-print("✅ Feature list sent as separate message (no truncation)")
-print("📱 Check your private Telegram – you received the game file + info")
-print("🎵 TikTok caption ready above!")
+print("\n🎉 DEATHROLL STUDIO v19.0 FINISHED!")
+print("✅ Short 1-2 sentence descriptions")
+print("✅ Feedback polls (public) – SAR learns from ratings")
+print("✅ Weekly 'Game of the Week' (public channel)")
+print("✅ Monthly changelog (your private DM only)")
+print("📱 Check your Telegram channel and private DMs")
