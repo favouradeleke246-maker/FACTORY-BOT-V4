@@ -31,6 +31,14 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
+    - name: Commit and push portfolio data
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git add portfolio.json sar_analysis.json learning_data.json
+        git diff --staged --quiet || git commit -m "Update game portfolio [skip ci]"
+        git push
+    
     - name: Upload results
       uses: actions/upload-artifact@v4
       with:
