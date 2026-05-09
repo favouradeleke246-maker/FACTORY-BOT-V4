@@ -43,8 +43,6 @@
             font-size: 12px;
             font-family: monospace;
             z-index: 999;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
         }
         .footer { text-align: center; margin-top: 3rem; padding: 2rem; opacity: 0.7; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); }
         .footer a { color: #ffd700; text-decoration: none; }
@@ -77,7 +75,7 @@
         💬 Telegram: <a href="https://t.me/drolltech" target="_blank">@drolltech</a>
     </div>
 </div>
-<div class="auto-refresh-badge" id="refreshBadge">🔄 Checking for new games...</div>
+<div class="auto-refresh-badge" id="refreshBadge">🔄 Auto-refresh: 30s</div>
 
 <script>
     let lastGameCount = 0;
@@ -97,26 +95,23 @@
                 return;
             }
             
-            // Check if new game was added
             if (games.length > lastGameCount && lastGameCount > 0) {
                 const badge = document.getElementById('refreshBadge');
                 badge.style.background = '#ff6b6b';
-                badge.innerHTML = '🎉 NEW GAME DETECTED! Refreshing... 🎉';
+                badge.innerHTML = '🎉 NEW GAME DETECTED! 🎉';
                 setTimeout(() => {
                     badge.style.background = 'rgba(0,0,0,0.8)';
+                    badge.innerHTML = '🔄 Auto-refresh: 30s';
                 }, 3000);
             }
             lastGameCount = games.length;
             
-            // Update stats
             document.getElementById('gameCount').innerText = games.length;
             const uniqueGenres = new Set(games.map(g => g.genre));
             document.getElementById('genreCount').innerText = uniqueGenres.size;
             
-            // Update last updated time
             document.getElementById('lastUpdated').innerHTML = `📅 Last updated: ${new Date().toLocaleTimeString()} | ${games.length} games available`;
             
-            // Sort by date (newest first)
             const sortedGames = [...games].sort((a, b) => new Date(b.date) - new Date(a.date));
             
             const grid = document.getElementById('gamesGrid');
@@ -133,7 +128,7 @@
                     imageHtml = `<div class="game-image"><div class="no-image">🎮</div></div>`;
                 }
                 
-                const dateStr = game.date ? new Date(game.date).toLocaleDateString() : 'Unknown date';
+                const dateStr = game.date ? new Date(game.date).toLocaleDateString() : 'Unknown';
                 
                 card.innerHTML = `
                     ${imageHtml}
@@ -166,19 +161,12 @@
     
     function startAutoRefresh() {
         loadGames();
-        
-        refreshInterval = setInterval(() => {
-            loadGames();
-            countdown = 30;
-            const badge = document.getElementById('refreshBadge');
-            if (badge) badge.innerHTML = '🔄 Auto-refresh: 30s';
-        }, 30000);
-        
+        refreshInterval = setInterval(() => { loadGames(); countdown = 30; }, 30000);
         setInterval(() => {
             if (countdown > 0) {
                 countdown--;
                 const badge = document.getElementById('refreshBadge');
-                if (badge) badge.innerHTML = `🔄 Next check: ${countdown}s`;
+                if (badge) badge.innerHTML = `🔄 Next refresh: ${countdown}s`;
             }
         }, 1000);
     }
