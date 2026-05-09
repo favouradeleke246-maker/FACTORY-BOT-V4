@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeathRoll Studio – Daily 3D Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ff6b6b, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            text-align: center;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .game-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.3);
+        }
+        .game-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+        }
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 3rem;
+            background: #1a1a2e;
+        }
+        .game-info {
+            padding: 1.2rem;
+        }
+        .game-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+        }
+        .game-genre {
+            display: inline-block;
+            background: #ff6b6b;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            margin-bottom: 0.8rem;
+        }
+        .game-description {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+        .game-mechanic {
+            font-size: 0.8rem;
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+        .game-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0.8rem 0;
+        }
+        .buy-btn {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+        .buy-btn:hover {
+            background: #ff4757;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            opacity: 0.7;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .games-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎮 DeathRoll Studio</h1>
+    <div class="subtitle">A brand new 3D game – every single day</div>
+    
+    <div class="stats" id="stats">
+        <div class="stat-card"><div class="stat-number" id="gameCount">-</div><div>Games Created</div></div>
+        <div class="stat-card"><div class="stat-number" id="genreCount">-</div><div>Genres</div></div>
+        <div class="stat-card"><div class="stat-number" id="priceDisplay">$7</div><div>Price (SOL)</div></div>
+    </div>
+    
+    <div class="games-grid" id="gamesGrid">
+        <div class="loading">Loading games...</div>
+    </div>
+    
+    <div class="footer">
+        🔵 <strong>Trust Wallet:</strong> <code style="font-size:0.7rem;word-break:break-all;">6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3</code><br>
+        🟣 <strong>Phantom Wallet:</strong> <code style="font-size:0.7rem;word-break:break-all;">Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb</code><br>
+        📩 Send $7 SOL + your Telegram @username in memo → game delivered in 5 mins<br>
+        💬 <strong>Telegram Channel:</strong> <a href="https://t.me/drolltech" target="_blank">@drolltech</a>
+    </div>
+</div>
+
+<script>
+    async function loadGames() {
+        try {
+            const response = await fetch('portfolio.json');
+            if (!response.ok) throw new Error('Portfolio not found');
+            const games = await response.json();
+            
+            // Update stats
+            document.getElementById('gameCount').innerText = games.length;
+            const uniqueGenres = new Set(games.map(g => g.genre));
+            document.getElementById('genreCount').innerText = uniqueGenres.size;
+            
+            // Display games (newest first)
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+            
+            games.slice().reverse().forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                
+                // Image handling
+                let imageHtml = '';
+                if (game.image_url) {
+                    imageHtml = `<div class="game-image" style="background-image: url('${game.image_url}'); background-size: cover; background-position: center;"></div>`;
+                } else {
+                    imageHtml = `<div class="game-image"><div class="no-image">🎮</div></div>`;
+                }
+                
+                card.innerHTML = `
+                    ${imageHtml}
+                    <div class="game-info">
+                        <div class="game-title">${escapeHtml(game.game)}</div>
+                        <div><span class="game-genre">${escapeHtml(game.genre)}</span></div>
+                        <div class="game-mechanic">⚡ ${escapeHtml(game.mechanic)}</div>
+                        <div class="game-description">${escapeHtml(game.description || `A ${game.genre} game with ${game.mechanic}`)}</div>
+                        <div class="game-price">💰 $7 SOL</div>
+                        <a href="https://t.me/drolltech" class="buy-btn" target="_blank">🎮 Buy on Telegram →</a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } catch(e) {
+            document.getElementById('gamesGrid').innerHTML = '<div class="loading">⚠️ Could not load games. Run the bot to generate portfolio.json.</div>';
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    loadGames();
+</script>
+</body>
+</html>
