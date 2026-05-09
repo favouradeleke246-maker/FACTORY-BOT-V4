@@ -1,0 +1,30 @@
+{
+  "study": {
+    "total_runs": 1,
+    "successful_art": 1,
+    "failed_art": 0,
+    "games": [
+      {
+        "name": "Quantum Vector",
+        "genre": "top-down shooter",
+        "mechanic": "Soul Link",
+        "hook": "\ud83d\udd26 Can you survive?",
+        "timestamp": "2026-05-09T17:16:43.753216",
+        "success": true,
+        "art_prompt": "3D synthwave render of a top-down shooter character for 'Quantum Vector', detailed, 8K",
+        "feedback_score": null
+      }
+    ]
+  },
+  "analysis": {
+    "best_genre": "top-down shooter",
+    "best_mechanic": null,
+    "best_external_trend": null,
+    "success_rate": 1.0
+  },
+  "feedback": {},
+  "reprogram": {
+    "last_improvement": null,
+    "changes": []
+  }
+}
