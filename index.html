@@ -37,32 +37,37 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.7);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 11px;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 12px;
             font-family: monospace;
             z-index: 999;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         .footer { text-align: center; margin-top: 3rem; padding: 2rem; opacity: 0.7; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); }
         .footer a { color: #ffd700; text-decoration: none; }
         .loading { text-align: center; padding: 3rem; }
+        .last-updated { text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 1rem; }
         @media (max-width: 768px) { body { padding: 1rem; } .games-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>🎮 DeathRoll Studio</h1>
-    <div class="subtitle">A brand new 3D game – every single day ✨ AI‑generated mechanics & art</div>
+    <div class="subtitle">A brand new 3D game – every single day ✨ AI‑generated</div>
     
     <div class="stats" id="stats">
-        <div class="stat-card"><div class="stat-number" id="gameCount">-</div><div>Games Created</div></div>
+        <div class="stat-card"><div class="stat-number" id="gameCount">-</div><div>Total Games</div></div>
         <div class="stat-card"><div class="stat-number" id="genreCount">-</div><div>Genres</div></div>
         <div class="stat-card"><div class="stat-number" id="priceDisplay">$7</div><div>Price (SOL)</div></div>
     </div>
     
+    <div class="last-updated" id="lastUpdated">Loading games...</div>
+    
     <div class="games-grid" id="gamesGrid">
-        <div class="loading">Loading games...</div>
+        <div class="loading">🎮 Loading games...</div>
     </div>
     
     <div class="footer">
@@ -72,10 +77,11 @@
         💬 Telegram: <a href="https://t.me/drolltech" target="_blank">@drolltech</a>
     </div>
 </div>
-<div class="auto-refresh-badge" id="refreshBadge">🔄 Auto-refresh: 30s</div>
+<div class="auto-refresh-badge" id="refreshBadge">🔄 Checking for new games...</div>
 
 <script>
-    let refreshTimer;
+    let lastGameCount = 0;
+    let refreshInterval;
     let countdown = 30;
     
     async function loadGames() {
@@ -84,19 +90,39 @@
             if (!response.ok) throw new Error('Portfolio not found');
             const games = await response.json();
             
-            if (!games.length) {
+            if (!games || !games.length) {
                 document.getElementById('gamesGrid').innerHTML = '<div class="loading">✨ No games yet. First game will appear after bot runs.</div>';
+                document.getElementById('gameCount').innerText = '0';
+                document.getElementById('genreCount').innerText = '0';
                 return;
             }
             
+            // Check if new game was added
+            if (games.length > lastGameCount && lastGameCount > 0) {
+                const badge = document.getElementById('refreshBadge');
+                badge.style.background = '#ff6b6b';
+                badge.innerHTML = '🎉 NEW GAME DETECTED! Refreshing... 🎉';
+                setTimeout(() => {
+                    badge.style.background = 'rgba(0,0,0,0.8)';
+                }, 3000);
+            }
+            lastGameCount = games.length;
+            
+            // Update stats
             document.getElementById('gameCount').innerText = games.length;
             const uniqueGenres = new Set(games.map(g => g.genre));
             document.getElementById('genreCount').innerText = uniqueGenres.size;
             
+            // Update last updated time
+            document.getElementById('lastUpdated').innerHTML = `📅 Last updated: ${new Date().toLocaleTimeString()} | ${games.length} games available`;
+            
+            // Sort by date (newest first)
+            const sortedGames = [...games].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
             const grid = document.getElementById('gamesGrid');
             grid.innerHTML = '';
             
-            games.slice().reverse().forEach(game => {
+            sortedGames.forEach(game => {
                 const card = document.createElement('div');
                 card.className = 'game-card';
                 
@@ -107,11 +133,13 @@
                     imageHtml = `<div class="game-image"><div class="no-image">🎮</div></div>`;
                 }
                 
+                const dateStr = game.date ? new Date(game.date).toLocaleDateString() : 'Unknown date';
+                
                 card.innerHTML = `
                     ${imageHtml}
                     <div class="game-info">
                         <div class="game-title">${escapeHtml(game.game)}</div>
-                        <div><span class="game-genre">${escapeHtml(game.genre)}</span></div>
+                        <div><span class="game-genre">${escapeHtml(game.genre)}</span> <span style="font-size:0.7rem; opacity:0.5;">📅 ${dateStr}</span></div>
                         <div class="game-mechanic">⚡ ${escapeHtml(game.mechanic)}</div>
                         <div class="game-description">${escapeHtml(game.description || `A ${game.genre} game with ${game.mechanic}`)}</div>
                         <div class="game-price">💰 $7 SOL</div>
@@ -137,24 +165,20 @@
     }
     
     function startAutoRefresh() {
-        // Initial load
         loadGames();
         
-        // Set up auto-refresh every 30 seconds
-        refreshTimer = setInterval(() => {
+        refreshInterval = setInterval(() => {
             loadGames();
-            // Update badge
             countdown = 30;
             const badge = document.getElementById('refreshBadge');
             if (badge) badge.innerHTML = '🔄 Auto-refresh: 30s';
         }, 30000);
         
-        // Update countdown badge every second
         setInterval(() => {
             if (countdown > 0) {
                 countdown--;
                 const badge = document.getElementById('refreshBadge');
-                if (badge) badge.innerHTML = `🔄 Auto-refresh: ${countdown}s`;
+                if (badge) badge.innerHTML = `🔄 Next check: ${countdown}s`;
             }
         }, 1000);
     }
