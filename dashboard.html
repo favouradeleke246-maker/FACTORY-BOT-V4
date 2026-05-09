@@ -12,190 +12,166 @@
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: white;
             padding: 2rem;
+            min-height: 100vh;
         }
         .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 2rem; font-size: 2.5rem; }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .card h3 { font-size: 1rem; opacity: 0.8; margin-bottom: 0.5rem; }
-        .card .value { font-size: 2.5rem; font-weight: bold; color: #ffd700; }
-        .card .unit { font-size: 0.9rem; opacity: 0.7; }
-        .two-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        .chart-container {
-            background: rgba(0,0,0,0.3);
-            border-radius: 1.5rem;
-            padding: 1rem;
-        }
+        h1 { text-align: center; margin-bottom: 2rem; font-size: 2.5rem; background: linear-gradient(135deg, #ff6b6b, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 1.5rem; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+        .card h3 { font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem; }
+        .card .value { font-size: 2rem; font-weight: bold; color: #ffd700; }
+        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        .chart-container { background: rgba(0,0,0,0.3); border-radius: 1.5rem; padding: 1rem; }
         canvas { max-height: 300px; width: 100%; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(0,0,0,0.3);
-            border-radius: 1rem;
-            overflow: hidden;
-        }
+        table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.3); border-radius: 1rem; overflow: hidden; }
         th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
         th { background: rgba(255,255,255,0.1); }
-        .genre-badge {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 2rem;
-            background: #ff6b6b;
-            font-size: 0.8rem;
+        .auto-refresh-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 999;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        footer { text-align: center; margin-top: 2rem; opacity: 0.6; font-size: 0.8rem; }
-        @media (max-width: 768px) {
-            .two-columns { grid-template-columns: 1fr; }
-            body { padding: 1rem; }
-        }
+        .last-updated { text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 1rem; }
+        @media (max-width: 768px) { .two-columns { grid-template-columns: 1fr; } body { padding: 1rem; } }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🎮 DeathRoll Studio – Analytics Dashboard</h1>
+    <h1>📊 DeathRoll Studio – Analytics Dashboard</h1>
+    <div class="last-updated" id="lastUpdated">Loading data...</div>
+    
     <div class="stats-grid" id="statsGrid"></div>
+    
     <div class="two-columns">
         <div class="chart-container">
             <h3>📊 Games per Genre</h3>
             <canvas id="genreChart"></canvas>
         </div>
         <div class="chart-container">
-            <h3>⭐ Average Player Rating per Genre</h3>
-            <canvas id="ratingChart"></canvas>
-        </div>
-    </div>
-    <div class="two-columns">
-        <div class="chart-container">
-            <h3>🚀 Best Performing Mechanics</h3>
+            <h3>🚀 Top Mechanics</h3>
             <canvas id="mechanicsChart"></canvas>
         </div>
-        <div class="chart-container">
-            <h3>📈 Games Created Over Time</h3>
-            <canvas id="timelineChart"></canvas>
-        </div>
     </div>
+    
     <h3>📋 All Games</h3>
     <div style="overflow-x: auto;">
         <table id="gamesTable">
-            <thead>
-                <tr><th>Date</th><th>Game</th><th>Genre</th><th>Mechanic</th><th>Avg Rating</th><th>Repo</th></tr>
-            </thead>
+            <thead><tr><th>Date</th><th>Game</th><th>Genre</th><th>Mechanic</th><th>Buy</th></tr></thead>
             <tbody id="gamesTableBody"></tbody>
         </table>
     </div>
-    <footer>Data from portfolio.json and sar_analysis.json – updated daily</footer>
 </div>
+<div class="auto-refresh-badge" id="refreshBadge">🔄 Auto-refresh: 30s</div>
 
 <script>
-    async function loadData() {
+    let genreChart, mechanicsChart;
+    let refreshInterval;
+    let countdown = 30;
+    
+    async function loadDashboard() {
         try {
-            const portfolioRes = await fetch('portfolio.json');
-            const sarRes = await fetch('sar_analysis.json');
-            if (!portfolioRes.ok || !sarRes.ok) throw new Error('Data files not found');
-            const portfolio = await portfolioRes.json();
-            const sar = await sarRes.json();
-            displayDashboard(portfolio, sar);
+            const response = await fetch('portfolio.json?_=' + Date.now());
+            if (!response.ok) throw new Error('Portfolio not found');
+            const games = await response.json();
+            
+            if (!games || !games.length) {
+                document.getElementById('statsGrid').innerHTML = '<div class="card"><h3>No Games</h3><div class="value">0</div></div>';
+                document.getElementById('lastUpdated').innerHTML = 'No games yet. Run the bot to start.';
+                return;
+            }
+            
+            document.getElementById('lastUpdated').innerHTML = `📅 Last updated: ${new Date().toLocaleTimeString()} | ${games.length} games total`;
+            
+            // Stats
+            const uniqueGenres = new Set(games.map(g => g.genre));
+            const uniqueMechanics = new Set(games.map(g => g.mechanic));
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="card"><h3>🎮 Total Games</h3><div class="value">${games.length}</div></div>
+                <div class="card"><h3>🎲 Unique Genres</h3><div class="value">${uniqueGenres.size}</div></div>
+                <div class="card"><h3>⚡ Unique Mechanics</h3><div class="value">${uniqueMechanics.size}</div></div>
+                <div class="card"><h3>💰 Price</h3><div class="value">$7 SOL</div></div>
+            `;
+            
+            // Genre chart
+            const genreCount = {};
+            games.forEach(g => { genreCount[g.genre] = (genreCount[g.genre] || 0) + 1; });
+            const genreLabels = Object.keys(genreCount);
+            const genreValues = Object.values(genreCount);
+            
+            if (genreChart) genreChart.destroy();
+            genreChart = new Chart(document.getElementById('genreChart'), {
+                type: 'bar',
+                data: { labels: genreLabels, datasets: [{ label: 'Games', data: genreValues, backgroundColor: '#ff6b6b' }] },
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+            
+            // Mechanics chart
+            const mechanicCount = {};
+            games.forEach(g => { mechanicCount[g.mechanic] = (mechanicCount[g.mechanic] || 0) + 1; });
+            const topMechanics = Object.entries(mechanicCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            
+            if (mechanicsChart) mechanicsChart.destroy();
+            mechanicsChart = new Chart(document.getElementById('mechanicsChart'), {
+                type: 'pie',
+                data: { labels: topMechanics.map(m=>m[0]), datasets: [{ data: topMechanics.map(m=>m[1]), backgroundColor: ['#ff6b6b','#4a90e2','#50e3c2','#f5a623','#d0029b'] }] },
+                options: { responsive: true }
+            });
+            
+            // Games table
+            const tbody = document.getElementById('gamesTableBody');
+            tbody.innerHTML = '';
+            const sorted = [...games].sort((a,b) => new Date(b.date) - new Date(a.date));
+            sorted.forEach(game => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerHTML = game.date ? new Date(game.date).toLocaleDateString() : 'N/A';
+                row.insertCell(1).innerHTML = `<strong>${escapeHtml(game.game)}</strong>`;
+                row.insertCell(2).innerHTML = `<span style="background:#ff6b6b;padding:2px 8px;border-radius:20px;font-size:0.8rem;">${escapeHtml(game.genre)}</span>`;
+                row.insertCell(3).innerHTML = escapeHtml(game.mechanic);
+                row.insertCell(4).innerHTML = `<a href="https://t.me/drolltech" target="_blank" style="color:#ffd700;">🎮 Buy</a>`;
+            });
         } catch(e) {
-            document.body.innerHTML = '<div style="text-align:center;padding:50px">⚠️ Could not load data files. Make sure portfolio.json and sar_analysis.json exist in the same directory.</div>';
+            console.error('Error:', e);
+            document.getElementById('statsGrid').innerHTML = '<div class="card"><h3>Error</h3><div class="value">⚠️</div></div>';
         }
     }
-
-    function displayDashboard(portfolio, sar) {
-        const games = portfolio;
-        const feedback = sar.feedback || {};
-        const totalGames = games.length;
-        const totalSales = games.length; // placeholder – you can replace with actual sales data
-        const avgRating = computeOverallRating(games, feedback);
-        const uniqueGenres = new Set(games.map(g => g.genre)).size;
-        
-        // Stats cards
-        document.getElementById('statsGrid').innerHTML = `
-            <div class="card"><h3>🎮 Total Games</h3><div class="value">${totalGames}</div></div>
-            <div class="card"><h3>⭐ Avg Player Rating</h3><div class="value">${avgRating.toFixed(1)}</div><div class="unit">/5</div></div>
-            <div class="card"><h3>🎲 Unique Genres</h3><div class="value">${uniqueGenres}</div></div>
-            <div class="card"><h3>💰 Estimated Sales</h3><div class="value">${totalSales}</div><div class="unit">games sold</div></div>
-        `;
-        
-        // Genre counts
-        const genreCount = {};
-        games.forEach(g => { genreCount[g.genre] = (genreCount[g.genre] || 0) + 1; });
-        const genreLabels = Object.keys(genreCount);
-        const genreValues = Object.values(genreCount);
-        new Chart(document.getElementById('genreChart'), { type: 'bar', data: { labels: genreLabels, datasets: [{ label: 'Games', data: genreValues, backgroundColor: '#ff6b6b' }] }, options: { responsive: true, maintainAspectRatio: true } });
-        
-        // Avg rating per genre
-        const genreRatings = {};
-        games.forEach(g => {
-            const ratings = feedback[g.game] || [];
-            const avg = ratings.length ? ratings.reduce((a,b)=>a+b,0)/ratings.length : 0;
-            if (!genreRatings[g.genre]) genreRatings[g.genre] = { sum: 0, count: 0 };
-            genreRatings[g.genre].sum += avg;
-            genreRatings[g.genre].count++;
-        });
-        const ratingLabels = Object.keys(genreRatings);
-        const ratingAverages = ratingLabels.map(l => genreRatings[l].count ? genreRatings[l].sum / genreRatings[l].count : 0);
-        new Chart(document.getElementById('ratingChart'), { type: 'bar', data: { labels: ratingLabels, datasets: [{ label: 'Average Rating (1-5)', data: ratingAverages, backgroundColor: '#4a90e2' }] }, options: { responsive: true, maintainAspectRatio: true, scales: { y: { max: 5 } } } });
-        
-        // Top mechanics
-        const mechanicCount = {};
-        games.forEach(g => { mechanicCount[g.mechanic] = (mechanicCount[g.mechanic] || 0) + 1; });
-        const topMechanics = Object.entries(mechanicCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-        new Chart(document.getElementById('mechanicsChart'), { type: 'pie', data: { labels: topMechanics.map(m=>m[0]), datasets: [{ data: topMechanics.map(m=>m[1]), backgroundColor: ['#ff6b6b','#4a90e2','#50e3c2','#f5a623','#d0029b'] }] }, options: { responsive: true } });
-        
-        // Timeline (last 30 days)
-        const sorted = [...games].sort((a,b)=>new Date(a.date) - new Date(b.date));
-        const timelineLabels = sorted.map(g => new Date(g.date).toLocaleDateString());
-        const timelineIndex = sorted.map((_,i) => i+1);
-        new Chart(document.getElementById('timelineChart'), { type: 'line', data: { labels: timelineLabels, datasets: [{ label: 'Cumulative Games', data: timelineIndex, borderColor: '#ffd700', fill: false }] }, options: { responsive: true } });
-        
-        // Games table
-        const tbody = document.getElementById('gamesTableBody');
-        tbody.innerHTML = '';
-        games.slice().reverse().forEach(g => {
-            const ratings = feedback[g.game] || [];
-            const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1) : 'N/A';
-            const row = `<tr>
-                <td>${new Date(g.date).toLocaleDateString()}</td>
-                <td><strong>${g.game}</strong></td>
-                <td><span class="genre-badge">${g.genre}</span></td>
-                <td>${g.mechanic}</td>
-                <td>${avg}</td>
-                <td><a href="${g.repo}" target="_blank" style="color:#ffd700;">🔗</a></td>
-            </tr>`;
-            tbody.innerHTML += row;
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
         });
     }
     
-    function computeOverallRating(games, feedback) {
-        let total = 0, count = 0;
-        games.forEach(g => {
-            const ratings = feedback[g.game] || [];
-            if (ratings.length) {
-                total += ratings.reduce((a,b)=>a+b,0) / ratings.length;
-                count++;
+    function startAutoRefresh() {
+        loadDashboard();
+        refreshInterval = setInterval(() => {
+            loadDashboard();
+            countdown = 30;
+            const badge = document.getElementById('refreshBadge');
+            if (badge) badge.innerHTML = '🔄 Auto-refresh: 30s';
+        }, 30000);
+        
+        setInterval(() => {
+            if (countdown > 0) {
+                countdown--;
+                const badge = document.getElementById('refreshBadge');
+                if (badge) badge.innerHTML = `🔄 Next refresh: ${countdown}s`;
             }
-        });
-        return count ? total / count : 0;
+        }, 1000);
     }
     
-    loadData();
+    startAutoRefresh();
 </script>
 </body>
 </html>
