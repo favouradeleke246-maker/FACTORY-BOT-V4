@@ -33,12 +33,13 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
-    - name: Commit and push all game assets
+    - name: Commit and push all assets
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add portfolio.json sar_analysis.json learning_data.json last_hook.txt last_style.txt 2>/dev/null || true
-        git add workspace/ 2>/dev/null || true
+        git add portfolio.json
+        git add workspace/ --force
+        git add sar_analysis.json learning_data.json 2>/dev/null || true
         git diff --staged --quiet || git commit -m "Auto update: ${{ github.run_number }}"
         git push
       env:
@@ -51,7 +52,4 @@ jobs:
         path: |
           sprite.png
           portfolio.json
-          build_info.txt
-          learning_data.json
-          sar_analysis.json
           workspace/
