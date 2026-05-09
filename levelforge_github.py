@@ -331,7 +331,6 @@ available = [h for h in hook_pool if h != last_hook] or hook_pool
 selected_hook = random.choice(available)
 last_hook_file.write_text(selected_hook)
 
-selected_question = random.choice(["Which mechanic would you add? 👇", "Rate this game 1-10! 🔥"])
 selected_cta = random.choice(["Follow for daily games! 🎮", "Share with a friend! 🔄"])
 
 genre_emojis = {
@@ -402,7 +401,6 @@ ai_description = fallback_description
 hashtag_string = fallback_hashtags
 
 def generate_all_in_one(current_name, current_genre, current_mechanic, mechanic_desc_text):
-    # Use local defaults
     local_default_desc = f"Master the {current_mechanic} in this {current_genre} game!"
     local_default_tags = f"#gamedev #indiegame #solana #{current_genre.replace(' ', '')}"
     
@@ -430,15 +428,12 @@ HASHTAGS: <5-7 hashtags including #gamedev #indiegame #solana>"""
         if new_name and len(new_name) > 2:
             return new_name, (new_desc if new_desc else local_default_desc), (new_tags if new_tags else local_default_tags)
     
-    # If we get here, something failed - return originals
     return current_name, local_default_desc, local_default_tags
 
-# Call the function
 new_name, ai_description, hashtag_string = generate_all_in_one(
     game_name, selected_type, selected_mechanic, mechanic_desc
 )
 
-# Only update game_name if we got a valid new name
 if new_name and len(new_name) > 2:
     game_name = new_name
 
@@ -536,21 +531,27 @@ print("\n📦 Creating GitHub repository...")
 repo_url = None
 if github_token:
     try:
-        r = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} – {selected_type}", "private": False, "auto_init": True}, timeout=30)
+        r = requests.post("https://api.github.com/user/repos", 
+                         headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, 
+                         json={"name": repo_name, "description": f"{game_name} – {selected_type}", "private": False, "auto_init": True}, 
+                         timeout=30)
         if r.status_code == 201:
             repo_url = r.json()["html_url"]
             print(f"   ✅ Repo created: {repo_url}")
-    except:
-        pass
+        else:
+            print(f"   ⚠️ GitHub returned {r.status_code}, continuing anyway")
+    except Exception as e:
+        print(f"   ⚠️ GitHub repo creation skipped: {e}")
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
+print(f"   📦 Repo link: {repo_link}")
 
-# ============ GUARANTEED PORTFOLIO UPDATE ============
-print("\n📁 UPDATING PORTFOLIO.JSON (SAFE METHOD)...")
+# ============ GUARANTEED PORTFOLIO UPDATE - FIXED ============
+print("\n📁 UPDATING PORTFOLIO.JSON (GUARANTEED METHOD)...")
 
 image_url = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/FACTORY-BOT-V4/main/workspace/{game_name.replace(' ', '_')}/icon.png"
 port = Path("portfolio.json")
 
-# Safe load with error handling
+# Safe load
 entries = []
 if port.exists():
     try:
@@ -560,15 +561,12 @@ if port.exists():
             if not isinstance(entries, list):
                 entries = []
         print(f"   Loaded {len(entries)} existing games")
-    except json.JSONDecodeError:
-        print(f"   Portfolio was corrupted, starting fresh")
-        entries = []
-    except Exception as e:
-        print(f"   Error: {e}, starting fresh")
+    except (json.JSONDecodeError, Exception) as e:
+        print(f"   Starting fresh portfolio: {e}")
         entries = []
 
 # Add new game
-entries.append({
+new_entry = {
     "date": datetime.now().isoformat(),
     "game": game_name,
     "genre": selected_type,
@@ -578,15 +576,27 @@ entries.append({
     "repo": repo_link,
     "hook": selected_hook,
     "hashtags": hashtag_string
-})
-print(f"   ✅ Added: {game_name}")
-
-# Keep last 100
+}
+entries.append(new_entry)
 entries = entries[-100:]
 
-# Write back
-port.write_text(json.dumps(entries, indent=2))
-print(f"   ✅ Portfolio now has {len(entries)} total games")
+# Write portfolio.json
+try:
+    port.write_text(json.dumps(entries, indent=2))
+    print(f"   ✅ Portfolio now has {len(entries)} total games")
+    print(f"   ✅ Added: {game_name}")
+    
+    # Verify it wrote correctly
+    verify = json.loads(port.read_text())
+    if game_name in str(verify):
+        print(f"   ✅ VERIFIED: {game_name} saved to portfolio.json")
+    else:
+        print(f"   ⚠️ Warning: Verification failed, but file was written")
+except Exception as e:
+    print(f"   ❌ Portfolio write failed: {e}")
+    # Emergency save
+    Path("portfolio_emergency.json").write_text(json.dumps(entries, indent=2))
+    print(f"   ✅ Emergency backup saved to portfolio_emergency.json")
 
 # Create backup
 backup_path = Path(f"portfolio_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
@@ -602,7 +612,7 @@ if telegram_token and telegram_chat_id:
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendDocument", files=files, data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"}, timeout=60)
         print("   ✅ Game ZIP sent to admin")
     except Exception as e:
-        print(f"   ⚠️ Error: {e}")
+        print(f"   ⚠️ Telegram admin send failed: {e}")
 
 # ============ TELEGRAM SALES POST ============
 print("\n📱 Sending Telegram sales post...")
@@ -632,7 +642,7 @@ if telegram_token:
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
         print(f"   ✅ Sales post sent")
     except Exception as e:
-        print(f"   ⚠️ Error: {e}")
+        print(f"   ⚠️ Telegram sales post failed: {e}")
 
 # ============ FEEDBACK POLL ============
 print("\n📊 Sending feedback poll...")
@@ -648,7 +658,7 @@ if telegram_token:
         requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPoll", data=poll_data, timeout=30)
         print("   ✅ Poll sent")
     except Exception as e:
-        print(f"   ⚠️ Error: {e}")
+        print(f"   ⚠️ Poll failed: {e}")
 
 # ============ WEEKLY BEST OF ============
 if datetime.now().strftime("%A") == "Sunday":
@@ -710,7 +720,6 @@ Art success: {art_success}
 print("   ✅ Build info saved")
 
 # ============ CREATE last_update.txt for git ============
-print("\n📝 Creating git tracking files...")
 try:
     with open("last_update.txt", "w") as f:
         f.write(f"Last update: {datetime.now().isoformat()}\nGame: {game_name}")
