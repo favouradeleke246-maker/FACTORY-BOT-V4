@@ -33,6 +33,17 @@
         .game-price { font-size: 1.2rem; font-weight: bold; margin: 0.8rem 0; }
         .buy-btn { display: block; background: #ff6b6b; color: white; padding: 0.6rem 1.2rem; border-radius: 2rem; text-decoration: none; font-weight: bold; text-align: center; transition: background 0.3s; }
         .buy-btn:hover { background: #ff4757; }
+        .auto-refresh-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: monospace;
+            z-index: 999;
+        }
         .footer { text-align: center; margin-top: 3rem; padding: 2rem; opacity: 0.7; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); }
         .footer a { color: #ffd700; text-decoration: none; }
         .loading { text-align: center; padding: 3rem; }
@@ -42,7 +53,7 @@
 <body>
 <div class="container">
     <h1>🎮 DeathRoll Studio</h1>
-    <div class="subtitle">A brand new 3D game – every single day</div>
+    <div class="subtitle">A brand new 3D game – every single day ✨ AI‑generated mechanics & art</div>
     
     <div class="stats" id="stats">
         <div class="stat-card"><div class="stat-number" id="gameCount">-</div><div>Games Created</div></div>
@@ -61,13 +72,22 @@
         💬 Telegram: <a href="https://t.me/drolltech" target="_blank">@drolltech</a>
     </div>
 </div>
+<div class="auto-refresh-badge" id="refreshBadge">🔄 Auto-refresh: 30s</div>
 
 <script>
+    let refreshTimer;
+    let countdown = 30;
+    
     async function loadGames() {
         try {
-            const response = await fetch('portfolio.json');
+            const response = await fetch('portfolio.json?_=' + Date.now());
             if (!response.ok) throw new Error('Portfolio not found');
             const games = await response.json();
+            
+            if (!games.length) {
+                document.getElementById('gamesGrid').innerHTML = '<div class="loading">✨ No games yet. First game will appear after bot runs.</div>';
+                return;
+            }
             
             document.getElementById('gameCount').innerText = games.length;
             const uniqueGenres = new Set(games.map(g => g.genre));
@@ -101,7 +121,8 @@
                 grid.appendChild(card);
             });
         } catch(e) {
-            document.getElementById('gamesGrid').innerHTML = '<div class="loading">⚠️ No games yet. Run the bot to generate portfolio.json.</div>';
+            console.error('Error loading games:', e);
+            document.getElementById('gamesGrid').innerHTML = '<div class="loading">⚠️ Loading... Check back after bot runs.</div>';
         }
     }
     
@@ -115,7 +136,30 @@
         });
     }
     
-    loadGames();
+    function startAutoRefresh() {
+        // Initial load
+        loadGames();
+        
+        // Set up auto-refresh every 30 seconds
+        refreshTimer = setInterval(() => {
+            loadGames();
+            // Update badge
+            countdown = 30;
+            const badge = document.getElementById('refreshBadge');
+            if (badge) badge.innerHTML = '🔄 Auto-refresh: 30s';
+        }, 30000);
+        
+        // Update countdown badge every second
+        setInterval(() => {
+            if (countdown > 0) {
+                countdown--;
+                const badge = document.getElementById('refreshBadge');
+                if (badge) badge.innerHTML = `🔄 Auto-refresh: ${countdown}s`;
+            }
+        }, 1000);
+    }
+    
+    startAutoRefresh();
 </script>
 </body>
 </html>
