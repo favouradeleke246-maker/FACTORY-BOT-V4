@@ -31,15 +31,17 @@ jobs:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
+      continue-on-error: true
       run: python levelforge_github.py
     
     - name: Commit and push updates
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add portfolio.json sar_analysis.json learning_data.json workspace/ openai_cache.json last_hook.txt last_style.txt
-        git diff --staged --quiet || git commit -m "Auto update: ${{ github.run_number }}"
-        git push
+        git add portfolio.json sar_analysis.json learning_data.json workspace/ last_hook.txt last_style.txt 2>/dev/null || true
+        git add openai_cache.json 2>/dev/null || true
+        git diff --staged --quiet || git commit -m "Auto update: ${{ github.run_number }}" || true
+        git push || true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
