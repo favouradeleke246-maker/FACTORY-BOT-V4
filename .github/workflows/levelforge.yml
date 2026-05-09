@@ -35,9 +35,7 @@ jobs:
     
     - name: Ensure required files exist
       run: |
-        # Create last_update.txt if it doesn't exist (prevents git error)
         touch last_update.txt
-        # Create any other expected files that might be missing
         touch portfolio.json 2>/dev/null || true
         touch sar_analysis.json 2>/dev/null || true
         touch learning_data.json 2>/dev/null || true
@@ -48,11 +46,9 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Add all assets (last_update.txt now exists)
         git add last_update.txt portfolio.json sar_analysis.json learning_data.json last_hook.txt last_style.txt openai_cache.json recent_game_names.json build_info.txt 2>/dev/null || true
         git add workspace/ --force
         
-        # Only commit if there are changes
         if git diff --staged --quiet; then
           echo "✅ No changes to commit — portfolio already up to date"
         else
@@ -77,3 +73,4 @@ jobs:
           last_hook.txt
           last_style.txt
           recent_game_names.json
+          last_update.txt
