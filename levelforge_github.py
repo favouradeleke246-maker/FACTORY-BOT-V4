@@ -425,6 +425,8 @@ print(f"   #️⃣ {hashtag_string[:80]}...")
 # ============ ART STYLE ============
 visual_styles = ["isometric", "neon cyberpunk", "low-poly", "cell-shaded", "voxel", "pastel gothic"]
 trending_style = random.choice(visual_styles)
+last_style_file = Path("last_style.txt")
+last_style_file.write_text(trending_style)
 print(f"\n🎨 Style: {trending_style}")
 
 # ============ ART GENERATION ============
@@ -668,6 +670,18 @@ print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} runs)")
 # ============ SAVE DATA ============
 Path("learning_data.json").write_text(json.dumps({"last_run": datetime.now().isoformat(), "game": game_name, "genre": selected_type}, indent=2))
 print("   ✅ Data saved")
+
+# ============ CREATE BUILD INFO ============
+Path("build_info.txt").write_text(f"""
+DeathRoll Studio v{BOT_VERSION}
+Game: {game_name}
+Genre: {selected_type}
+Mechanic: {selected_mechanic}
+Date: {datetime.now().isoformat()}
+Trends used: {real_time_trends}
+Art success: {art_success}
+""")
+print("   ✅ Build info saved")
 
 # ============ VERIFICATION ============
 print("\n🔍 Final verification:")
