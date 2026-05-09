@@ -393,40 +393,55 @@ repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 # ============ COMBINED GENERATION (Name, Description, Hashtags) - FIXED ============
 print("\n📝 Generating name, description, hashtags...")
 
-def generate_all_in_one(current_name, selected_genre, selected_mechanic, mechanic_description):
-    # Default fallbacks
-    default_desc = f"Master the {selected_mechanic} in this {selected_genre} game!"
-    default_tags = f"#gamedev #indiegame #solana #{selected_genre.replace(' ', '')}"
+# Create fallback values FIRST
+fallback_description = f"Master the {selected_mechanic} in this {selected_type} game!"
+fallback_hashtags = f"#gamedev #indiegame #solana #{selected_type.replace(' ', '')}"
+
+# Initialize variables
+ai_description = fallback_description
+hashtag_string = fallback_hashtags
+
+def generate_all_in_one(current_name, current_genre, current_mechanic, mechanic_desc_text):
+    # Use local defaults
+    local_default_desc = f"Master the {current_mechanic} in this {current_genre} game!"
+    local_default_tags = f"#gamedev #indiegame #solana #{current_genre.replace(' ', '')}"
     
     if not openai_key:
-        return current_name, default_desc, default_tags
+        return current_name, local_default_desc, local_default_tags
     
-    prompt = f"""For a {selected_genre} game with mechanic '{selected_mechanic} – {mechanic_description}', return EXACTLY three lines:
+    prompt = f"""For a {current_genre} game with mechanic '{current_mechanic} – {mechanic_desc_text}', return EXACTLY three lines:
 NAME: <creative name, max 25 chars>
 DESCRIPTION: <1 sentence, max 120 chars, exciting>
 HASHTAGS: <5-7 hashtags including #gamedev #indiegame #solana>"""
+    
     result = cached_generate(prompt, temperature=0.9, max_tokens=150)
     if result:
         lines = result.strip().split("\n")
-        name = None
-        desc = None
-        tags = None
+        new_name = None
+        new_desc = None
+        new_tags = None
         for line in lines:
             if line.startswith("NAME:"):
-                name = line.replace("NAME:", "").strip()
+                new_name = line.replace("NAME:", "").strip()
             elif line.startswith("DESCRIPTION:"):
-                desc = line.replace("DESCRIPTION:", "").strip()
+                new_desc = line.replace("DESCRIPTION:", "").strip()
             elif line.startswith("HASHTAGS:"):
-                tags = line.replace("HASHTAGS:", "").strip()
-        if name:
-            return name, (desc if desc else default_desc), (tags if tags else default_tags)
-    # If anything fails, return the original values with defaults
-    return current_name, default_desc, default_tags
+                new_tags = line.replace("HASHTAGS:", "").strip()
+        if new_name and len(new_name) > 2:
+            return new_name, (new_desc if new_desc else local_default_desc), (new_tags if new_tags else local_default_tags)
+    
+    # If we get here, something failed - return originals
+    return current_name, local_default_desc, local_default_tags
 
-# Call the function with proper parameters
-game_name, ai_description, hashtag_string = generate_all_in_one(
+# Call the function
+new_name, ai_description, hashtag_string = generate_all_in_one(
     game_name, selected_type, selected_mechanic, mechanic_desc
 )
+
+# Only update game_name if we got a valid new name
+if new_name and len(new_name) > 2:
+    game_name = new_name
+
 print(f"   ✅ Name: {game_name}")
 print(f"   📝 {ai_description}")
 print(f"   #️⃣ {hashtag_string[:80]}...")
@@ -695,8 +710,13 @@ Art success: {art_success}
 print("   ✅ Build info saved")
 
 # ============ CREATE last_update.txt for git ============
-Path("last_update.txt").write_text(datetime.now().isoformat())
-print("   ✅ last_update.txt created")
+print("\n📝 Creating git tracking files...")
+try:
+    with open("last_update.txt", "w") as f:
+        f.write(f"Last update: {datetime.now().isoformat()}\nGame: {game_name}")
+    print("   ✅ last_update.txt created")
+except Exception as e:
+    print(f"   ⚠️ Could not create last_update.txt: {e}")
 
 # ============ VERIFICATION ============
 print("\n🔍 Final verification:")
