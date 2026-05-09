@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v20.5
-- FULL COMPLETE FEATURE SET
-- Token caching & combined prompts
-- Real‑time trends (Steam, Itch.io, Reddit, HN, Lobsters, X)
-- AI‑invented mechanics, 1-2 sentence descriptions
-- Player feedback polls, weekly Best Of, monthly changelog (private)
-- SAR self‑learning, automatic portfolio.json updates
+LevelForge+ ULTRA – DEATHROLL STUDIO v20.6 – FULL COMPLETE
+- ALL features: real-time trends, AI mechanics, combined prompts
+- Token caching, rate limit handling
+- Auto portfolio updates (array format)
+- SAR learning, weekly best, monthly changelog
 """
 
 import os
@@ -24,11 +22,11 @@ from PIL import Image, ImageDraw
 from collections import Counter
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v20.5 – FULL COMPLETE")
-print("✅ Real‑time Trends | AI Mechanics | Auto Portfolio | Self‑Learning")
+print("🔥 DEATHROLL STUDIO v20.6 – FULL COMPLETE")
+print("✅ All Features | Auto Portfolio | Self-Learning")
 print("=" * 60)
 
-BOT_VERSION = "20.5.0"
+BOT_VERSION = "20.6.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -85,6 +83,7 @@ def cached_generate(prompt, model="gpt-4o-mini", temperature=0.9, max_tokens=120
     
     for attempt in range(retries):
         try:
+            time.sleep(1)  # Delay between attempts
             response = requests.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
@@ -94,7 +93,7 @@ def cached_generate(prompt, model="gpt-4o-mini", temperature=0.9, max_tokens=120
                     "temperature": temperature,
                     "max_tokens": max_tokens
                 },
-                timeout=20
+                timeout=30
             )
             if response.status_code == 200:
                 result = response.json()["choices"][0]["message"]["content"].strip().strip('"')
@@ -137,8 +136,9 @@ class SARSystem:
                 "success_rate": 0
             },
             "feedback": {},
-            "reprogram": {"last_improvement": None, "changes": []}
+            "reprogram": {"last_improvement": None, "changes": []
         }
+    }
     def save(self):
         self.sar_file.write_text(json.dumps(self.data, indent=2))
     def record(self, game_name, genre, mechanic, hook, art_success, exec_time, external_trends=None, art_prompt_used=None, feedback_score=None):
@@ -173,6 +173,20 @@ class SARSystem:
         if genre_counts:
             best = max(genre_counts.keys(), key=lambda x: genre_counts[x]["success"] / max(genre_counts[x]["count"], 1))
             self.data["analysis"]["best_genre"] = best
+        # Update best external trend
+        if external_trends:
+            trend_counts = {}
+            for g in self.data["study"]["games"]:
+                trends = g.get("external_trends", [])
+                for t in trends:
+                    if t not in trend_counts:
+                        trend_counts[t] = {"count": 0, "success": 0}
+                    trend_counts[t]["count"] += 1
+                    if g["success"]:
+                        trend_counts[t]["success"] += 1
+            if trend_counts:
+                best_trend = max(trend_counts.keys(), key=lambda x: trend_counts[x]["success"] / max(trend_counts[x]["count"], 1))
+                self.data["analysis"]["best_external_trend"] = best_trend
         total = self.data["study"]["successful_art"] + self.data["study"]["failed_art"]
         if total > 0:
             self.data["analysis"]["success_rate"] = self.data["study"]["successful_art"] / total
@@ -197,7 +211,7 @@ sar = SARSystem()
 sar.analyze()
 print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
-# ============ REAL‑TIME TRENDING GENRES ============
+# ============ REAL‑TIME TRENDING GENRES (ALL SOURCES) ============
 print("\n🌍 Fetching real‑time trending genres...")
 
 def fetch_steam_trending_genres():
@@ -505,6 +519,7 @@ print(f"   ✨ New mechanic: {selected_mechanic} – {mechanic_desc}")
 
 # ============ COMBINED GENERATION (name, desc, hashtags) ============
 print("\n🎮 Generating name, description, hashtags in one call...")
+
 def generate_all_in_one():
     if not openai_key:
         prefixes = ["Neon","Cyber","Quantum","Astral","Void","Echo","Flux","Rogue"]
@@ -549,7 +564,7 @@ print(f"   #️⃣ {hashtag_string[:80]}...")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
 # ============ ART STYLE (avoid repetition) ============
-visual_styles = ["isometric", "neon cyberpunk", "low‑poly", "cell‑shaded", "voxel", "pastel gothic", "glitchcore", "glassmorphism", "paper cutout", "watercolor"]
+visual_styles = ["isometric", "neon cyberpunk", "low‑poly", "cell‑shaded", "voxel", "pastel gothic", "glitchcore", "glassmorphism", "paper cutout", "watercolor", "claymation", "sketch", "graffiti", "synthwave", "steampunk"]
 style_file = Path("last_style.txt")
 last_style = style_file.read_text().strip() if style_file.exists() else ""
 available = [s for s in visual_styles if s != last_style] or visual_styles
@@ -680,8 +695,6 @@ entries.append({
     "image_url": image_url,
     "repo": repo_link
 })
-
-# Keep only last 50
 entries = entries[-50:]
 port.write_text(json.dumps(entries, indent=2))
 print(f"   ✅ Portfolio updated ({len(entries)} games)")
@@ -773,8 +786,8 @@ if datetime.now().day == 1:
 ✅ Player feedback polls → SAR learning
 ✅ Weekly "Game of the Week"
 ✅ Advanced art prompts (trending visual styles)
-✅ Auto portfolio.json updates
 ✅ Token caching & rate limit handling
+✅ Auto portfolio.json updates
 
 📊 *Stats:*
 • Games created: {sar.data['study']['total_runs']}
@@ -815,8 +828,8 @@ print(f"   {ai_description}")
 print(f"   GitHub: {repo_link}")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v20.5 FINISHED!")
-print("✅ Full feature set complete")
+print("\n🎉 DEATHROLL STUDIO v20.6 FINISHED!")
+print("✅ All features intact – no stripping")
 print("✅ Portfolio.json automatically updated (array format)")
 print("✅ Website will show games after commit")
 print("📱 Check your website: https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/")
