@@ -14,11 +14,9 @@ import requests
 import time
 import shutil
 import zipfile
-import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
-from collections import Counter
 
 print("=" * 60)
 print("🔥 DEATHROLL STUDIO v25.0 – COMPLETE ALL FEATURES")
@@ -392,20 +390,27 @@ save_recent_names(recent_names)
 print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ COMBINED GENERATION (Name, Description, Hashtags) ============
+# ============ COMBINED GENERATION (Name, Description, Hashtags) - FIXED ============
 print("\n📝 Generating name, description, hashtags...")
 
-def generate_all_in_one():
+def generate_all_in_one(current_name, selected_genre, selected_mechanic, mechanic_description):
+    # Default fallbacks
+    default_desc = f"Master the {selected_mechanic} in this {selected_genre} game!"
+    default_tags = f"#gamedev #indiegame #solana #{selected_genre.replace(' ', '')}"
+    
     if not openai_key:
-        return game_name, f"Master the {selected_mechanic} in this {selected_type} game!", f"#gamedev #indiegame #solana #{selected_type.replace(' ', '')}"
-    prompt = f"""For a {selected_type} game with mechanic '{selected_mechanic} – {mechanic_desc}', return EXACTLY three lines:
+        return current_name, default_desc, default_tags
+    
+    prompt = f"""For a {selected_genre} game with mechanic '{selected_mechanic} – {mechanic_description}', return EXACTLY three lines:
 NAME: <creative name, max 25 chars>
 DESCRIPTION: <1 sentence, max 120 chars, exciting>
 HASHTAGS: <5-7 hashtags including #gamedev #indiegame #solana>"""
     result = cached_generate(prompt, temperature=0.9, max_tokens=150)
     if result:
         lines = result.strip().split("\n")
-        name = desc = tags = None
+        name = None
+        desc = None
+        tags = None
         for line in lines:
             if line.startswith("NAME:"):
                 name = line.replace("NAME:", "").strip()
@@ -414,10 +419,14 @@ HASHTAGS: <5-7 hashtags including #gamedev #indiegame #solana>"""
             elif line.startswith("HASHTAGS:"):
                 tags = line.replace("HASHTAGS:", "").strip()
         if name:
-            return name, desc or ai_description, tags or hashtag_string
-    return game_name, ai_description, hashtag_string
+            return name, (desc if desc else default_desc), (tags if tags else default_tags)
+    # If anything fails, return the original values with defaults
+    return current_name, default_desc, default_tags
 
-game_name, ai_description, hashtag_string = generate_all_in_one()
+# Call the function with proper parameters
+game_name, ai_description, hashtag_string = generate_all_in_one(
+    game_name, selected_type, selected_mechanic, mechanic_desc
+)
 print(f"   ✅ Name: {game_name}")
 print(f"   📝 {ai_description}")
 print(f"   #️⃣ {hashtag_string[:80]}...")
@@ -551,7 +560,9 @@ entries.append({
     "mechanic": selected_mechanic,
     "description": ai_description,
     "image_url": image_url,
-    "repo": repo_link
+    "repo": repo_link,
+    "hook": selected_hook,
+    "hashtags": hashtag_string
 })
 print(f"   ✅ Added: {game_name}")
 
@@ -682,6 +693,10 @@ Trends used: {real_time_trends}
 Art success: {art_success}
 """)
 print("   ✅ Build info saved")
+
+# ============ CREATE last_update.txt for git ============
+Path("last_update.txt").write_text(datetime.now().isoformat())
+print("   ✅ last_update.txt created")
 
 # ============ VERIFICATION ============
 print("\n🔍 Final verification:")
