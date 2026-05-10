@@ -46,7 +46,7 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add last_update.txt portfolio.json sar_analysis.json learning_data.json last_hook.txt last_style.txt openai_cache.json recent_game_names.json build_info.txt 2>/dev/null || true
+        git add last_update.txt portfolio.json sar_analysis.json learning_data.json last_hook.txt last_style.txt openai_cache.json recent_game_names.json build_info.json build_info.txt games_created.txt 2>/dev/null || true
         git add workspace/ --force
         
         if git diff --staged --quiet; then
@@ -74,3 +74,4 @@ jobs:
           last_style.txt
           recent_game_names.json
           last_update.txt
+          games_created.txt
