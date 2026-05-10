@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v27.0 - SIMPLIFIED & GUARANTEED
+DEATHROLL STUDIO v27.1 - SIMPLIFIED & GUARANTEED
 - Portfolio saves FIRST
-- No complex AI mechanic generation that breaks
+- Fixed SAR loading issues
 - All error handling
 """
 
@@ -18,10 +18,10 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v27.0 - SIMPLIFIED & GUARANTEED")
+print("🔥 DEATHROLL STUDIO v27.1 - SIMPLIFIED & GUARANTEED")
 print("=" * 60)
 
-BOT_VERSION = "27.0.0"
+BOT_VERSION = "27.1.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ CONFIGURATION ============
@@ -41,7 +41,7 @@ print(f"✅ Telegram: {'OK' if telegram_token else 'NO'}")
 print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 
-# ============ GAME DATA GENERATION (NO AI COMPLEXITY) ============
+# ============ GAME DATA GENERATION ============
 print("\n🎮 Generating game data...")
 
 # Simple game name
@@ -55,13 +55,13 @@ genres = ["top-down shooter", "action RPG", "racing game", "puzzle game", "survi
 selected_type = random.choice(genres)
 print(f"   Genre: {selected_type}")
 
-# Mechanic (simple list, no AI)
+# Mechanic
 mechanics = [
     "Phase Echo", "Mirror Shell", "Gravity Well", "Soul Link", 
     "Void Step", "Chrono Fracture", "Static Charge", "Blood Pact"
 ]
 mechanic_name = random.choice(mechanics)
-mechanic_desc = f"Use {mechanic_name} to gain an advantage in combat"
+mechanic_desc = f"Use {mechanic_name} to gain an advantage"
 print(f"   Mechanic: {mechanic_name}")
 
 # Description
@@ -72,14 +72,13 @@ hashtags = f"#gamedev #indiegame #{selected_type.replace(' ', '')}"
 hooks = ["🔥 Run or die", "💀 Can you survive?", "⚔️ Your next obsession", "🏎️ Speed meets chaos"]
 selected_hook = random.choice(hooks)
 
-# Emojis for the game
+# Emojis
 emojis = ["🎮", "🔥", "⚡", "💀", "🔫", "⚔️"]
 selected_emojis = " ".join(random.sample(emojis, 3))
 
 print(f"   Description: {description}")
-print(f"   Hook: {selected_hook}")
 
-# ============ 🚨 IMMEDIATE PORTFOLIO SAVE (BEFORE ANYTHING ELSE) 🚨 ============
+# ============ 🚨 IMMEDIATE PORTFOLIO SAVE ============
 print("\n" + "=" * 60)
 print("💾 STEP 1: SAVING TO PORTFOLIO.JSON")
 print("=" * 60)
@@ -100,7 +99,7 @@ if portfolio_path.exists():
         print(f"   Starting fresh: {e}")
         existing_games = []
 
-# Create game entry
+# Create new game entry
 image_url = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/FACTORY-BOT-V4/main/workspace/{game_name.replace(' ', '_')}/icon.png"
 
 new_game = {
@@ -129,13 +128,13 @@ except Exception as e:
     Path("portfolio_emergency.json").write_text(json.dumps([new_game], indent=2))
     print(f"   ✅ Emergency backup saved")
 
-# Also log to simple text file
+# Simple log file
 games_log = Path("games_log.txt")
 with open(games_log, "a") as f:
     f.write(f"{datetime.now().isoformat()} | {game_name} | {selected_type} | {mechanic_name}\n")
 print(f"   ✅ Logged to games_log.txt")
 
-# Create run timestamp
+# Run timestamp
 Path("last_run.txt").write_text(datetime.now().isoformat())
 print(f"   ✅ last_run.txt created")
 
@@ -146,10 +145,9 @@ print("\n🎨 STEP 2: Generating art...")
 sprite_path = Path("sprite.png")
 art_success = False
 
-# Try online art
 try:
     style = random.choice(["isometric", "neon cyberpunk", "low-poly", "cell-shaded"])
-    prompt = f"3D {style} render of a {selected_type} character for '{game_name}', game asset"
+    prompt = f"3D {style} render of a {selected_type} character for '{game_name}'"
     prompt_url = prompt.replace(" ", "+").replace("'", "")[:150]
     url = f"https://image.pollinations.ai/prompt/{prompt_url}?width=512&height=512"
     r = requests.get(url, timeout=30)
@@ -161,7 +159,6 @@ try:
         raise Exception("Online art failed")
 except Exception as e:
     print(f"   ⚠️ Online art failed: {e}")
-    # Fallback art
     try:
         img = Image.new('RGB', (512, 512), color=(30, 30, 60))
         draw = ImageDraw.Draw(img)
@@ -183,7 +180,7 @@ if sprite_path.exists():
 else:
     Image.new('RGB', (512, 512), color=(50, 50, 80)).save(project_dir / "icon.png")
 
-# Create Godot files
+# Godot files
 (project_dir / "project.godot").write_text(f"""[application]
 config/name="{game_name}"
 config/icon="res://icon.png"
@@ -215,7 +212,7 @@ try:
 except Exception as e:
     print(f"   ⚠️ ZIP failed: {e}")
 
-# ============ UPDATE PORTFOLIO WITH ART URL ============
+# ============ UPDATE PORTFOLIO ============
 print("\n📁 STEP 5: Updating portfolio with final details...")
 try:
     current_games = json.loads(portfolio_path.read_text())
@@ -245,6 +242,8 @@ if github_token:
         if r.status_code == 201:
             repo_link = r.json()["html_url"]
             print(f"   ✅ Repo created")
+        else:
+            print(f"   ⚠️ Repo returned {r.status_code}")
     except Exception as e:
         print(f"   ⚠️ Repo skip: {e}")
 
@@ -295,17 +294,32 @@ Send ${game_price} SOL + your @username → game in 5 mins
     except Exception as e:
         print(f"   ⚠️ Sales post failed: {e}")
 
-# ============ SAR SYSTEM (Simple) ============
+# ============ SAR SYSTEM - FIXED ============
 print("\n🧠 STEP 8: Updating SAR system...")
 sar_path = Path("sar_analysis.json")
 
-sar_data = {"total_runs": 0, "games": []}
+# Initialize with default structure
+sar_data = {
+    "total_runs": 0,
+    "games": []
+}
+
+# Load existing if it exists
 if sar_path.exists():
     try:
-        sar_data = json.loads(sar_path.read_text())
-    except:
-        pass
+        content = sar_path.read_text()
+        if content.strip():
+            loaded = json.loads(content)
+            if isinstance(loaded, dict):
+                sar_data["total_runs"] = loaded.get("total_runs", 0)
+                sar_data["games"] = loaded.get("games", [])
+            elif isinstance(loaded, list):
+                # Handle old format where it was just a list
+                sar_data["games"] = loaded
+    except Exception as e:
+        print(f"   ⚠️ Error loading SAR: {e}")
 
+# Update data
 sar_data["total_runs"] = sar_data.get("total_runs", 0) + 1
 sar_data["last_game"] = game_name
 sar_data["last_run"] = datetime.now().isoformat()
@@ -317,8 +331,12 @@ sar_data["games"].append({
 })
 sar_data["games"] = sar_data["games"][-100:]
 
-sar_path.write_text(json.dumps(sar_data, indent=2))
-print(f"   ✅ SAR updated (run #{sar_data['total_runs']})")
+# Save
+try:
+    sar_path.write_text(json.dumps(sar_data, indent=2))
+    print(f"   ✅ SAR updated (run #{sar_data['total_runs']})")
+except Exception as e:
+    print(f"   ⚠️ SAR save failed: {e}")
 
 # ============ LEARNING DATA ============
 print("\n📚 STEP 9: Updating learning data...")
@@ -330,11 +348,15 @@ learning_data = {
     "art_success": art_success,
     "total_games": len(existing_games)
 }
-Path("learning_data.json").write_text(json.dumps(learning_data, indent=2))
-print(f"   ✅ Learning data saved")
+try:
+    Path("learning_data.json").write_text(json.dumps(learning_data, indent=2))
+    print(f"   ✅ Learning data saved")
+except Exception as e:
+    print(f"   ⚠️ Learning data save failed: {e}")
 
 # ============ BUILD INFO ============
-Path("build_info.txt").write_text(f"""
+try:
+    Path("build_info.txt").write_text(f"""
 DEATHROLL STUDIO v{BOT_VERSION}
 Game: {game_name}
 Genre: {selected_type}
@@ -343,11 +365,16 @@ Date: {datetime.now().isoformat()}
 Art success: {art_success}
 Total games: {len(existing_games)}
 """)
-print(f"   ✅ Build info saved")
+    print(f"   ✅ Build info saved")
+except Exception as e:
+    print(f"   ⚠️ Build info failed: {e}")
 
 # ============ last_update.txt ============
-Path("last_update.txt").write_text(f"Last update: {datetime.now().isoformat()}\nGame: {game_name}")
-print(f"   ✅ last_update.txt created")
+try:
+    Path("last_update.txt").write_text(f"Last update: {datetime.now().isoformat()}\nGame: {game_name}")
+    print(f"   ✅ last_update.txt created")
+except Exception as e:
+    print(f"   ⚠️ last_update.txt failed: {e}")
 
 # ============ FINAL VERIFICATION ============
 print("\n" + "=" * 60)
@@ -357,7 +384,7 @@ print("=" * 60)
 print(f"   Game: {game_name}")
 print(f"   Genre: {selected_type}")
 print(f"   Portfolio entries: {len(existing_games)}")
-print(f"   SAR runs: {sar_data['total_runs']}")
+print(f"   SAR runs: {sar_data.get('total_runs', 0)}")
 
 # Verify portfolio.json
 try:
@@ -366,7 +393,7 @@ try:
         print(f"   ✅ VERIFIED: {game_name} is in portfolio.json")
     else:
         print(f"   ❌ ERROR: Game NOT in portfolio.json!")
-        # Emergency: add it again
+        # Emergency re-save
         current = json.loads(verify) if verify.strip() else []
         current.append(new_game)
         portfolio_path.write_text(json.dumps(current[-200:], indent=2))
@@ -378,5 +405,5 @@ print("\n" + "=" * 60)
 print(f"✅ {game_name} is COMPLETE!")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v27.0 FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v27.1 FINISHED!")
 print(f"📊 Website: https://{BRAND_GITHUB}.github.io/FACTORY-BOT-V4/")
