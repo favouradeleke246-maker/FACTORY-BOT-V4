@@ -61,5 +61,10 @@
     "status": "complete",
     "version": "28.1.0",
     "art_success": true
+  },
+  {
+    "date": "2026-05-10T17:15:03.511522",
+    "game": "TEST_171503",
+    "status": "success"
   }
 ]
