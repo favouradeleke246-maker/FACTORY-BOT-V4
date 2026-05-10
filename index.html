@@ -3,175 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeathRoll Studio – Daily 3D Games</title>
+    <title>DeathRoll Studio - Daily Games</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: 'Segoe UI', Roboto, system-ui;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #fff;
             min-height: 100vh;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 3rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #ff6b6b, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .subtitle { text-align: center; opacity: 0.8; margin-bottom: 2rem; }
-        .stats { display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; }
-        .stat-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 1rem 2rem; border-radius: 1rem; text-align: center; }
-        .stat-number { font-size: 2rem; font-weight: bold; color: #ffd700; }
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-        .game-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 1.5rem; overflow: hidden; transition: transform 0.3s; border: 1px solid rgba(255,255,255,0.2); }
-        .game-card:hover { transform: translateY(-5px); }
-        .game-image { width: 100%; height: 220px; background-color: #1a1a2e; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .game-image img { width: 100%; height: 100%; object-fit: cover; }
-        .no-image { display: flex; align-items: center; justify-content: center; height: 100%; font-size: 3rem; }
-        .game-info { padding: 1.2rem; }
-        .game-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 0.5rem; color: #ffd700; }
-        .game-genre { display: inline-block; background: #ff6b6b; padding: 0.2rem 0.6rem; border-radius: 2rem; font-size: 0.7rem; margin-bottom: 0.8rem; }
-        .game-description { font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.8rem; line-height: 1.4; }
-        .game-mechanic { font-size: 0.8rem; color: #ffd700; margin-bottom: 0.5rem; }
-        .game-price { font-size: 1.2rem; font-weight: bold; margin: 0.8rem 0; }
-        .buy-btn { display: block; background: #ff6b6b; color: white; padding: 0.6rem 1.2rem; border-radius: 2rem; text-decoration: none; font-weight: bold; text-align: center; transition: background 0.3s; }
-        .buy-btn:hover { background: #ff4757; }
-        .auto-refresh-badge {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 8px 15px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-family: monospace;
-            z-index: 999;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        .footer { text-align: center; margin-top: 3rem; padding: 2rem; opacity: 0.7; font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.1); }
-        .footer a { color: #ffd700; text-decoration: none; }
-        .loading { text-align: center; padding: 3rem; }
-        .last-updated { text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 1rem; }
-        @media (max-width: 768px) { body { padding: 1rem; } .games-grid { grid-template-columns: 1fr; } }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px 40px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .stat-label {
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .game-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-color: #4ecdc4;
+        }
+        
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #2a2a4e, #1a1a2e);
+        }
+        
+        .game-info {
+            padding: 20px;
+        }
+        
+        .game-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        
+        .game-genre {
+            display: inline-block;
+            background: rgba(78,205,196,0.2);
+            color: #4ecdc4;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+        
+        .game-mechanic {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .game-description {
+            color: #aaa;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .game-date {
+            color: #666;
+            font-size: 0.7rem;
+        }
+        
+        .price {
+            font-size: 1.2rem;
+            color: #ffd93d;
+            margin-top: 10px;
+        }
+        
+        .refresh-note {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 40px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .stat-card { padding: 15px 25px; }
+            .stat-number { font-size: 1.8rem; }
+            .games-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🎮 DeathRoll Studio</h1>
-    <div class="subtitle">A brand new 3D game – every single day ✨ AI‑generated</div>
-    
-    <div class="stats" id="stats">
-        <div class="stat-card"><div class="stat-number" id="gameCount">-</div><div>Total Games</div></div>
-        <div class="stat-card"><div class="stat-number" id="genreCount">-</div><div>Genres</div></div>
-        <div class="stat-card"><div class="stat-number" id="priceDisplay">$7</div><div>Price (SOL)</div></div>
+    <div class="container">
+        <header>
+            <h1>🔥 DeathRoll Studio</h1>
+            <p class="subtitle">A brand new 3D game – every single day<br>AI-generated mechanics & art</p>
+        </header>
+        
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalGames">-</div>
+                <div class="stat-label">Games Created</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalGenres">-</div>
+                <div class="stat-label">Genres</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="gamePrice">$7</div>
+                <div class="stat-label">Price (SOL)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="latestGame">-</div>
+                <div class="stat-label">Latest Game</div>
+            </div>
+        </div>
+        
+        <div class="games-grid" id="gamesGrid">
+            <div class="loading">Loading games...</div>
+        </div>
+        
+        <div class="refresh-note">
+            🔄 Auto-refresh: 30s | Last updated: <span id="lastUpdated">-</span>
+        </div>
+        
+        <footer>
+            <p>© 2026 DeathRoll Studio | Powered by AI | Built with ❤️</p>
+            <p>📱 Telegram: @deathroll1 | 🐦 TikTok: @deathroll.co</p>
+        </footer>
     </div>
     
-    <div class="last-updated" id="lastUpdated">Loading games...</div>
-    
-    <div class="games-grid" id="gamesGrid">
-        <div class="loading">🎮 Loading games...</div>
-    </div>
-    
-    <div class="footer">
-        🔵 Trust: 6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3<br>
-        🟣 Phantom: Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb<br>
-        📩 Send $7 SOL + your @username in memo → game in 5 mins<br>
-        💬 Telegram: <a href="https://t.me/drolltech" target="_blank">@drolltech</a>
-    </div>
-</div>
-<div class="auto-refresh-badge" id="refreshBadge">🔄 Auto-refresh: 30s</div>
-
-<script>
-    let lastGameCount = 0;
-    let refreshInterval;
-    let countdown = 30;
-    
-    async function loadGames() {
-        try {
-            const response = await fetch('portfolio.json?_=' + Date.now());
-            if (!response.ok) throw new Error('Portfolio not found');
-            const games = await response.json();
+    <script>
+        let gamesData = [];
+        
+        async function loadGames() {
+            try {
+                // Fetch the portfolio.json file
+                const response = await fetch('portfolio.json?v=' + Date.now());
+                if (!response.ok) throw new Error('Failed to load games');
+                gamesData = await response.json();
+                
+                // Sort by date (newest first)
+                gamesData.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                updateStats();
+                updateGamesGrid();
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Error loading games:', error);
+                document.getElementById('gamesGrid').innerHTML = '<div class="loading">⚠️ Unable to load games. Please try again later.</div>';
+            }
+        }
+        
+        function updateStats() {
+            const totalGames = gamesData.length;
+            const uniqueGenres = new Set(gamesData.map(g => g.genre)).size;
+            const latestGame = gamesData[0]?.game || '-';
             
-            if (!games || !games.length) {
-                document.getElementById('gamesGrid').innerHTML = '<div class="loading">✨ No games yet. First game will appear after bot runs.</div>';
-                document.getElementById('gameCount').innerText = '0';
-                document.getElementById('genreCount').innerText = '0';
+            document.getElementById('totalGames').textContent = totalGames;
+            document.getElementById('totalGenres').textContent = uniqueGenres;
+            document.getElementById('latestGame').textContent = latestGame;
+            
+            // Update price from the latest game if available
+            if (gamesData[0]?.price_sol) {
+                document.getElementById('gamePrice').textContent = `$${gamesData[0].price_sol}`;
+            }
+        }
+        
+        function updateGamesGrid() {
+            const grid = document.getElementById('gamesGrid');
+            
+            if (gamesData.length === 0) {
+                grid.innerHTML = '<div class="loading">No games yet. Check back soon!</div>';
                 return;
             }
             
-            if (games.length > lastGameCount && lastGameCount > 0) {
-                const badge = document.getElementById('refreshBadge');
-                badge.style.background = '#ff6b6b';
-                badge.innerHTML = '🎉 NEW GAME DETECTED! 🎉';
-                setTimeout(() => {
-                    badge.style.background = 'rgba(0,0,0,0.8)';
-                    badge.innerHTML = '🔄 Auto-refresh: 30s';
-                }, 3000);
-            }
-            lastGameCount = games.length;
-            
-            document.getElementById('gameCount').innerText = games.length;
-            const uniqueGenres = new Set(games.map(g => g.genre));
-            document.getElementById('genreCount').innerText = uniqueGenres.size;
-            
-            document.getElementById('lastUpdated').innerHTML = `📅 Last updated: ${new Date().toLocaleTimeString()} | ${games.length} games available`;
-            
-            const sortedGames = [...games].sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            const grid = document.getElementById('gamesGrid');
-            grid.innerHTML = '';
-            
-            sortedGames.forEach(game => {
-                const card = document.createElement('div');
-                card.className = 'game-card';
-                
-                let imageHtml = '';
-                if (game.image_url) {
-                    imageHtml = `<div class="game-image"><img src="${game.image_url}" alt="${game.game}" onerror="this.parentElement.innerHTML='<div class=\'no-image\'>🎮</div>'"></div>`;
-                } else {
-                    imageHtml = `<div class="game-image"><div class="no-image">🎮</div></div>`;
-                }
-                
-                const dateStr = game.date ? new Date(game.date).toLocaleDateString() : 'Unknown';
-                
-                card.innerHTML = `
-                    ${imageHtml}
+            grid.innerHTML = gamesData.map(game => `
+                <div class="game-card">
+                    <img class="game-image" src="${game.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                         onerror="this.src='https://via.placeholder.com/300x200?text=Game+Art'"
+                         alt="${game.game}">
                     <div class="game-info">
-                        <div class="game-title">${escapeHtml(game.game)}</div>
-                        <div><span class="game-genre">${escapeHtml(game.genre)}</span> <span style="font-size:0.7rem; opacity:0.5;">📅 ${dateStr}</span></div>
-                        <div class="game-mechanic">⚡ ${escapeHtml(game.mechanic)}</div>
-                        <div class="game-description">${escapeHtml(game.description || `A ${game.genre} game with ${game.mechanic}`)}</div>
-                        <div class="game-price">💰 $7 SOL</div>
-                        <a href="https://t.me/drolltech" class="buy-btn" target="_blank">🎮 Buy on Telegram →</a>
+                        <div class="game-name">${escapeHtml(game.game)}</div>
+                        <div class="game-genre">${escapeHtml(game.genre || 'Unknown')}</div>
+                        <div class="game-mechanic">⚡ ${escapeHtml(game.mechanic || 'No mechanic')}</div>
+                        <div class="game-description">${escapeHtml(game.description || 'No description available')}</div>
+                        <div class="price">💰 $${game.price_sol || '7'} SOL</div>
+                        <div class="game-date">📅 ${new Date(game.date).toLocaleDateString()}</div>
                     </div>
-                `;
-                grid.appendChild(card);
-            });
-        } catch(e) {
-            console.error('Error loading games:', e);
-            document.getElementById('gamesGrid').innerHTML = '<div class="loading">⚠️ Loading... Check back after bot runs.</div>';
+                </div>
+            `).join('');
         }
-    }
-    
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    function startAutoRefresh() {
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Load games on page load
         loadGames();
-        refreshInterval = setInterval(() => { loadGames(); countdown = 30; }, 30000);
-        setInterval(() => {
-            if (countdown > 0) {
-                countdown--;
-                const badge = document.getElementById('refreshBadge');
-                if (badge) badge.innerHTML = `🔄 Next refresh: ${countdown}s`;
-            }
-        }, 1000);
-    }
-    
-    startAutoRefresh();
-</script>
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadGames, 30000);
+    </script>
 </body>
 </html>
