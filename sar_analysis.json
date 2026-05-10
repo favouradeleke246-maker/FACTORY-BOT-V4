@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 1,
-    "successful_art": 1,
+    "total_runs": 2,
+    "successful_art": 2,
     "failed_art": 0,
     "games": [
       {
@@ -9,6 +9,13 @@
         "genre": "survival horror",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-10T17:23:55.015440",
+        "success": true
+      },
+      {
+        "name": "Crimson Blade",
+        "genre": "survival horror",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-10T17:35:54.809802",
         "success": true
       }
     ]

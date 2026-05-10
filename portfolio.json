@@ -80,5 +80,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-10T17:35:50.505634",
+    "game": "Crimson Blade",
+    "genre": "survival horror",
+    "mechanic": "Soul Link",
+    "mechanic_description": "share damage with an enemy",
+    "description": "Master the Soul Link in this intense survival horror experience!",
+    "hook": "\u2694\ufe0f Your next obsession",
+    "hashtags": "#gamedev #indiegame #survivalhorror #SoulLink #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Crimson_Blade/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
