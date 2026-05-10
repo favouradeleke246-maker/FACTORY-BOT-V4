@@ -1,9 +1,9 @@
 
-DEATHROLL STUDIO v28.1.0
-Game: Crimson Runner
-Genre: top-down shooter
-Mechanic: Void Step
-Date: 2026-05-10T14:50:05.809914
+DEATHROLL STUDIO v28.0.0
+Game: Solar Blade
+Genre: survival horror
+Mechanic: Soul Link
+Date: 2026-05-10T17:23:55.015840
 Art success: True
-Total portfolio: 5
-SAR runs: 3
+Total portfolio: 7
+SAR runs: 1

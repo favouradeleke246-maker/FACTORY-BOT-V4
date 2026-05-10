@@ -66,5 +66,19 @@
     "date": "2026-05-10T17:15:03.511522",
     "game": "TEST_171503",
     "status": "success"
+  },
+  {
+    "date": "2026-05-10T17:23:50.133239",
+    "game": "Solar Blade",
+    "genre": "survival horror",
+    "mechanic": "Soul Link",
+    "mechanic_description": "share damage with an enemy",
+    "description": "Master the Soul Link in this intense survival horror experience!",
+    "hook": "\ud83c\udfc3\u200d\u2642\ufe0f Run or die",
+    "hashtags": "#gamedev #indiegame #survivalhorror #SoulLink #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Solar_Blade/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
