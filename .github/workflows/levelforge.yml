@@ -1,9 +1,14 @@
-name: DeathRoll Studio Daily Game Factory
+name: LevelForge+ Daily Game Factory
 
 on:
   schedule:
     - cron: '0 6 * * *'
   workflow_dispatch:
+
+# THIS IS IMPORTANT - Add permissions
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   create-games:
@@ -33,17 +38,25 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
-    - name: Create .nojekyll for GitHub Pages
-      run: touch .nojekyll
+    - name: Debug - Check if portfolio.json was created
+      run: |
+        echo "=== Current directory contents ==="
+        ls -la
+        echo ""
+        echo "=== portfolio.json content (if exists) ==="
+        cat portfolio.json 2>/dev/null || echo "portfolio.json does NOT exist!"
+        echo ""
+        echo "=== File timestamps ==="
+        ls -la portfolio.json 2>/dev/null || echo "No portfolio.json"
     
     - name: Commit and push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add .nojekyll portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt openai_cache.json recent_names.txt last_hook.txt last_style.txt 2>/dev/null || true
-        git add workspace/ --force
-        git add index.html dashboard.html 2>/dev/null || true
+        # Force add all files
+        git add -A
+        git status
         
         if git diff --staged --quiet; then
           echo "No changes to commit"
@@ -55,7 +68,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Upload artifact
+    - name: Upload results
       uses: actions/upload-artifact@v4
       with:
         name: game-output
@@ -64,5 +77,4 @@ jobs:
           games_log.txt
           sar_analysis.json
           learning_data.json
-          build_info.txt
           workspace/
