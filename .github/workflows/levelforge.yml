@@ -21,8 +21,7 @@ jobs:
         python-version: '3.11'
     
     - name: Install dependencies
-      run: |
-        pip install pillow requests
+      run: pip install pillow requests
     
     - name: Run Game Factory
       env:
@@ -33,20 +32,6 @@ jobs:
         TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
-    
-    - name: Show verification
-      run: |
-        echo "=== portfolio.json (first 3 games) ==="
-        head -100 portfolio.json
-        echo ""
-        echo "=== games_log.txt ==="
-        tail -5 games_log.txt
-        echo ""
-        echo "=== last_run.txt ==="
-        cat last_run.txt
-        echo ""
-        echo "=== SAR stats ==="
-        cat sar_analysis.json | head -20
     
     - name: Commit and push
       run: |
@@ -61,7 +46,6 @@ jobs:
         else
           git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M')"
           git push
-          echo "Changes pushed successfully"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,8 +59,4 @@ jobs:
           games_log.txt
           sar_analysis.json
           learning_data.json
-          build_info.txt
-          last_run.txt
-          last_update.txt
-          sprite.png
           workspace/
