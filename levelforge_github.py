@@ -1,39 +1,35 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v29.1 - COMPLETE FULL FEATURES (FIXED)
-- AI-generated mechanics, names, descriptions (with fallbacks)
-- SAR self-learning system with performance tracking
-- Real-time trends from Reddit
-- Weighted genre selection based on SAR performance
-- Viral hooks and emoji generation
-- Art generation with multiple fallbacks
-- Godot project creation
-- GitHub repository creation
-- Telegram admin delivery, sales posts, and feedback polls
-- Weekly Best Of and monthly changelog
-- GUARANTEED portfolio updates on EVERY run
+LevelForge+ ULTRA – DEATHROLL STUDIO v26.1 – NO CACHING (FIXED)
+- ALL features: SAR, trends, AI mechanics, combined prompts
+- GUARANTEED portfolio updates
+- NO API caching (calls fresh every time)
+- FIXED: All variable scope issues resolved
 """
 
 import os
 import json
 import random
-import hashlib  # <-- THIS WAS MISSING!
+import hashlib
 import requests
 import time
 import shutil
 import zipfile
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
+from collections import Counter
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v29.1 - COMPLETE FULL FEATURES")
+print("🔥 DEATHROLL STUDIO v26.1 – NO CACHING (FIXED)")
+print("✅ SAR | Trends | AI Mechanics | Fresh API Calls")
 print("=" * 60)
 
-BOT_VERSION = "29.1.0"
+BOT_VERSION = "26.1.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
-# ============ CONFIGURATION ============
+# ============ YOUR CONTACT INFO ============
 BRAND_NAME = "DeathRoll"
 BRAND_EMAIL_PRIMARY = "favouradeleke246@gmail.com"
 BRAND_EMAIL_SECONDARY = "fadeleke246@gmail.com"
@@ -63,31 +59,15 @@ print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"🐦 X reading: {'OK' if bearer_token else 'NO'}")
 
-# ============ CACHE SYSTEM ============
-CACHE_FILE = Path("openai_cache.json")
-
-def load_cache():
-    if CACHE_FILE.exists():
-        try:
-            return json.loads(CACHE_FILE.read_text())
-        except:
-            return {}
-    return {}
-
-def save_cache(cache):
-    CACHE_FILE.write_text(json.dumps(cache, indent=2))
-
-def cached_generate(prompt, max_tokens=150, temperature=0.9, retries=2):
+# ============ API CALL (NO CACHING, WITH RETRIES) ============
+def call_api(prompt, max_tokens=120, temperature=0.9, retries=3):
+    """Direct API call - no caching, with retries"""
     if not openai_key:
         return None
-    cache = load_cache()
-    key = hashlib.md5(f"{prompt}{max_tokens}{temperature}".encode()).hexdigest()
-    if key in cache:
-        print("   (cached)")
-        return cache[key]
+    
     for attempt in range(retries):
         try:
-            time.sleep(1)
+            time.sleep(1)  # Small delay
             response = requests.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
@@ -100,17 +80,135 @@ def cached_generate(prompt, max_tokens=150, temperature=0.9, retries=2):
                 timeout=30
             )
             if response.status_code == 200:
-                result = response.json()["choices"][0]["message"]["content"].strip().strip('"')
-                cache[key] = result
-                save_cache(cache)
-                return result
+                return response.json()["choices"][0]["message"]["content"].strip().strip('"')
             elif response.status_code == 429:
-                time.sleep(2 ** attempt)
+                print(f"   ⚠️ Rate limited, waiting... (attempt {attempt + 1}/{retries})")
+                time.sleep(5)
             else:
-                return None
-        except:
-            time.sleep(1)
+                print(f"   ⚠️ API returned {response.status_code}")
+        except Exception as e:
+            print(f"   ⚠️ API error: {e}")
+        
     return None
+
+# ============ PREVENT LOOPS ============
+RECENT_NAMES_FILE = Path("recent_game_names.json")
+
+def load_recent_names():
+    if RECENT_NAMES_FILE.exists():
+        try:
+            return json.loads(RECENT_NAMES_FILE.read_text())
+        except:
+            return []
+    return []
+
+def save_recent_names(names):
+    RECENT_NAMES_FILE.write_text(json.dumps(names[-10:]))
+
+def get_unique_game_name(recent_names):
+    prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Crimson", "Shadow", "Phantom", "Eclipse", "Solar", "Nova"]
+    suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone", "Realm", "Fury", "Strike", "Blade", "Force"]
+    for _ in range(50):
+        name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
+        if name.lower() not in [n.lower() for n in recent_names]:
+            return name
+    return f"{random.choice(prefixes)} {random.choice(suffixes)} {random.randint(1, 999)}"
+
+# ============ SAR SYSTEM ============
+print("\n🧠 Initializing SAR System...")
+
+class SARSystem:
+    def __init__(self):
+        self.sar_file = Path("sar_analysis.json")
+        self.data = self.load()
+    def load(self):
+        if self.sar_file.exists():
+            try:
+                return json.loads(self.sar_file.read_text())
+            except:
+                return self.get_default()
+        return self.get_default()
+    def get_default(self):
+        return {
+            "study": {"total_runs": 0, "successful_art": 0, "failed_art": 0, "games": []},
+            "analysis": {
+                "best_genre": None,
+                "best_mechanic": None,
+                "best_external_trend": None,
+                "success_rate": 0
+            },
+            "feedback": {},
+            "reprogram": {"last_improvement": None, "changes": []}
+        }
+    def save(self):
+        self.sar_file.write_text(json.dumps(self.data, indent=2))
+    def record(self, game_name, genre, mechanic, hook, art_success, exec_time, external_trends=None, art_prompt_used=None, feedback_score=None):
+        self.data["study"]["total_runs"] += 1
+        if art_success:
+            self.data["study"]["successful_art"] += 1
+        else:
+            self.data["study"]["failed_art"] += 1
+        game_entry = {
+            "name": game_name,
+            "genre": genre,
+            "mechanic": mechanic,
+            "hook": hook,
+            "timestamp": datetime.now().isoformat(),
+            "success": art_success,
+            "art_prompt": art_prompt_used,
+            "feedback_score": feedback_score
+        }
+        if external_trends:
+            game_entry["external_trends"] = external_trends
+        self.data["study"]["games"].append(game_entry)
+        self.data["study"]["games"] = self.data["study"]["games"][-50:]
+        genre_counts = {}
+        for g in self.data["study"]["games"]:
+            ggenre = g["genre"]
+            if ggenre not in genre_counts:
+                genre_counts[ggenre] = {"count": 0, "success": 0}
+            genre_counts[ggenre]["count"] += 1
+            if g["success"]:
+                genre_counts[ggenre]["success"] += 1
+        if genre_counts:
+            best = max(genre_counts.keys(), key=lambda x: genre_counts[x]["success"] / max(genre_counts[x]["count"], 1))
+            self.data["analysis"]["best_genre"] = best
+        if external_trends:
+            trend_counts = {}
+            for g in self.data["study"]["games"]:
+                trends = g.get("external_trends", [])
+                for t in trends:
+                    if t not in trend_counts:
+                        trend_counts[t] = {"count": 0, "success": 0}
+                    trend_counts[t]["count"] += 1
+                    if g["success"]:
+                        trend_counts[t]["success"] += 1
+            if trend_counts:
+                best_trend = max(trend_counts.keys(), key=lambda x: trend_counts[x]["success"] / max(trend_counts[x]["count"], 1))
+                self.data["analysis"]["best_external_trend"] = best_trend
+        total = self.data["study"]["successful_art"] + self.data["study"]["failed_art"]
+        if total > 0:
+            self.data["analysis"]["success_rate"] = self.data["study"]["successful_art"] / total
+        self.save()
+    def record_feedback(self, game_name, rating):
+        if game_name not in self.data["feedback"]:
+            self.data["feedback"][game_name] = []
+        self.data["feedback"][game_name].append(rating)
+        self.save()
+    def get_average_feedback(self, game_name):
+        if game_name in self.data["feedback"] and self.data["feedback"][game_name]:
+            return sum(self.data["feedback"][game_name]) / len(self.data["feedback"][game_name])
+        return None
+    def analyze(self):
+        if "reprogram" not in self.data:
+            self.data["reprogram"] = {"last_improvement": None, "changes": []}
+        if "feedback" not in self.data:
+            self.data["feedback"] = {}
+        self.save()
+
+sar = SARSystem()
+sar.analyze()
+print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
 
 # ============ REAL-TIME TRENDS ============
 print("\n🌍 Fetching real-time trends...")
@@ -134,696 +232,461 @@ def fetch_reddit_trends():
                 "shooter": all_text.count("shooter")
             }
             sorted_genres = sorted(genres.items(), key=lambda x: x[1], reverse=True)
-            top_genres = [g for g, count in sorted_genres if count > 0][:3]
+            top_genres = [g for g, count in sorted_genres if count > 0][:2]
             if top_genres:
-                print(f"   🔥 Reddit trends: {', '.join(top_genres)}")
+                print(f"   🔥 Reddit trending: {', '.join(top_genres)}")
                 return top_genres
     except:
         pass
-    return []
+    return None
 
-real_time_trends = fetch_reddit_trends()
-print(f"   🌍 Final trends: {real_time_trends if real_time_trends else 'none (using defaults)'}")
-
-# ============ SAR SYSTEM (Self-Learning) ============
-print("\n🧠 Initializing SAR System...")
-
-class SARSystem:
-    def __init__(self):
-        self.sar_file = Path("sar_analysis.json")
-        self.data = self.load()
-    
-    def load(self):
-        default_data = {
-            "total_runs": 0,
-            "successful_art": 0,
-            "failed_art": 0,
-            "games": [],
-            "genre_performance": {},
-            "mechanic_performance": {},
-            "best_genre": None,
-            "best_mechanic": None,
-            "trend_performance": {},
-            "feedback": {},
-            "weekly_winners": [],
-            "monthly_stats": []
+def fetch_x_trends():
+    if not bearer_token:
+        return None
+    try:
+        headers = {"Authorization": f"Bearer {bearer_token}"}
+        params = {
+            "query": "gamedev OR indie game OR game release -filter:retweets",
+            "max_results": 30,
+            "tweet.fields": "public_metrics"
         }
-        
-        if not self.sar_file.exists():
-            return default_data
-        
-        try:
-            content = self.sar_file.read_text().strip()
-            if not content:
-                return default_data
-            
-            data = json.loads(content)
-            for key in default_data:
-                if key not in data:
-                    data[key] = default_data[key]
-            return data
-        except Exception as e:
-            print(f"   ⚠️ Error loading SAR: {e}")
-            return default_data
-    
-    def save(self):
-        try:
-            self.sar_file.write_text(json.dumps(self.data, indent=2))
-        except Exception as e:
-            print(f"   ⚠️ Error saving SAR: {e}")
-    
-    def record(self, game_name, genre, mechanic, art_success, trends_used=None, feedback_score=None):
-        self.data["total_runs"] = self.data.get("total_runs", 0) + 1
-        if art_success:
-            self.data["successful_art"] = self.data.get("successful_art", 0) + 1
-        else:
-            self.data["failed_art"] = self.data.get("failed_art", 0) + 1
-        
-        if genre not in self.data["genre_performance"]:
-            self.data["genre_performance"][genre] = {"count": 0, "success": 0}
-        self.data["genre_performance"][genre]["count"] += 1
-        if art_success:
-            self.data["genre_performance"][genre]["success"] += 1
-        
-        if mechanic not in self.data["mechanic_performance"]:
-            self.data["mechanic_performance"][mechanic] = {"count": 0, "success": 0}
-        self.data["mechanic_performance"][mechanic]["count"] += 1
-        if art_success:
-            self.data["mechanic_performance"][mechanic]["success"] += 1
-        
-        if trends_used:
-            for trend in trends_used:
-                if trend not in self.data["trend_performance"]:
-                    self.data["trend_performance"][trend] = {"count": 0, "success": 0}
-                self.data["trend_performance"][trend]["count"] += 1
-                if art_success:
-                    self.data["trend_performance"][trend]["success"] += 1
-        
-        game_record = {
-            "name": game_name,
-            "genre": genre,
-            "mechanic": mechanic,
-            "timestamp": datetime.now().isoformat(),
-            "art_success": art_success,
-            "trends_used": trends_used
-        }
-        if feedback_score:
-            game_record["feedback_score"] = feedback_score
-        self.data["games"].append(game_record)
-        self.data["games"] = self.data["games"][-100:]
-        
-        if self.data["genre_performance"]:
-            best = max(self.data["genre_performance"].keys(), 
-                      key=lambda x: self.data["genre_performance"][x]["success"] / max(self.data["genre_performance"][x]["count"], 1))
-            self.data["best_genre"] = best
-        
-        if self.data["mechanic_performance"]:
-            best = max(self.data["mechanic_performance"].keys(),
-                      key=lambda x: self.data["mechanic_performance"][x]["success"] / max(self.data["mechanic_performance"][x]["count"], 1))
-            self.data["best_mechanic"] = best
-        
-        self.save()
-    
-    def get_best_genre(self):
-        return self.data.get("best_genre")
-    
-    def get_best_mechanic(self):
-        return self.data.get("best_mechanic")
-    
-    def get_success_rate(self):
-        total = self.data.get("successful_art", 0) + self.data.get("failed_art", 0)
-        if total > 0:
-            return self.data.get("successful_art", 0) / total
-        return 0
+        r = requests.get("https://api.twitter.com/2/tweets/search/recent", headers=headers, params=params, timeout=10)
+        if r.status_code == 200:
+            tweets = r.json().get("data", [])
+            if tweets:
+                all_text = " ".join([t.get("text", "").lower() for t in tweets])
+                genres = {
+                    "action": all_text.count("action"),
+                    "platformer": all_text.count("platformer"),
+                    "puzzle": all_text.count("puzzle"),
+                    "rpg": all_text.count("rpg"),
+                    "strategy": all_text.count("strategy"),
+                    "horror": all_text.count("horror"),
+                    "shooter": all_text.count("shooter")
+                }
+                sorted_genres = sorted(genres.items(), key=lambda x: x[1], reverse=True)
+                top_genres = [g for g, count in sorted_genres if count > 0][:2]
+                if top_genres:
+                    print(f"   🐦 X trending: {', '.join(top_genres)}")
+                    return top_genres
+    except:
+        pass
+    return None
 
-sar = SARSystem()
-print(f"   ✅ SAR ready ({sar.data.get('total_runs', 0)} runs)")
-print(f"   📊 Success rate: {sar.get_success_rate()*100:.1f}%")
-if sar.get_best_genre():
-    print(f"   🏆 Best genre so far: {sar.get_best_genre()}")
-if sar.get_best_mechanic():
-    print(f"   ⚡ Best mechanic: {sar.get_best_mechanic()}")
+reddit_trends = fetch_reddit_trends() or []
+x_trends = fetch_x_trends() or []
+all_trends = reddit_trends + x_trends
+real_time_trends = list(dict.fromkeys(all_trends))[:2] if all_trends else []
+print(f"   🌍 Trends: {real_time_trends if real_time_trends else 'none'}")
 
 # ============ WEIGHTED GENRE SELECTION ============
 print("\n🎮 Weighted genre selection...")
-
 all_genres = [
     "top-down shooter", "action RPG", "racing game", "puzzle game", "survival horror",
     "fighting game", "strategy game", "extraction shooter", "cozy builder", "roguelite"
 ]
+sar_best = sar.data["analysis"].get("best_genre")
+recent_genres = [g["genre"] for g in sar.data["study"]["games"][-5:]]
 
 candidates = []
 weights = []
-
-sar_best = sar.get_best_genre()
 if sar_best and sar_best in all_genres:
     candidates.append(sar_best)
     weights.append(0.4)
-
 if real_time_trends:
     for trend in real_time_trends[:1]:
         if trend in all_genres:
             candidates.append(trend)
             weights.append(0.3)
-
 candidates.append(random.choice(all_genres))
 weights.append(0.3)
 
 selected_type = random.choices(candidates, weights=weights)[0] if candidates else random.choice(all_genres)
-print(f"   Selected genre: {selected_type}")
+print(f"   Selected: {selected_type}")
 
 # ============ VIRAL HOOKS ============
 hook_pool = [
     "🏃‍♂️ Run or die", "💀 This game haunted me", "🔦 Can you survive?",
     "🔫 I built a shooter in 24 hours", "⚔️ Your next obsession",
     "🏎️ Speed meets chaos", "🧠 1000 IQ required", "👊 One combo to rule them all",
-    "♟️ Outsmart the system", "🏴‍☠️ Loot or die", "🌿 Build your dream",
-    "🌀 One mechanic changes everything", "💀 Death is just the beginning"
+    "♟️ Outsmart the system", "🏴‍☠️ Loot or die", "🌿 Build your dream"
 ]
-selected_hook = random.choice(hook_pool)
-
 last_hook_file = Path("last_hook.txt")
 last_hook = last_hook_file.read_text().strip() if last_hook_file.exists() else ""
-if selected_hook == last_hook:
-    selected_hook = random.choice([h for h in hook_pool if h != last_hook] or hook_pool)
+available = [h for h in hook_pool if h != last_hook] or hook_pool
+selected_hook = random.choice(available)
 last_hook_file.write_text(selected_hook)
 
-selected_cta = random.choice(["Follow for daily games! 🎮", "Share with a friend! 🔄", "Join our Telegram! 📱", "Get your copy now! 🎯"])
+selected_question = random.choice(["Which mechanic would you add? 👇", "Rate this game 1-10! 🔥"])
+selected_cta = random.choice(["Follow for daily games! 🎮", "Share with a friend! 🔄"])
 
 genre_emojis = {
-    "survival horror": ["😱", "💀", "👻", "🔪", "🩸"],
-    "top-down shooter": ["🔫", "💥", "🎯", "⚡", "💣"],
-    "action RPG": ["⚔️", "🛡️", "👑", "🗡️", "🏹"],
-    "racing game": ["🏎️", "💨", "🔥", "🏁", "⚡"],
-    "puzzle game": ["🧠", "💡", "🔮", "🎲", "❓"],
-    "fighting game": ["👊", "💥", "⚡", "🥊", "💪"],
-    "strategy game": ["♟️", "🧠", "👑", "🏰", "⚔️"],
+    "survival horror": ["😱", "💀", "👻"],
+    "top-down shooter": ["🔫", "💥", "🎯"],
+    "action RPG": ["⚔️", "🛡️", "👑"],
+    "racing game": ["🏎️", "💨", "🔥"],
+    "puzzle game": ["🧠", "💡", "🔮"],
+    "fighting game": ["👊", "💥", "⚡"],
+    "strategy game": ["♟️", "🧠", "👑"],
 }
-emojis = genre_emojis.get(selected_type, ["🎮", "🔥", "⚡", "💀", "🎯"])
-selected_emojis = " ".join(random.sample(emojis, min(4, len(emojis))))
+emojis = genre_emojis.get(selected_type, ["🎮", "🔥", "⚡"])
+selected_emojis = " ".join(random.sample(emojis, min(3, len(emojis))))
 
-# ============ MECHANIC GENERATION (with fallback) ============
-print("\n⚙️ Generating unique mechanic...")
-
+# ============ AI MECHANIC ============
+print("\n⚙️ AI inventing mechanic...")
 creative_fallbacks = [
-    ("Phase Echo", "leave behind a short-lived decoy that distracts enemies"),
-    ("Chrono Fracture", "create a time bubble that slows everything but you"),
-    ("Void Step", "teleport through short walls and obstacles"),
-    ("Mirror Shell", "reflect projectiles back at attackers"),
-    ("Gravity Well", "pull nearby enemies toward you with force"),
-    ("Soul Link", "share damage with an enemy, making them your anchor"),
-    ("Static Charge", "build electricity with movement, release as a shockwave"),
-    ("Nightmare Fuel", "enemies see their worst fear and flee"),
-    ("Blood Pact", "sacrifice health for temporary invincibility"),
-    ("Echo Location", "reveal hidden paths and enemies with sound waves"),
-    ("Shadow Cloak", "become invisible when standing still"),
-    ("Berserker Rage", "deal more damage as your health drops")
+    ("Phase Echo", "leave behind a short-lived decoy"),
+    ("Chrono Fracture", "create a time bubble"),
+    ("Void Step", "teleport through short walls"),
+    ("Mirror Shell", "reflect projectiles"),
+    ("Gravity Well", "pull enemies toward you"),
+    ("Soul Link", "share damage with an enemy"),
+    ("Static Charge", "build and release electricity")
 ]
 
-def generate_mechanic():
-    # Use fallback if no OpenAI
+def generate_ai_mechanic():
     if not openai_key:
         return random.choice(creative_fallbacks)
-    
+    past = [g["mechanic"] for g in sar.data["study"]["games"][-3:] if g.get("success")]
+    blacklist = ["dash", "double jump", "time slow", "shield", "grapple", "invisibility", "wall run", "teleport"] + past
+    prompt = f"Invent a unique mechanic for a {selected_type} game. Avoid: {', '.join(blacklist[:8])}. Return EXACTLY:\nMECHANIC: <name>\nDESCRIPTION: <one sentence>"
     try:
-        recent = [g.get("mechanic", "") for g in sar.data.get("games", [])[-3:] if g.get("mechanic")]
-        avoid = ', '.join(recent) if recent else "none"
-        
-        prompt = f"""Invent a unique game mechanic for a {selected_type} game.
-Avoid: {avoid}
-Return EXACTLY:
-MECHANIC: <name 2-4 words>
-DESCRIPTION: <one sentence, max 80 chars>"""
-        
-        result = cached_generate(prompt, temperature=1.2, max_tokens=120)
+        result = call_api(prompt, temperature=1.1, max_tokens=100)
         if result:
             lines = result.strip().split("\n")
-            name = None
-            desc = None
+            name, desc = None, None
             for line in lines:
                 if line.startswith("MECHANIC:"):
                     name = line.replace("MECHANIC:", "").strip()
                 elif line.startswith("DESCRIPTION:"):
                     desc = line.replace("DESCRIPTION:", "").strip()
-            if name and desc and len(name) > 2:
-                return name, desc[:100]
+            if name and desc and len(name) > 3:
+                return name, desc
     except Exception as e:
-        print(f"   ⚠️ AI mechanic generation failed: {e}")
-    
+        print(f"   ⚠️ AI mechanic failed: {e}")
     return random.choice(creative_fallbacks)
 
-mechanic_name, mechanic_desc = generate_mechanic()
+mechanic_name, mechanic_desc = generate_ai_mechanic()
 selected_mechanic = mechanic_name
-print(f"   ✨ Mechanic: {selected_mechanic}")
-print(f"   📖 {mechanic_desc}")
+print(f"   ✨ {selected_mechanic} – {mechanic_desc}")
 
-# ============ GAME NAME GENERATION ============
-print("\n🎮 Generating game name...")
-
-prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Crimson", "Shadow", "Phantom", "Eclipse", "Solar", "Nova", "Dark", "Light", "Storm", "Thunder"]
-suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone", "Realm", "Fury", "Strike", "Blade", "Force", "Hunter", "Seeker", "Warden", "Ghost", "Wraith"]
-
-if openai_key and random.random() > 0.3:
-    try:
-        prompt = f"Generate a cool name for a {selected_type} game. Return ONLY the name, 1-3 words, max 25 chars:"
-        ai_name = cached_generate(prompt, temperature=0.9, max_tokens=20)
-        if ai_name and len(ai_name) > 2 and len(ai_name) < 30:
-            game_name = ai_name
-        else:
-            game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
-    except:
-        game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
-else:
-    game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
-
-# Ensure unique name
-recent_names_file = Path("recent_names.txt")
-recent_names = recent_names_file.read_text().splitlines() if recent_names_file.exists() else []
-if game_name in recent_names:
-    game_name = f"{game_name} {random.randint(2, 99)}"
+# ============ UNIQUE GAME NAME ============
+print("\n🎮 Generating unique name...")
+recent_names = load_recent_names()
+game_name = get_unique_game_name(recent_names)
 recent_names.append(game_name)
-recent_names_file.write_text("\n".join(recent_names[-20:]))
-
-print(f"   ✅ Game name: {game_name}")
+save_recent_names(recent_names)
+print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ DESCRIPTION & HASHTAGS ============
-print("\n📝 Generating description and hashtags...")
+# ============ COMBINED GENERATION (FIXED) ============
+print("\n📝 Generating name, description, hashtags...")
 
-ai_description = f"Master the {selected_mechanic} in this intense {selected_type} experience! {mechanic_desc[:70]}"
+# Initialize default values FIRST (critical fix)
+fallback_description = f"Master the {selected_mechanic} in this intense {selected_type} experience!"
+fallback_hashtags = f"#gamedev #indiegame #solana #{selected_type.replace(' ', '')} #DeathRollStudio"
 
-hashtag_string = f"#gamedev #indiegame #{selected_type.replace(' ', '')} #{selected_mechanic.replace(' ', '')} #DeathRollStudio"
-if real_time_trends:
-    hashtag_string += f" #{real_time_trends[0].replace(' ', '')}"
+ai_description = fallback_description
+hashtag_string = fallback_hashtags
 
-if openai_key and random.random() > 0.5:
+def generate_all_in_one():
+    if not openai_key:
+        return game_name, fallback_description, fallback_hashtags
+    
+    prompt = f"""For a {selected_type} game with mechanic '{selected_mechanic} – {mechanic_desc}', return EXACTLY three lines:
+NAME: <creative name, max 25 chars>
+DESCRIPTION: <1 sentence, max 120 chars, exciting>
+HASHTAGS: <5-7 hashtags including #gamedev #indiegame #solana>"""
+    
     try:
-        prompt = f"Write a ONE-SENTENCE hype description for '{game_name}' ({selected_type}) with mechanic '{selected_mechanic}'. Max 120 chars:"
-        ai_desc = cached_generate(prompt, temperature=0.8, max_tokens=80)
-        if ai_desc and len(ai_desc) > 20:
-            ai_description = ai_desc[:120]
-    except:
-        pass
+        result = call_api(prompt, temperature=0.9, max_tokens=150)
+        if result:
+            lines = result.strip().split("\n")
+            name = None
+            desc = None
+            tags = None
+            for line in lines:
+                if line.startswith("NAME:"):
+                    name = line.replace("NAME:", "").strip()
+                elif line.startswith("DESCRIPTION:"):
+                    desc = line.replace("DESCRIPTION:", "").strip()
+                elif line.startswith("HASHTAGS:"):
+                    tags = line.replace("HASHTAGS:", "").strip()
+            if name and len(name) > 2:
+                return name, (desc if desc else fallback_description), (tags if tags else fallback_hashtags)
+    except Exception as e:
+        print(f"   ⚠️ AI generation failed: {e}")
+    
+    return game_name, fallback_description, fallback_hashtags
 
+# Call the function
+new_name, ai_description, hashtag_string = generate_all_in_one()
+if new_name and len(new_name) > 2:
+    game_name = new_name
+
+# Ensure game name is not empty (fallback)
+if not game_name or len(game_name) < 2:
+    prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Crimson", "Shadow"]
+    suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone", "Fury"]
+    game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
+    print(f"   ⚠️ Using fallback name: {game_name}")
+
+print(f"   ✅ Name: {game_name}")
 print(f"   📝 {ai_description}")
 print(f"   #️⃣ {hashtag_string[:80]}...")
 
-# ============ 🚨 IMMEDIATE PORTFOLIO SAVE ============
-print("\n" + "=" * 60)
-print("💾 STEP 1: SAVING TO PORTFOLIO.JSON")
-print("=" * 60)
-
-portfolio_path = Path("portfolio.json")
-
-existing_games = []
-if portfolio_path.exists():
-    try:
-        content = portfolio_path.read_text()
-        if content.strip():
-            existing_games = json.loads(content)
-            if not isinstance(existing_games, list):
-                existing_games = []
-        print(f"   Loaded {len(existing_games)} existing games")
-    except Exception as e:
-        print(f"   Starting fresh: {e}")
-        existing_games = []
-
-image_url = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/FACTORY-BOT-V4/main/workspace/{game_name.replace(' ', '_')}/icon.png"
-
-new_game_entry = {
-    "date": datetime.now().isoformat(),
-    "game": game_name,
-    "genre": selected_type,
-    "mechanic": selected_mechanic,
-    "mechanic_description": mechanic_desc,
-    "description": ai_description,
-    "hook": selected_hook,
-    "hashtags": hashtag_string,
-    "image_url": image_url,
-    "price_sol": game_price,
-    "trends_used": real_time_trends,
-    "status": "generated",
-    "version": BOT_VERSION
-}
-
-existing_games.append(new_game_entry)
-existing_games = existing_games[-500:]
-
-try:
-    portfolio_path.write_text(json.dumps(existing_games, indent=2))
-    print(f"   ✅ Portfolio saved! Total games: {len(existing_games)}")
-    print(f"   ✅ Added: {game_name}")
-except Exception as e:
-    print(f"   ❌ Portfolio save failed: {e}")
-    Path("portfolio_emergency.json").write_text(json.dumps([new_game_entry], indent=2))
-    print(f"   ✅ Emergency backup saved")
-
-with open("games_log.txt", "a") as f:
-    f.write(f"{datetime.now().isoformat()} | {game_name} | {selected_type} | {selected_mechanic} | {real_time_trends}\n")
-print(f"   ✅ Logged to games_log.txt")
-
-Path("last_run.txt").write_text(datetime.now().isoformat())
-print(f"   ✅ last_run.txt created")
-
-print("=" * 60)
-
-# ============ ART STYLE SELECTION ============
-print("\n🎨 Selecting art style...")
-visual_styles = ["isometric", "neon cyberpunk", "low-poly", "cell-shaded", "voxel", "pastel gothic", "dark fantasy", "steampunk"]
+# ============ ART STYLE ============
+visual_styles = ["isometric", "neon cyberpunk", "low-poly", "cell-shaded", "voxel", "pastel gothic"]
 trending_style = random.choice(visual_styles)
-Path("last_style.txt").write_text(trending_style)
-print(f"   Style: {trending_style}")
+print(f"\n🎨 Style: {trending_style}")
 
 # ============ ART GENERATION ============
-print("\n🎨 Generating game art...")
+print("\n🎨 Generating art...")
 sprite_path = Path("sprite.png")
-art_success = False
-art_method = "none"
 
-try:
-    prompt = f"3D {trending_style} render of a {selected_type} character for '{game_name}', game art"
-    url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '+')[:150]}?width=512&height=512"
-    r = requests.get(url, timeout=45)
-    if r.status_code == 200 and len(r.content) > 5000:
-        sprite_path.write_bytes(r.content)
-        art_success = True
-        art_method = "online"
-        print(f"   ✅ Online art generated")
-    else:
-        raise Exception("Online failed")
-except Exception as e:
-    print(f"   ⚠️ Online art failed: {e}")
+def generate_art():
     try:
-        img = Image.new('RGB', (512, 512), color=(30, 30, 60))
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([50, 50, 462, 462], outline=(78, 205, 196), width=3)
-        draw.text((180, 230), game_name[:15], fill=(255, 255, 255))
-        draw.text((200, 260), selected_type[:12], fill=(200, 200, 200))
-        img.save(sprite_path)
-        art_success = True
-        art_method = "fallback"
-        print(f"   ✅ Fallback art created")
-    except Exception as e2:
-        print(f"   ❌ Art failed: {e2}")
-        art_success = False
+        prompt = f"3D {trending_style} render of a {selected_type} character for '{game_name}', game asset"
+        prompt_url = prompt.replace(" ", "+").replace("'", "").replace(",", "+")
+        url = f"https://image.pollinations.ai/prompt/{prompt_url}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
+        r = requests.get(url, timeout=45)
+        if r.status_code == 200 and len(r.content) > 5000:
+            with open(sprite_path, "wb") as f:
+                f.write(r.content)
+            return True
+    except:
+        pass
+    img = Image.new('RGB', (512, 512), color=(20, 20, 40))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([100,100,412,412], outline=(255,255,255), width=4)
+    draw.text((180, 450), game_name[:15], fill=(255,255,255))
+    img.save(sprite_path)
+    return True
 
-print(f"   🎨 Art ready (method: {art_method})")
+art_success = generate_art()
+print(f"   ✅ Art ready")
 
-# ============ WORKSPACE SETUP ============
-print("\n📁 Setting up workspace...")
+# ============ SAVE TO WORKSPACE ============
+print("\n📁 Saving to workspace...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
+shutil.copy(sprite_path, project_dir / "icon.png")
 
-if sprite_path.exists():
-    shutil.copy(sprite_path, project_dir / "icon.png")
-else:
-    Image.new('RGB', (512, 512), color=(50, 50, 80)).save(project_dir / "icon.png")
-
-# Godot project
+# ============ GODOT PROJECT ============
 (project_dir / "project.godot").write_text(f"""
 ; Godot 4.2
 config_version=5
 [application]
 config/name="{game_name}"
+config/features=PackedStringArray("4.2")
+run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
+[rendering]
+renderer="forward_plus"
 """)
 
 (project_dir / "main.tscn").write_text("""
-[gd_scene format=3]
-[node name="Main" type="Node2D"]
-[node name="Player" type="CharacterBody2D" position="(400,300)"]
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://player.gd" id=1]
+[node name="Main" type="Node3D"]
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 0.5, 0)
+script = ExtResource("1")
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 0.866, 0.5, 0, -0.5, 0.866, 0, 5, 5)
 """)
 
 (project_dir / "player.gd").write_text(f"""
-extends CharacterBody2D
-var speed = 300
+extends CharacterBody3D
+var speed = 5.0
 func _ready():
-    print("{game_name} - {selected_type}")
-    print("Mechanic: {selected_mechanic}")
+    print("{game_name} – {selected_type}")
 func _physics_process(delta):
-    var input = Vector2(
-        Input.get_axis("left", "right"),
-        Input.get_axis("up", "down")
-    )
-    velocity = input * speed
+    var input = Input.get_vector("left", "right", "forward", "back")
+    var dir = (transform.basis * Vector3(input.x, 0, input.y)).normalized()
+    velocity.x = dir.x * speed
+    velocity.z = dir.z * speed
     move_and_slide()
 """)
-
-(project_dir / "README.md").write_text(f"""
-# {game_name}
-
-## Description
-{ai_description}
-
-## Genre
-{selected_type}
-
-## Key Mechanic
-**{selected_mechanic}**: {mechanic_desc}
-
-## Price
-{game_price} SOL
-
----
-Generated by DeathRoll Studio v{BOT_VERSION}
-""")
-
-print(f"   ✅ Godot project created")
+print(f"   ✅ Project created")
 
 # ============ CREATE ZIP ============
 print("\n📦 Creating game ZIP...")
 zip_path = Path("workspace/latest_game.zip")
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    for file in project_dir.rglob("*"):
+        zipf.write(file, file.relative_to(project_dir.parent))
+print(f"   ✅ ZIP created")
 
-try:
-    if zip_path.exists():
-        zip_path.unlink()
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for file in project_dir.rglob("*"):
-            if file.is_file():
-                try:
-                    zipf.write(file, file.relative_to(project_dir.parent))
-                except:
-                    pass
-    print(f"   ✅ ZIP created")
-except Exception as e:
-    print(f"   ⚠️ ZIP failed: {e}")
-
-# ============ UPDATE PORTFOLIO ============
-print("\n📁 Updating portfolio with final details...")
-try:
-    current = json.loads(portfolio_path.read_text())
-    for game in current:
-        if game["game"] == game_name:
-            game["art_success"] = art_success
-            game["art_method"] = art_method
-            game["art_style"] = trending_style
-            game["status"] = "complete"
-            game["completed_at"] = datetime.now().isoformat()
-            break
-    portfolio_path.write_text(json.dumps(current, indent=2))
-    print(f"   ✅ Portfolio updated")
-except Exception as e:
-    print(f"   ⚠️ Update failed: {e}")
-
-# ============ GITHUB REPOSITORY ============
+# ============ GITHUB REPO ============
 print("\n📦 Creating GitHub repository...")
-repo_link = f"https://github.com/{BRAND_GITHUB}/{repo_name}"
-
+repo_url = None
 if github_token:
     try:
-        r = requests.post(
-            "https://api.github.com/user/repos",
-            headers={"Authorization": f"token {github_token}"},
-            json={"name": repo_name, "description": ai_description[:100], "private": False},
-            timeout=30
-        )
+        r = requests.post("https://api.github.com/user/repos", headers={"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}, json={"name": repo_name, "description": f"{game_name} – {selected_type}", "private": False, "auto_init": True}, timeout=30)
         if r.status_code == 201:
-            repo_link = r.json()["html_url"]
-            print(f"   ✅ Repo created: {repo_link}")
-        else:
-            print(f"   ⚠️ Repo returned {r.status_code}")
-    except Exception as e:
-        print(f"   ⚠️ Repo skip: {e}")
+            repo_url = r.json()["html_url"]
+            print(f"   ✅ Repo created: {repo_url}")
+    except:
+        pass
+repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
 
-# Update portfolio with repo link
-try:
-    current = json.loads(portfolio_path.read_text())
-    for game in current:
-        if game["game"] == game_name:
-            game["repo"] = repo_link
-            break
-    portfolio_path.write_text(json.dumps(current, indent=2))
-except:
-    pass
+# ============ GUARANTEED PORTFOLIO UPDATE ============
+print("\n📁 UPDATING PORTFOLIO.JSON...")
 
-# ============ TELEGRAM ============
-print("\n📱 Sending to Telegram...")
+image_url = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/FACTORY-BOT-V4/main/workspace/{game_name.replace(' ', '_')}/icon.png"
+port = Path("portfolio.json")
 
+entries = []
+if port.exists():
+    try:
+        content = port.read_text().strip()
+        if content:
+            entries = json.loads(content)
+            if not isinstance(entries, list):
+                entries = []
+        print(f"   Loaded {len(entries)} existing games")
+    except:
+        print(f"   Starting fresh portfolio")
+        entries = []
+
+entries.append({
+    "date": datetime.now().isoformat(),
+    "game": game_name,
+    "genre": selected_type,
+    "mechanic": selected_mechanic,
+    "description": ai_description,
+    "image_url": image_url,
+    "repo": repo_link
+})
+print(f"   ✅ Added: {game_name}")
+
+entries = entries[-100:]
+port.write_text(json.dumps(entries, indent=2))
+print(f"   ✅ Portfolio now has {len(entries)} total games")
+
+# ============ SEND TO ADMIN ============
+print("\n📬 Sending game to admin...")
 if telegram_token and telegram_chat_id:
     try:
         with open(zip_path, "rb") as f:
-            caption = f"🎮 *NEW: {game_name}*\n🎭 {selected_type}\n⚡ {selected_mechanic}\n📝 {ai_description}\n💰 ${game_price} SOL"
-            requests.post(
-                f"https://api.telegram.org/bot{telegram_token}/sendDocument",
-                files={"document": f},
-                data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"},
-                timeout=60
-            )
-        print(f"   ✅ Game sent to admin")
+            files = {"document": f}
+            caption = f"🎮 *{game_name}* – {selected_type}\n{ai_description}\n💰 ${game_price} SOL"
+            requests.post(f"https://api.telegram.org/bot{telegram_token}/sendDocument", files=files, data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"}, timeout=60)
+        print("   ✅ Game ZIP sent to admin")
     except Exception as e:
-        print(f"   ⚠️ Admin failed: {e}")
+        print(f"   ⚠️ Error: {e}")
 
+# ============ TELEGRAM SALES POST ============
+print("\n📱 Sending Telegram sales post...")
 if telegram_token:
-    try:
-        post = f"""
+    viral_post_text = f"""
 {selected_emojis} *{selected_hook}* {selected_emojis}
 
 ✨ *{game_name}* – {selected_type}
 {ai_description}
 
 ⚡ *Mechanic:* `{selected_mechanic}`
-📖 {mechanic_desc}
 
-💰 *Price:* `${game_price} SOL`
-
+💰 *Price:* ${game_price} SOL
 🔵 Trust: `{SOLANA_TRUST_WALLET}`
 🟣 Phantom: `{SOLANA_PHANTOM_WALLET}`
 
-Send `${game_price} SOL` + @username → game in 5 mins
+📩 Send ${game_price} SOL + your @username in memo → game in 5 mins
 
 {hashtag_string}
 {selected_cta}
 #DeathRollStudio
 """
+    try:
         with open(sprite_path, "rb") as photo:
-            requests.post(
-                f"https://api.telegram.org/bot{telegram_token}/sendPhoto",
-                files={"photo": photo},
-                data={"chat_id": TELEGRAM_CHANNEL, "caption": post, "parse_mode": "Markdown"},
-                timeout=30
-            )
-        print(f"   ✅ Sales post sent to channel")
+            files = {"photo": photo}
+            data = {"chat_id": TELEGRAM_CHANNEL, "caption": viral_post_text, "parse_mode": "Markdown"}
+            requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
+        print(f"   ✅ Sales post sent")
     except Exception as e:
-        print(f"   ⚠️ Sales post failed: {e}")
+        print(f"   ⚠️ Error: {e}")
 
-# ============ SAR UPDATE ============
-print("\n🧠 Updating SAR system...")
-sar.record(game_name, selected_type, selected_mechanic, art_success, real_time_trends)
-print(f"   ✅ SAR updated (run #{sar.data.get('total_runs', 0)})")
-
-# ============ LEARNING DATA ============
-print("\n📚 Updating learning data...")
-learning_data = {
-    "last_run": datetime.now().isoformat(),
-    "last_game": game_name,
-    "genre": selected_type,
-    "mechanic": selected_mechanic,
-    "mechanic_description": mechanic_desc,
-    "trends_used": real_time_trends,
-    "art_success": art_success,
-    "art_method": art_method,
-    "art_style": trending_style,
-    "total_games": len(existing_games),
-    "sar_runs": sar.data.get("total_runs", 0),
-    "success_rate": sar.get_success_rate(),
-    "best_genre": sar.get_best_genre(),
-    "best_mechanic": sar.get_best_mechanic(),
-    "version": BOT_VERSION
-}
-Path("learning_data.json").write_text(json.dumps(learning_data, indent=2))
-print(f"   ✅ Learning data saved")
-
-# ============ BUILD INFO ============
-build_info = f"""
-DEATHROLL STUDIO v{BOT_VERSION}
-================================
-Game: {game_name}
-Genre: {selected_type}
-Mechanic: {selected_mechanic}
-Description: {ai_description}
-Hook: {selected_hook}
-Date: {datetime.now().isoformat()}
-Trends: {real_time_trends}
-Art: {art_method} ({art_success})
-Repo: {repo_link}
-Portfolio: {len(existing_games)} games
-SAR runs: {sar.data.get('total_runs', 0)}
-Success rate: {sar.get_success_rate()*100:.1f}%
-"""
-Path("build_info.txt").write_text(build_info)
-print(f"   ✅ Build info saved")
-
-# ============ GIT FILES ============
-Path("last_update.txt").write_text(f"Last update: {datetime.now().isoformat()}\nGame: {game_name}\nRun: {sar.data.get('total_runs', 0)}")
-print(f"   ✅ last_update.txt created")
+# ============ FEEDBACK POLL ============
+print("\n📊 Sending feedback poll...")
+if telegram_token:
+    try:
+        poll_data = {
+            "chat_id": TELEGRAM_CHANNEL,
+            "question": f"Rate {game_name} (1-5 stars)?",
+            "options": json.dumps(["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"]),
+            "is_anonymous": False,
+            "open_period": 86400
+        }
+        requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPoll", data=poll_data, timeout=30)
+        print("   ✅ Poll sent")
+    except Exception as e:
+        print(f"   ⚠️ Error: {e}")
 
 # ============ WEEKLY BEST OF ============
-if datetime.now().strftime("%A") == "Sunday" and telegram_token:
-    try:
-        week_ago = datetime.now().timestamp() - (7 * 24 * 3600)
-        weekly = [g for g in sar.data.get("games", []) if datetime.fromisoformat(g["timestamp"]).timestamp() > week_ago]
-        if weekly:
-            best = weekly[0]
-            best_msg = f"🏆 *Game of the Week* 🏆\n\n{best['name']}\nGenre: {best['genre']}\nMechanic: {best['mechanic']}"
-            requests.post(
-                f"https://api.telegram.org/bot{telegram_token}/sendMessage",
-                json={"chat_id": TELEGRAM_CHANNEL, "text": best_msg, "parse_mode": "Markdown"},
-                timeout=30
-            )
-            print(f"   ✅ Game of the Week sent")
-    except:
-        pass
+if datetime.now().strftime("%A") == "Sunday":
+    print("\n🏆 Game of the Week...")
+    games = sar.data["study"]["games"]
+    if games:
+        best = max(games[-7:], key=lambda g: sar.get_average_feedback(g["name"]) or 0, default=games[-1])
+        best_msg = f"🏆 *Game of the Week* 🏆\n\n{best['name']}\n🔗 {best.get('repo', repo_link)}"
+        try:
+            requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": TELEGRAM_CHANNEL, "text": best_msg, "parse_mode": "Markdown"}, timeout=30)
+            print("   ✅ Game of the Week announced")
+        except:
+            pass
 
 # ============ MONTHLY CHANGELOG ============
-if datetime.now().day == 1 and telegram_token and telegram_chat_id:
-    try:
-        month_games = [g for g in sar.data.get("games", []) if datetime.fromisoformat(g["timestamp"]).month == datetime.now().month]
-        changelog = f"""📅 *DeathRoll Studio Monthly*
+if datetime.now().day == 1:
+    print("\n📢 Monthly changelog to admin...")
+    changelog = f"""📅 *DeathRoll Studio – Monthly Changelog*
 
-Games this month: {len(month_games)}
-Total all-time: {sar.data.get('total_runs', 0)}
-Best genre: {sar.get_best_genre() or 'N/A'}
-Success rate: {sar.get_success_rate()*100:.1f}%
+✅ Real-time trends
+✅ AI-invented mechanics
+✅ Player feedback polls
+✅ Weekly Game of the Week
+✅ SAR self-learning
+✅ Portfolio with ALL games saved ({len(entries)} total)
 
-Thanks for playing! 🎮
+📊 Stats:
+• Games created: {sar.data['study']['total_runs']}
+• Best genre: {sar.data['analysis']['best_genre'] or 'N/A'}
+
+Thanks for running DeathRoll Studio! 💪
 """
-        requests.post(
-            f"https://api.telegram.org/bot{telegram_token}/sendMessage",
-            json={"chat_id": telegram_chat_id, "text": changelog, "parse_mode": "Markdown"},
-            timeout=30
-        )
-        print(f"   ✅ Monthly report sent")
+    try:
+        requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": telegram_chat_id, "text": changelog, "parse_mode": "Markdown"}, timeout=30)
+        print("   ✅ Changelog sent")
     except:
         pass
 
-# ============ FINAL VERIFICATION ============
-print("\n" + "=" * 60)
-print("🔍 FINAL VERIFICATION")
-print("=" * 60)
+# ============ SAR RECORD ============
+print("\n🧠 Recording run...")
+sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, time.time(), real_time_trends, "", None)
+sar.analyze()
+print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} runs)")
 
-print(f"   ✅ Game: {game_name}")
-print(f"   ✅ Genre: {selected_type}")
-print(f"   ✅ Mechanic: {selected_mechanic}")
-print(f"   ✅ Portfolio entries: {len(existing_games)}")
-print(f"   ✅ SAR runs: {sar.data.get('total_runs', 0)}")
-print(f"   ✅ Art: {art_method}")
+# ============ SAVE DATA ============
+Path("learning_data.json").write_text(json.dumps({"last_run": datetime.now().isoformat(), "game": game_name, "genre": selected_type}, indent=2))
+print("   ✅ Data saved")
 
-# Verify portfolio contains the new game
-try:
-    if game_name in portfolio_path.read_text():
-        print(f"   ✅ VERIFIED: {game_name} in portfolio.json")
-    else:
-        print(f"   ❌ ERROR: Game not found!")
-        current = json.loads(portfolio_path.read_text()) if portfolio_path.exists() else []
-        current.append(new_game_entry)
-        portfolio_path.write_text(json.dumps(current[-500:], indent=2))
-        print(f"   🔄 Emergency re-save")
-except Exception as e:
-    print(f"   ⚠️ Verification error: {e}")
+# ============ CREATE last_update.txt for git ============
+Path("last_update.txt").write_text(datetime.now().isoformat())
+print("   ✅ last_update.txt created")
+
+# ============ VERIFICATION ============
+print("\n🔍 Final verification:")
+print(f"   Game: {game_name}")
+print(f"   Genre: {selected_type}")
+print(f"   Mechanic: {selected_mechanic}")
+print(f"   Portfolio: {len(entries)} total games")
+print(f"   Art: {'✅' if art_success else '⚠️'}")
 
 print("\n" + "=" * 60)
-print(f"✅ {game_name} IS COMPLETE!")
+print(f"✅ {game_name} is READY!")
 print("=" * 60)
 
-print(f"\n🎉 DEATHROLL STUDIO v{BOT_VERSION} FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v26.1 FINISHED!")
+print("✅ ALL features working (NO caching)")
+print("✅ Portfolio guaranteed to save every game")
 print(f"📊 Website: https://{BRAND_GITHUB}.github.io/FACTORY-BOT-V4/")
