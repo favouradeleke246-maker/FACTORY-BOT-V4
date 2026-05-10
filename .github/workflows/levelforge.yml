@@ -5,10 +5,8 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
-# THIS IS IMPORTANT - Add permissions
 permissions:
   contents: write
-  actions: read
 
 jobs:
   create-games:
@@ -38,33 +36,13 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
-    - name: Debug - Check if portfolio.json was created
-      run: |
-        echo "=== Current directory contents ==="
-        ls -la
-        echo ""
-        echo "=== portfolio.json content (if exists) ==="
-        cat portfolio.json 2>/dev/null || echo "portfolio.json does NOT exist!"
-        echo ""
-        echo "=== File timestamps ==="
-        ls -la portfolio.json 2>/dev/null || echo "No portfolio.json"
-    
     - name: Commit and push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        
-        # Force add all files
         git add -A
-        git status
-        
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
-          echo "Changes pushed successfully"
-        fi
+        git diff --staged --quiet || git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M:%S')"
+        git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
