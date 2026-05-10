@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v26.2 – NO CACHING (FULLY FIXED)
+LevelForge+ ULTRA – DEATHROLL STUDIO v27.0 – SIMPLE & WORKING
 - ALL features: SAR, trends, AI mechanics, combined prompts
 - GUARANTEED portfolio updates
-- NO API caching (calls fresh every time)
-- FIXED: All variable scope and SAR key errors resolved
+- Simple API calls (no retry loops)
 """
 
 import os
@@ -15,18 +14,16 @@ import requests
 import time
 import shutil
 import zipfile
-import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw
-from collections import Counter
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v26.2 – NO CACHING (FULLY FIXED)")
+print("🔥 DEATHROLL STUDIO v27.0 – SIMPLE & WORKING")
 print("✅ SAR | Trends | AI Mechanics | Fresh API Calls")
 print("=" * 60)
 
-BOT_VERSION = "26.2.0"
+BOT_VERSION = "27.0.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -59,37 +56,28 @@ print(f"✅ OpenAI: {'OK' if openai_key else 'NO'}")
 print(f"✅ GitHub: {'OK' if github_token else 'NO'}")
 print(f"🐦 X reading: {'OK' if bearer_token else 'NO'}")
 
-# ============ API CALL (NO CACHING, WITH RETRIES) ============
-def call_api(prompt, max_tokens=120, temperature=0.9, retries=3):
-    """Direct API call - no caching, with retries"""
+# ============ SIMPLE API CALL (NO RETRIES) ============
+def call_api(prompt, max_tokens=120, temperature=0.9):
+    """Simple API call - no retries"""
     if not openai_key:
         return None
-    
-    for attempt in range(retries):
-        try:
-            time.sleep(1)
-            response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
-                json={
-                    "model": "gpt-4o-mini",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "temperature": temperature,
-                    "max_tokens": max_tokens
-                },
-                timeout=30
-            )
-            if response.status_code == 200:
-                return response.json()["choices"][0]["message"]["content"].strip().strip('"')
-            elif response.status_code == 429:
-                print(f"   ⚠️ Rate limited, waiting... (attempt {attempt + 1}/{retries})")
-                time.sleep(5)
-            else:
-                print(f"   ⚠️ API returned {response.status_code}")
-        except Exception as e:
-            print(f"   ⚠️ API error: {e}")
-        
-    return None
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+            json={
+                "model": "gpt-4o-mini",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+                "max_tokens": max_tokens
+            },
+            timeout=30
+        )
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"].strip().strip('"')
+        return None
+    except:
+        return None
 
 # ============ PREVENT LOOPS ============
 RECENT_NAMES_FILE = Path("recent_game_names.json")
@@ -114,113 +102,55 @@ def get_unique_game_name(recent_names):
             return name
     return f"{random.choice(prefixes)} {random.choice(suffixes)} {random.randint(1, 999)}"
 
-# ============ SAR SYSTEM ============
+# ============ SAR SYSTEM - SIMPLE & SAFE ============
 print("\n🧠 Initializing SAR System...")
 
-class SARSystem:
-    def __init__(self):
-        self.sar_file = Path("sar_analysis.json")
-        self.data = self.load()
-    def load(self):
-        default_data = {
-            "study": {"total_runs": 0, "successful_art": 0, "failed_art": 0, "games": []},
-            "analysis": {
-                "best_genre": None,
-                "best_mechanic": None,
-                "best_external_trend": None,
-                "success_rate": 0
-            },
-            "feedback": {},
-            "reprogram": {"last_improvement": None, "changes": []}
-        }
-        
-        if self.sar_file.exists():
-            try:
-                content = self.sar_file.read_text().strip()
-                if content:
-                    data = json.loads(content)
-                    # Ensure all required keys exist
-                    if "study" not in data:
-                        data["study"] = default_data["study"]
-                    if "analysis" not in data:
-                        data["analysis"] = default_data["analysis"]
-                    if "feedback" not in data:
-                        data["feedback"] = {}
-                    if "reprogram" not in data:
-                        data["reprogram"] = {"last_improvement": None, "changes": []}
-                    return data
-            except Exception as e:
-                print(f"   ⚠️ Error loading SAR: {e}")
-        return default_data
-    def save(self):
-        self.sar_file.write_text(json.dumps(self.data, indent=2))
-    def record(self, game_name, genre, mechanic, hook, art_success, exec_time, external_trends=None, art_prompt_used=None, feedback_score=None):
-        self.data["study"]["total_runs"] += 1
-        if art_success:
-            self.data["study"]["successful_art"] += 1
-        else:
-            self.data["study"]["failed_art"] += 1
-        game_entry = {
-            "name": game_name,
-            "genre": genre,
-            "mechanic": mechanic,
-            "hook": hook,
-            "timestamp": datetime.now().isoformat(),
-            "success": art_success,
-            "art_prompt": art_prompt_used,
-            "feedback_score": feedback_score
-        }
-        if external_trends:
-            game_entry["external_trends"] = external_trends
-        self.data["study"]["games"].append(game_entry)
-        self.data["study"]["games"] = self.data["study"]["games"][-50:]
-        genre_counts = {}
-        for g in self.data["study"]["games"]:
-            ggenre = g["genre"]
-            if ggenre not in genre_counts:
-                genre_counts[ggenre] = {"count": 0, "success": 0}
-            genre_counts[ggenre]["count"] += 1
-            if g["success"]:
-                genre_counts[ggenre]["success"] += 1
-        if genre_counts:
-            best = max(genre_counts.keys(), key=lambda x: genre_counts[x]["success"] / max(genre_counts[x]["count"], 1))
-            self.data["analysis"]["best_genre"] = best
-        if external_trends:
-            trend_counts = {}
-            for g in self.data["study"]["games"]:
-                trends = g.get("external_trends", [])
-                for t in trends:
-                    if t not in trend_counts:
-                        trend_counts[t] = {"count": 0, "success": 0}
-                    trend_counts[t]["count"] += 1
-                    if g["success"]:
-                        trend_counts[t]["success"] += 1
-            if trend_counts:
-                best_trend = max(trend_counts.keys(), key=lambda x: trend_counts[x]["success"] / max(trend_counts[x]["count"], 1))
-                self.data["analysis"]["best_external_trend"] = best_trend
-        total = self.data["study"]["successful_art"] + self.data["study"]["failed_art"]
-        if total > 0:
-            self.data["analysis"]["success_rate"] = self.data["study"]["successful_art"] / total
-        self.save()
-    def record_feedback(self, game_name, rating):
-        if game_name not in self.data["feedback"]:
-            self.data["feedback"][game_name] = []
-        self.data["feedback"][game_name].append(rating)
-        self.save()
-    def get_average_feedback(self, game_name):
-        if game_name in self.data["feedback"] and self.data["feedback"][game_name]:
-            return sum(self.data["feedback"][game_name]) / len(self.data["feedback"][game_name])
-        return None
-    def analyze(self):
-        if "reprogram" not in self.data:
-            self.data["reprogram"] = {"last_improvement": None, "changes": []}
-        if "feedback" not in self.data:
-            self.data["feedback"] = {}
-        self.save()
+# Delete corrupted SAR file if it exists
+sar_path = Path("sar_analysis.json")
+if sar_path.exists():
+    try:
+        test = json.loads(sar_path.read_text())
+        if not isinstance(test, dict) or "study" not in test:
+            print("   ⚠️ Found corrupted SAR file, recreating...")
+            sar_path.unlink()
+    except:
+        print("   ⚠️ Found corrupted SAR file, recreating...")
+        sar_path.unlink()
 
-sar = SARSystem()
-sar.analyze()
-print(f"   ✅ SAR ready ({sar.data['study']['total_runs']} runs)")
+# Simple SAR data structure
+sar_data = {
+    "study": {
+        "total_runs": 0,
+        "successful_art": 0,
+        "failed_art": 0,
+        "games": []
+    },
+    "analysis": {
+        "best_genre": None,
+        "best_mechanic": None,
+        "best_external_trend": None,
+        "success_rate": 0
+    },
+    "feedback": {},
+    "reprogram": {"last_improvement": None, "changes": []}
+}
+
+if sar_path.exists():
+    try:
+        loaded = json.loads(sar_path.read_text())
+        if isinstance(loaded, dict):
+            if "study" in loaded:
+                sar_data["study"] = loaded["study"]
+            if "analysis" in loaded:
+                sar_data["analysis"] = loaded["analysis"]
+            if "feedback" in loaded:
+                sar_data["feedback"] = loaded["feedback"]
+        print(f"   ✅ Loaded existing SAR data")
+    except:
+        print(f"   ✅ Using fresh SAR data")
+
+sar_path.write_text(json.dumps(sar_data, indent=2))
+print(f"   ✅ SAR ready ({sar_data['study']['total_runs']} runs)")
 
 # ============ REAL-TIME TRENDS ============
 print("\n🌍 Fetching real-time trends...")
@@ -297,8 +227,8 @@ all_genres = [
     "top-down shooter", "action RPG", "racing game", "puzzle game", "survival horror",
     "fighting game", "strategy game", "extraction shooter", "cozy builder", "roguelite"
 ]
-sar_best = sar.data["analysis"].get("best_genre")
-recent_genres = [g["genre"] for g in sar.data["study"]["games"][-5:]]
+sar_best = sar_data["analysis"].get("best_genre")
+recent_genres = [g["genre"] for g in sar_data["study"]["games"][-5:]]
 
 candidates = []
 weights = []
@@ -359,23 +289,20 @@ creative_fallbacks = [
 def generate_ai_mechanic():
     if not openai_key:
         return random.choice(creative_fallbacks)
-    past = [g["mechanic"] for g in sar.data["study"]["games"][-3:] if g.get("success")]
+    past = [g["mechanic"] for g in sar_data["study"]["games"][-3:] if g.get("success")]
     blacklist = ["dash", "double jump", "time slow", "shield", "grapple", "invisibility", "wall run", "teleport"] + past
     prompt = f"Invent a unique mechanic for a {selected_type} game. Avoid: {', '.join(blacklist[:8])}. Return EXACTLY:\nMECHANIC: <name>\nDESCRIPTION: <one sentence>"
-    try:
-        result = call_api(prompt, temperature=1.1, max_tokens=100)
-        if result:
-            lines = result.strip().split("\n")
-            name, desc = None, None
-            for line in lines:
-                if line.startswith("MECHANIC:"):
-                    name = line.replace("MECHANIC:", "").strip()
-                elif line.startswith("DESCRIPTION:"):
-                    desc = line.replace("DESCRIPTION:", "").strip()
-            if name and desc and len(name) > 3:
-                return name, desc
-    except Exception as e:
-        print(f"   ⚠️ AI mechanic failed: {e}")
+    result = call_api(prompt, temperature=1.1, max_tokens=100)
+    if result:
+        lines = result.strip().split("\n")
+        name, desc = None, None
+        for line in lines:
+            if line.startswith("MECHANIC:"):
+                name = line.replace("MECHANIC:", "").strip()
+            elif line.startswith("DESCRIPTION:"):
+                desc = line.replace("DESCRIPTION:", "").strip()
+        if name and desc and len(name) > 3:
+            return name, desc
     return random.choice(creative_fallbacks)
 
 mechanic_name, mechanic_desc = generate_ai_mechanic()
@@ -391,10 +318,10 @@ save_recent_names(recent_names)
 print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ COMBINED GENERATION (FIXED) ============
+# ============ COMBINED GENERATION ============
 print("\n📝 Generating name, description, hashtags...")
 
-# Initialize default values FIRST (critical fix)
+# Initialize default values FIRST
 fallback_description = f"Master the {selected_mechanic} in this intense {selected_type} experience!"
 fallback_hashtags = f"#gamedev #indiegame #solana #{selected_type.replace(' ', '')} #DeathRollStudio"
 
@@ -410,38 +337,27 @@ NAME: <creative name, max 25 chars>
 DESCRIPTION: <1 sentence, max 120 chars, exciting>
 HASHTAGS: <5-7 hashtags including #gamedev #indiegame #solana>"""
     
-    try:
-        result = call_api(prompt, temperature=0.9, max_tokens=150)
-        if result:
-            lines = result.strip().split("\n")
-            name = None
-            desc = None
-            tags = None
-            for line in lines:
-                if line.startswith("NAME:"):
-                    name = line.replace("NAME:", "").strip()
-                elif line.startswith("DESCRIPTION:"):
-                    desc = line.replace("DESCRIPTION:", "").strip()
-                elif line.startswith("HASHTAGS:"):
-                    tags = line.replace("HASHTAGS:", "").strip()
-            if name and len(name) > 2:
-                return name, (desc if desc else fallback_description), (tags if tags else fallback_hashtags)
-    except Exception as e:
-        print(f"   ⚠️ AI generation failed: {e}")
+    result = call_api(prompt, temperature=0.9, max_tokens=150)
+    if result:
+        lines = result.strip().split("\n")
+        name = None
+        desc = None
+        tags = None
+        for line in lines:
+            if line.startswith("NAME:"):
+                name = line.replace("NAME:", "").strip()
+            elif line.startswith("DESCRIPTION:"):
+                desc = line.replace("DESCRIPTION:", "").strip()
+            elif line.startswith("HASHTAGS:"):
+                tags = line.replace("HASHTAGS:", "").strip()
+        if name and len(name) > 2:
+            return name, (desc if desc else fallback_description), (tags if tags else fallback_hashtags)
     
     return game_name, fallback_description, fallback_hashtags
 
-# Call the function
 new_name, ai_description, hashtag_string = generate_all_in_one()
 if new_name and len(new_name) > 2:
     game_name = new_name
-
-# Ensure game name is not empty (fallback)
-if not game_name or len(game_name) < 2:
-    prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Crimson", "Shadow"]
-    suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone", "Fury"]
-    game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
-    print(f"   ⚠️ Using fallback name: {game_name}")
 
 print(f"   ✅ Name: {game_name}")
 print(f"   📝 {ai_description}")
@@ -638,9 +554,9 @@ if telegram_token:
 # ============ WEEKLY BEST OF ============
 if datetime.now().strftime("%A") == "Sunday":
     print("\n🏆 Game of the Week...")
-    games = sar.data["study"]["games"]
+    games = sar_data["study"]["games"]
     if games:
-        best = max(games[-7:], key=lambda g: sar.get_average_feedback(g["name"]) or 0, default=games[-1])
+        best = max(games[-7:], key=lambda g: g.get("feedback_score", 0) or 0, default=games[-1])
         best_msg = f"🏆 *Game of the Week* 🏆\n\n{best['name']}\n🔗 {best.get('repo', repo_link)}"
         try:
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendMessage", json={"chat_id": TELEGRAM_CHANNEL, "text": best_msg, "parse_mode": "Markdown"}, timeout=30)
@@ -661,8 +577,8 @@ if datetime.now().day == 1:
 ✅ Portfolio with ALL games saved ({len(entries)} total)
 
 📊 Stats:
-• Games created: {sar.data['study']['total_runs']}
-• Best genre: {sar.data['analysis']['best_genre'] or 'N/A'}
+• Games created: {sar_data['study']['total_runs']}
+• Best genre: {sar_data['analysis']['best_genre'] or 'N/A'}
 
 Thanks for running DeathRoll Studio! 💪
 """
@@ -674,9 +590,44 @@ Thanks for running DeathRoll Studio! 💪
 
 # ============ SAR RECORD ============
 print("\n🧠 Recording run...")
-sar.record(game_name, selected_type, selected_mechanic, selected_hook, art_success, time.time(), real_time_trends, "", None)
-sar.analyze()
-print(f"   ✅ SAR updated ({sar.data['study']['total_runs']} runs)")
+
+# Update SAR data
+sar_data["study"]["total_runs"] = sar_data["study"].get("total_runs", 0) + 1
+if art_success:
+    sar_data["study"]["successful_art"] = sar_data["study"].get("successful_art", 0) + 1
+else:
+    sar_data["study"]["failed_art"] = sar_data["study"].get("failed_art", 0) + 1
+
+sar_data["study"]["games"].append({
+    "name": game_name,
+    "genre": selected_type,
+    "mechanic": selected_mechanic,
+    "hook": selected_hook,
+    "timestamp": datetime.now().isoformat(),
+    "success": art_success
+})
+sar_data["study"]["games"] = sar_data["study"]["games"][-50:]
+
+# Update best genre
+genre_counts = {}
+for g in sar_data["study"]["games"]:
+    ggenre = g["genre"]
+    if ggenre not in genre_counts:
+        genre_counts[ggenre] = {"count": 0, "success": 0}
+    genre_counts[ggenre]["count"] += 1
+    if g.get("success", False):
+        genre_counts[ggenre]["success"] += 1
+
+if genre_counts:
+    best = max(genre_counts.keys(), key=lambda x: genre_counts[x]["success"] / max(genre_counts[x]["count"], 1))
+    sar_data["analysis"]["best_genre"] = best
+
+total = sar_data["study"]["successful_art"] + sar_data["study"]["failed_art"]
+if total > 0:
+    sar_data["analysis"]["success_rate"] = sar_data["study"]["successful_art"] / total
+
+sar_path.write_text(json.dumps(sar_data, indent=2))
+print(f"   ✅ SAR updated ({sar_data['study']['total_runs']} runs)")
 
 # ============ SAVE DATA ============
 Path("learning_data.json").write_text(json.dumps({"last_run": datetime.now().isoformat(), "game": game_name, "genre": selected_type}, indent=2))
@@ -698,7 +649,7 @@ print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v26.2 FINISHED!")
-print("✅ ALL features working (NO caching)")
+print("\n🎉 DEATHROLL STUDIO v27.0 FINISHED!")
+print("✅ ALL features working")
 print("✅ Portfolio guaranteed to save every game")
 print(f"📊 Website: https://{BRAND_GITHUB}.github.io/FACTORY-BOT-V4/")
