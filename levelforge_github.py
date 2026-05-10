@@ -476,31 +476,37 @@ new_entry = {
 entries.append(new_entry)
 entries = entries[-100:]
 
-# Write portfolio.json
+# Write portfolio.json with verification
 try:
     port.write_text(json.dumps(entries, indent=2))
     print(f"   ✅ Portfolio now has {len(entries)} total games")
     print(f"   ✅ SAVED: {game_name}")
     
-    # Verify
-    verify = json.loads(port.read_text())
-    if game_name in str(verify):
-        print(f"   ✅ VERIFIED: {game_name} is in portfolio.json")
-    else:
-        print(f"   ⚠️ Warning: Verification issue, but file was written")
+    # Verify the write
+    with open(port, 'r') as f:
+        verify_content = f.read()
+        if game_name in verify_content:
+            print(f"   ✅ VERIFIED: {game_name} is in portfolio.json")
+        else:
+            print(f"   ⚠️ WARNING: Verification failed - game not found in file")
+            # Emergency: write again
+            port.write_text(json.dumps(entries, indent=2))
+            print(f"   🔄 Rewrote portfolio.json")
 except Exception as e:
     print(f"   ❌ Portfolio write failed: {e}")
-    Path("portfolio_emergency.json").write_text(json.dumps(entries, indent=2))
-    print(f"   ✅ Emergency backup saved")
+    # Emergency save to different file
+    emergency_path = Path("portfolio_emergency.json")
+    emergency_path.write_text(json.dumps(entries, indent=2))
+    print(f"   ✅ Emergency backup saved to portfolio_emergency.json")
 
-# Create backup
-backup_path = Path(f"portfolio_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
-backup_path.write_text(json.dumps(entries, indent=2))
-
-# Also log to simple text file
+# Also log to simple text file (always works)
 with open("games_created.txt", "a") as log:
-    log.write(f"{datetime.now().isoformat()} | {game_name} | {selected_type}\n")
+    log.write(f"{datetime.now().isoformat()} | {game_name} | {selected_type} | {selected_mechanic}\n")
 print("   ✅ Game logged to games_created.txt")
+
+# Create a timestamp file to prove script ran
+Path("last_run.txt").write_text(datetime.now().isoformat())
+print("   ✅ last_run.txt created")
 
 print("=" * 60)
 print("✅ PORTFOLIO UPDATE COMPLETE - Continuing with game creation...")
@@ -514,37 +520,51 @@ last_style_file = Path("last_style.txt")
 last_style_file.write_text(trending_style)
 print(f"   Style: {trending_style}")
 
-# ============ ART GENERATION ============
+# ============ ART GENERATION WITH TIMEOUT ============
 print("\n🎨 Generating art...")
 sprite_path = Path("sprite.png")
 
-def generate_art():
+def generate_art_safe():
     try:
+        # Try Pollinations.ai with timeout
         prompt = f"3D {trending_style} render of a {selected_type} character for '{game_name}', game asset"
         prompt_url = prompt.replace(" ", "+").replace("'", "").replace(",", "+")
         url = f"https://image.pollinations.ai/prompt/{prompt_url}?width=512&height=512&model=flux&seed={random.randint(1, 999999)}"
-        r = requests.get(url, timeout=45)
+        
+        # Use shorter timeout
+        r = requests.get(url, timeout=30)
         if r.status_code == 200 and len(r.content) > 5000:
             with open(sprite_path, "wb") as f:
                 f.write(r.content)
             return True
-    except:
-        pass
-    img = Image.new('RGB', (512, 512), color=(20, 20, 40))
-    draw = ImageDraw.Draw(img)
-    draw.rectangle([100,100,412,412], outline=(255,255,255), width=4)
-    draw.text((180, 450), game_name[:15], fill=(255,255,255))
-    img.save(sprite_path)
-    return True
+    except Exception as e:
+        print(f"   ⚠️ Pollinations.ai failed: {e}")
+    
+    # Fallback art - always works
+    try:
+        img = Image.new('RGB', (512, 512), color=(30, 30, 60))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([100, 100, 412, 412], outline=(255, 255, 255), width=3)
+        draw.text((180, 250), game_name[:15], fill=(255, 255, 255))
+        draw.text((200, 450), selected_type[:15], fill=(200, 200, 200))
+        img.save(sprite_path)
+        return True
+    except Exception as e:
+        print(f"   ❌ Fallback art failed: {e}")
+        return False
 
-art_success = generate_art()
-print(f"   ✅ Art ready")
+art_success = generate_art_safe()
+print(f"   ✅ Art ready (success: {art_success})")
 
 # ============ SAVE TO WORKSPACE ============
 print("\n📁 Saving to workspace...")
 project_dir = Path(f"workspace/{game_name.replace(' ', '_')}")
 project_dir.mkdir(parents=True, exist_ok=True)
-shutil.copy(sprite_path, project_dir / "icon.png")
+if sprite_path.exists():
+    shutil.copy(sprite_path, project_dir / "icon.png")
+else:
+    print(f"   ⚠️ No sprite found, creating placeholder")
+    Image.new('RGB', (512, 512), color=(50, 50, 80)).save(project_dir / "icon.png")
 
 # ============ GODOT PROJECT ============
 (project_dir / "project.godot").write_text(f"""
@@ -584,7 +604,7 @@ func _physics_process(delta):
 """)
 print(f"   ✅ Project created")
 
-# ============ CREATE ZIP - SAFE VERSION ============
+# ============ CREATE ZIP ============
 print("\n📦 Creating game ZIP...")
 zip_path = Path("workspace/latest_game.zip")
 
@@ -600,14 +620,14 @@ try:
                     zipf.write(file, arcname)
                 except Exception as e:
                     print(f"   ⚠️ Could not add {file.name}: {e}")
-    print(f"   ✅ ZIP created successfully")
+    print(f"   ✅ ZIP created")
 except Exception as e:
-    print(f"   ❌ ZIP creation failed: {e}")
-    with zipfile.ZipFile(zip_path, 'w') as zipf:
-        zipf.writestr("error.txt", f"ZIP failed: {e}")
-    print(f"   ⚠️ Created dummy zip instead")
+    print(f"   ⚠️ ZIP creation failed: {e}")
+    # Create simple zip with just the folder
+    shutil.make_archive(str(zip_path).replace('.zip', ''), 'zip', project_dir)
+    print(f"   ✅ Created zip with fallback method")
 
-# ============ GITHUB REPO ============
+# ============ GITHUB REPO (OPTIONAL - WON'T CRASH IF FAILS) ============
 print("\n📦 Creating GitHub repository...")
 repo_url = None
 if github_token:
@@ -620,13 +640,12 @@ if github_token:
             repo_url = r.json()["html_url"]
             print(f"   ✅ Repo created: {repo_url}")
         else:
-            print(f"   ⚠️ GitHub returned {r.status_code}, continuing")
+            print(f"   ⚠️ GitHub returned {r.status_code}")
     except Exception as e:
         print(f"   ⚠️ GitHub repo creation skipped: {e}")
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
 
-# ============ SEND TO ADMIN ============
-print("\n📬 Sending game to admin...")
+# ============ TELEGRAM (WON'T CRASH IF FAILS) ============
 if telegram_token and telegram_chat_id:
     try:
         with open(zip_path, "rb") as f:
@@ -637,8 +656,6 @@ if telegram_token and telegram_chat_id:
     except Exception as e:
         print(f"   ⚠️ Telegram send failed: {e}")
 
-# ============ TELEGRAM SALES POST ============
-print("\n📱 Sending Telegram sales post...")
 if telegram_token:
     viral_post_text = f"""
 {selected_emojis} *{selected_hook}* {selected_emojis}
@@ -667,9 +684,6 @@ if telegram_token:
     except Exception as e:
         print(f"   ⚠️ Sales post failed: {e}")
 
-# ============ FEEDBACK POLL ============
-print("\n📊 Sending feedback poll...")
-if telegram_token:
     try:
         poll_data = {
             "chat_id": TELEGRAM_CHANNEL,
@@ -739,6 +753,7 @@ Mechanic: {selected_mechanic}
 Date: {datetime.now().isoformat()}
 Trends used: {real_time_trends}
 Art success: {art_success}
+Portfolio entries: {len(entries)}
 """)
 print("   ✅ Build info saved")
 
@@ -757,6 +772,13 @@ print(f"   Genre: {selected_type}")
 print(f"   Mechanic: {selected_mechanic}")
 print(f"   Portfolio: {len(entries)} total games")
 print(f"   Art: {'✅' if art_success else '⚠️'}")
+
+# Double-check portfolio.json exists and has content
+if port.exists():
+    size = port.stat().st_size
+    print(f"   📁 portfolio.json size: {size} bytes")
+    if size < 100:
+        print(f"   ⚠️ WARNING: portfolio.json seems too small!")
 
 print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
