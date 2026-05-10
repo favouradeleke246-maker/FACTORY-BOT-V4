@@ -1,6 +1,6 @@
 {
-  "total_runs": 2,
-  "successful_art": 1,
+  "total_runs": 3,
+  "successful_art": 2,
   "failed_art": 0,
   "games": [
     {
@@ -15,9 +15,16 @@
       "mechanic": "Dark Ritual",
       "timestamp": "2026-05-10T08:54:31.186482",
       "art_success": true
+    },
+    {
+      "name": "Crimson Runner",
+      "genre": "top-down shooter",
+      "mechanic": "Void Step",
+      "timestamp": "2026-05-10T14:50:05.809548",
+      "art_success": true
     }
   ],
-  "best_genre": "puzzle game",
+  "best_genre": "top-down shooter",
   "best_mechanic": null,
   "last_game": "Cyber Zone",
   "last_run": "2026-05-10T08:27:12.943643"

@@ -45,5 +45,21 @@
     "status": "complete",
     "version": "28.1.0",
     "art_success": true
+  },
+  {
+    "date": "2026-05-10T14:50:02.105651",
+    "game": "Crimson Runner",
+    "genre": "top-down shooter",
+    "mechanic": "Void Step",
+    "mechanic_description": "Use Void Step to gain advantage in combat",
+    "description": "Master the Void Step in this intense top-down shooter experience! Use Void Step to gain advantage in combat",
+    "hook": "\ud83c\udfce\ufe0f Speed meets chaos",
+    "hashtags": "#gamedev #indiegame #top-downshooter #VoidStep #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Crimson_Runner/icon.png",
+    "price_sol": "7",
+    "trends_used": [],
+    "status": "complete",
+    "version": "28.1.0",
+    "art_success": true
   }
 ]

@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.1.0
-Game: Cyber Runner
-Genre: puzzle game
-Mechanic: Dark Ritual
-Date: 2026-05-10T08:54:31.186906
+Game: Crimson Runner
+Genre: top-down shooter
+Mechanic: Void Step
+Date: 2026-05-10T14:50:05.809914
 Art success: True
-Total portfolio: 4
-SAR runs: 2
+Total portfolio: 5
+SAR runs: 3
