@@ -1,30 +1,519 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="60">
-    <title>DeathRoll Studio Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeathRoll Studio - Premium Dashboard</title>
     <style>
-        body { font-family: monospace; background: #0a0a0a; color: #0f0; padding: 20px; }
-        pre { background: #111; padding: 15px; border-radius: 10px; overflow-x: auto; }
-        h1 { color: #ff6b6b; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0a0a0f 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(78,205,196,0.1) 0%, transparent 70%);
+            animation: pulse 20s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-25%, -25%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-25%, -25%) scale(1.5); opacity: 0.8; }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h1 {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        .subtitle {
+            color: #888;
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+
+        .last-updated {
+            margin-top: 15px;
+            display: inline-block;
+            background: rgba(78,205,196,0.2);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: #4ecdc4;
+            border: 1px solid rgba(78,205,196,0.3);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #4ecdc4;
+            box-shadow: 0 10px 30px rgba(78,205,196,0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 1.8rem;
+            margin: 30px 0 20px;
+            padding-left: 15px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: #4ecdc4;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .game-card:hover .game-image {
+            transform: scale(1.05);
+        }
+
+        .game-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.8);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #4ecdc4;
+            backdrop-filter: blur(5px);
+            z-index: 1;
+        }
+
+        .game-info {
+            padding: 20px;
+        }
+
+        .game-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .game-genre {
+            display: inline-block;
+            background: rgba(78,205,196,0.2);
+            color: #4ecdc4;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-bottom: 12px;
+        }
+
+        .game-mechanic {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+
+        .game-description {
+            color: #bbb;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .game-price {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+
+        .game-date {
+            color: #666;
+            font-size: 0.7rem;
+        }
+
+        /* Loading & Error */
+        .loading, .error {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2rem;
+        }
+
+        .loading {
+            color: #4ecdc4;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 40px;
+            color: #666;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4ecdc4;
+            border-radius: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .games-grid { grid-template-columns: 1fr; }
+            .stat-number { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
-    <h1>🔥 DeathRoll Studio Dashboard</h1>
-    <p>Last updated: <span id="time"></span></p>
-    <pre id="data">Loading...</pre>
+    <div class="bg-animation"></div>
     
+    <div class="container">
+        <header>
+            <h1>🔥 DeathRoll Studio</h1>
+            <p class="subtitle">Premium AI-Generated Games • Daily Drops • $7 SOL</p>
+            <div class="last-updated" id="lastUpdated">Loading...</div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="stats">
+            <div class="stat-card">
+                <div class="stat-icon">🎮</div>
+                <div class="stat-number" id="totalGames">-</div>
+                <div class="stat-label">Total Games</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎭</div>
+                <div class="stat-number" id="totalGenres">-</div>
+                <div class="stat-label">Genres</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-number" id="totalMechanics">-</div>
+                <div class="stat-label">Unique Mechanics</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-number" id="successRate">-</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-number">$7</div>
+                <div class="stat-label">Price (SOL)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-number" id="runsToday">-</div>
+                <div class="stat-label">Runs Today</div>
+            </div>
+        </div>
+
+        <!-- Recent Games Section -->
+        <h2 class="section-title">🎮 Latest Drops</h2>
+        <div class="games-grid" id="recentGames">
+            <div class="loading">✨ Loading masterpieces...</div>
+        </div>
+
+        <!-- All Games Section -->
+        <h2 class="section-title">📚 Complete Collection</h2>
+        <div class="games-grid" id="allGames">
+            <div class="loading">🎲 Loading game library...</div>
+        </div>
+
+        <footer>
+            <p>© 2026 DeathRoll Studio | AI-Powered Game Creation</p>
+            <p style="margin-top: 10px; font-size: 0.8rem;">
+                🔵 Trust Wallet: <span style="color: #4ecdc4; font-family: monospace;">6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3</span>
+            </p>
+            <p style="font-size: 0.7rem;">
+                📱 Telegram: @deathroll1 | 🐦 TikTok: @deathroll.co | 📧 favouradeleke246@gmail.com
+            </p>
+        </footer>
+    </div>
+
     <script>
-        fetch('portfolio.json?t=' + Date.now())
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('time').textContent = new Date().toLocaleString();
-                document.getElementById('data').textContent = JSON.stringify(data, null, 2);
-            })
-            .catch(() => {
-                document.getElementById('data').textContent = 'Error loading data';
-            });
+        let allGames = [];
+
+        async function loadDashboard() {
+            try {
+                const timestamp = Date.now();
+                const response = await fetch(`portfolio.json?t=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load data');
+                
+                allGames = await response.json();
+                if (!Array.isArray(allGames)) allGames = [];
+                
+                // Sort by date (newest first)
+                allGames.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                updateStats();
+                updateRecentGames();
+                updateAllGames();
+                
+                document.getElementById('lastUpdated').innerHTML = `🔄 Last updated: ${new Date().toLocaleString()}`;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('recentGames').innerHTML = `<div class="error">⚠️ Failed to load dashboard data. Please refresh.</div>`;
+                document.getElementById('allGames').innerHTML = '';
+            }
+        }
+
+        function updateStats() {
+            const totalGames = allGames.length;
+            const uniqueGenres = new Set(allGames.map(g => g.genre).filter(g => g && g !== 'test')).size;
+            const uniqueMechanics = new Set(allGames.map(g => g.mechanic).filter(m => m && m !== 'test')).size;
+            
+            // Calculate success rate (games with art_success = true)
+            const successful = allGames.filter(g => g.art_success === true).length;
+            const successRate = totalGames > 0 ? Math.round((successful / totalGames) * 100) : 0;
+            
+            // Count runs today
+            const today = new Date().toDateString();
+            const runsToday = allGames.filter(g => new Date(g.date).toDateString() === today).length;
+            
+            document.getElementById('totalGames').textContent = totalGames;
+            document.getElementById('totalGenres').textContent = uniqueGenres;
+            document.getElementById('totalMechanics').textContent = uniqueMechanics;
+            document.getElementById('successRate').textContent = `${successRate}%`;
+            document.getElementById('runsToday').textContent = runsToday;
+        }
+
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins} min ago`;
+                if (diffMins < 1440) return `${Math.floor(diffMins / 60)} hours ago`;
+                return date.toLocaleDateString();
+            } catch {
+                return 'Unknown date';
+            }
+        }
+
+        function getGameImageUrl(game) {
+            if (game.image_url && game.image_url !== 'null' && game.image_url !== 'undefined') {
+                return game.image_url;
+            }
+            return `https://via.placeholder.com/300x200?text=${encodeURIComponent(game.game || 'Game')}`;
+        }
+
+        function createGameCard(game) {
+            const isTest = game.genre === 'test' || game.status === 'success' && !game.genre;
+            if (isTest) return '';
+            
+            return `
+                <div class="game-card">
+                    <div class="game-badge">${game.art_success ? '🎨 Premium' : '⚡ Classic'}</div>
+                    <img class="game-image" src="${getGameImageUrl(game)}" 
+                         onerror="this.src='https://via.placeholder.com/300x200?text=${encodeURIComponent(game.game)}'"
+                         alt="${escapeHtml(game.game)}">
+                    <div class="game-info">
+                        <div class="game-name">${escapeHtml(game.game)}</div>
+                        <div class="game-genre">🎭 ${escapeHtml(game.genre || 'Unknown')}</div>
+                        <div class="game-mechanic">⚡ ${escapeHtml(game.mechanic || 'No mechanic')}</div>
+                        <div class="game-description">${escapeHtml(game.description || 'No description available')}</div>
+                        <div class="game-meta">
+                            <span class="game-price">💰 $${game.price_sol || '7'} SOL</span>
+                            <span class="game-date">📅 ${formatDate(game.date)}</span>
+                        </div>
+                        ${game.hook ? `<div style="margin-top: 10px; color: #4ecdc4; font-size: 0.75rem;">🔥 ${escapeHtml(game.hook)}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateRecentGames() {
+            const recent = allGames.filter(g => g.genre !== 'test' && g.status !== 'success').slice(0, 6);
+            const container = document.getElementById('recentGames');
+            
+            if (recent.length === 0) {
+                container.innerHTML = '<div class="loading">🎮 No games yet. Check back soon!</div>';
+                return;
+            }
+            
+            container.innerHTML = recent.map(createGameCard).join('');
+        }
+
+        function updateAllGames() {
+            const validGames = allGames.filter(g => g.genre !== 'test' && g.status !== 'success');
+            const container = document.getElementById('allGames');
+            
+            if (validGames.length === 0) {
+                container.innerHTML = '<div class="loading">📚 Building game library...</div>';
+                return;
+            }
+            
+            container.innerHTML = validGames.map(createGameCard).join('');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initial load
+        loadDashboard();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
     </script>
 </body>
 </html>
