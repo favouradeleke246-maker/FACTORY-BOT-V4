@@ -36,20 +36,12 @@ jobs:
     - name: Create .nojekyll for GitHub Pages
       run: touch .nojekyll
     
-    - name: Verify portfolio.json
-      run: |
-        echo "=== portfolio.json content preview ==="
-        head -100 portfolio.json
-        echo ""
-        echo "=== Total games in portfolio ==="
-        grep -c '"game"' portfolio.json || echo "0"
-    
     - name: Commit and push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add .nojekyll portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt 2>/dev/null || true
+        git add .nojekyll portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt openai_cache.json recent_names.txt last_hook.txt last_style.txt 2>/dev/null || true
         git add workspace/ --force
         git add index.html dashboard.html 2>/dev/null || true
         
