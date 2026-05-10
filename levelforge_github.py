@@ -3,7 +3,7 @@
 LevelForge+ ULTRA – DEATHROLL STUDIO v25.0 – COMPLETE
 - ALL features: SAR, trends, AI mechanics, combined prompts
 - Weekly Best Of, monthly changelog, feedback polls
-- GUARANTEED portfolio.json updates (never loses games)
+- GUARANTEED portfolio.json updates (saves game FIRST before anything else)
 """
 
 import os
@@ -389,14 +389,12 @@ save_recent_names(recent_names)
 print(f"   ✅ {game_name}")
 repo_name = f"daily-{game_name.lower().replace(' ', '-')}"
 
-# ============ COMBINED GENERATION (Name, Description, Hashtags) - FIXED ============
+# ============ COMBINED GENERATION (Name, Description, Hashtags) ============
 print("\n📝 Generating name, description, hashtags...")
 
-# Create fallback values FIRST
 fallback_description = f"Master the {selected_mechanic} in this {selected_type} game!"
 fallback_hashtags = f"#gamedev #indiegame #solana #{selected_type.replace(' ', '')}"
 
-# Initialize variables
 ai_description = fallback_description
 hashtag_string = fallback_hashtags
 
@@ -441,12 +439,80 @@ print(f"   ✅ Name: {game_name}")
 print(f"   📝 {ai_description}")
 print(f"   #️⃣ {hashtag_string[:80]}...")
 
+# ============ 🚨 CRITICAL: PORTFOLIO UPDATE - SAVED FIRST! 🚨 ============
+print("\n" + "=" * 60)
+print("💾 SAVING GAME TO PORTFOLIO (BEFORE ANY RISKY OPERATIONS)")
+print("=" * 60)
+
+image_url = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/FACTORY-BOT-V4/main/workspace/{game_name.replace(' ', '_')}/icon.png"
+port = Path("portfolio.json")
+
+# Safe load existing portfolio
+entries = []
+if port.exists():
+    try:
+        content = port.read_text().strip()
+        if content:
+            entries = json.loads(content)
+            if not isinstance(entries, list):
+                entries = []
+        print(f"   Loaded {len(entries)} existing games")
+    except (json.JSONDecodeError, Exception) as e:
+        print(f"   Starting fresh portfolio: {e}")
+        entries = []
+
+# Add new game
+new_entry = {
+    "date": datetime.now().isoformat(),
+    "game": game_name,
+    "genre": selected_type,
+    "mechanic": selected_mechanic,
+    "description": ai_description,
+    "image_url": image_url,
+    "repo": f"https://github.com/{BRAND_GITHUB}/{repo_name}",
+    "hook": selected_hook,
+    "hashtags": hashtag_string
+}
+entries.append(new_entry)
+entries = entries[-100:]
+
+# Write portfolio.json
+try:
+    port.write_text(json.dumps(entries, indent=2))
+    print(f"   ✅ Portfolio now has {len(entries)} total games")
+    print(f"   ✅ SAVED: {game_name}")
+    
+    # Verify
+    verify = json.loads(port.read_text())
+    if game_name in str(verify):
+        print(f"   ✅ VERIFIED: {game_name} is in portfolio.json")
+    else:
+        print(f"   ⚠️ Warning: Verification issue, but file was written")
+except Exception as e:
+    print(f"   ❌ Portfolio write failed: {e}")
+    Path("portfolio_emergency.json").write_text(json.dumps(entries, indent=2))
+    print(f"   ✅ Emergency backup saved")
+
+# Create backup
+backup_path = Path(f"portfolio_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+backup_path.write_text(json.dumps(entries, indent=2))
+
+# Also log to simple text file
+with open("games_created.txt", "a") as log:
+    log.write(f"{datetime.now().isoformat()} | {game_name} | {selected_type}\n")
+print("   ✅ Game logged to games_created.txt")
+
+print("=" * 60)
+print("✅ PORTFOLIO UPDATE COMPLETE - Continuing with game creation...")
+print("=" * 60)
+
 # ============ ART STYLE ============
+print("\n🎨 Style selection...")
 visual_styles = ["isometric", "neon cyberpunk", "low-poly", "cell-shaded", "voxel", "pastel gothic"]
 trending_style = random.choice(visual_styles)
 last_style_file = Path("last_style.txt")
 last_style_file.write_text(trending_style)
-print(f"\n🎨 Style: {trending_style}")
+print(f"   Style: {trending_style}")
 
 # ============ ART GENERATION ============
 print("\n🎨 Generating art...")
@@ -518,13 +584,28 @@ func _physics_process(delta):
 """)
 print(f"   ✅ Project created")
 
-# ============ CREATE ZIP ============
+# ============ CREATE ZIP - SAFE VERSION ============
 print("\n📦 Creating game ZIP...")
 zip_path = Path("workspace/latest_game.zip")
-with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-    for file in project_dir.rglob("*"):
-        zipf.write(file, file.relative_to(project_dir.parent))
-print(f"   ✅ ZIP created")
+
+try:
+    if zip_path.exists():
+        zip_path.unlink()
+    
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for file in project_dir.rglob("*"):
+            if file.is_file():
+                try:
+                    arcname = file.relative_to(project_dir.parent)
+                    zipf.write(file, arcname)
+                except Exception as e:
+                    print(f"   ⚠️ Could not add {file.name}: {e}")
+    print(f"   ✅ ZIP created successfully")
+except Exception as e:
+    print(f"   ❌ ZIP creation failed: {e}")
+    with zipfile.ZipFile(zip_path, 'w') as zipf:
+        zipf.writestr("error.txt", f"ZIP failed: {e}")
+    print(f"   ⚠️ Created dummy zip instead")
 
 # ============ GITHUB REPO ============
 print("\n📦 Creating GitHub repository...")
@@ -539,68 +620,10 @@ if github_token:
             repo_url = r.json()["html_url"]
             print(f"   ✅ Repo created: {repo_url}")
         else:
-            print(f"   ⚠️ GitHub returned {r.status_code}, continuing anyway")
+            print(f"   ⚠️ GitHub returned {r.status_code}, continuing")
     except Exception as e:
         print(f"   ⚠️ GitHub repo creation skipped: {e}")
 repo_link = repo_url or f"https://github.com/{BRAND_GITHUB}/{repo_name}"
-print(f"   📦 Repo link: {repo_link}")
-
-# ============ GUARANTEED PORTFOLIO UPDATE - FIXED ============
-print("\n📁 UPDATING PORTFOLIO.JSON (GUARANTEED METHOD)...")
-
-image_url = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/FACTORY-BOT-V4/main/workspace/{game_name.replace(' ', '_')}/icon.png"
-port = Path("portfolio.json")
-
-# Safe load
-entries = []
-if port.exists():
-    try:
-        content = port.read_text().strip()
-        if content:
-            entries = json.loads(content)
-            if not isinstance(entries, list):
-                entries = []
-        print(f"   Loaded {len(entries)} existing games")
-    except (json.JSONDecodeError, Exception) as e:
-        print(f"   Starting fresh portfolio: {e}")
-        entries = []
-
-# Add new game
-new_entry = {
-    "date": datetime.now().isoformat(),
-    "game": game_name,
-    "genre": selected_type,
-    "mechanic": selected_mechanic,
-    "description": ai_description,
-    "image_url": image_url,
-    "repo": repo_link,
-    "hook": selected_hook,
-    "hashtags": hashtag_string
-}
-entries.append(new_entry)
-entries = entries[-100:]
-
-# Write portfolio.json
-try:
-    port.write_text(json.dumps(entries, indent=2))
-    print(f"   ✅ Portfolio now has {len(entries)} total games")
-    print(f"   ✅ Added: {game_name}")
-    
-    # Verify it wrote correctly
-    verify = json.loads(port.read_text())
-    if game_name in str(verify):
-        print(f"   ✅ VERIFIED: {game_name} saved to portfolio.json")
-    else:
-        print(f"   ⚠️ Warning: Verification failed, but file was written")
-except Exception as e:
-    print(f"   ❌ Portfolio write failed: {e}")
-    # Emergency save
-    Path("portfolio_emergency.json").write_text(json.dumps(entries, indent=2))
-    print(f"   ✅ Emergency backup saved to portfolio_emergency.json")
-
-# Create backup
-backup_path = Path(f"portfolio_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
-backup_path.write_text(json.dumps(entries, indent=2))
 
 # ============ SEND TO ADMIN ============
 print("\n📬 Sending game to admin...")
@@ -612,7 +635,7 @@ if telegram_token and telegram_chat_id:
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendDocument", files=files, data={"chat_id": telegram_chat_id, "caption": caption, "parse_mode": "Markdown"}, timeout=60)
         print("   ✅ Game ZIP sent to admin")
     except Exception as e:
-        print(f"   ⚠️ Telegram admin send failed: {e}")
+        print(f"   ⚠️ Telegram send failed: {e}")
 
 # ============ TELEGRAM SALES POST ============
 print("\n📱 Sending Telegram sales post...")
@@ -642,7 +665,7 @@ if telegram_token:
             requests.post(f"https://api.telegram.org/bot{telegram_token}/sendPhoto", files=files, data=data, timeout=30)
         print(f"   ✅ Sales post sent")
     except Exception as e:
-        print(f"   ⚠️ Telegram sales post failed: {e}")
+        print(f"   ⚠️ Sales post failed: {e}")
 
 # ============ FEEDBACK POLL ============
 print("\n📊 Sending feedback poll...")
