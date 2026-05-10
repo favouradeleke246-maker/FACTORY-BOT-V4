@@ -1,40 +1,13 @@
 {
-  "study": {
-    "total_runs": 2,
-    "successful_art": 2,
-    "failed_art": 0,
-    "games": [
-      {
-        "name": "Quantum Vector",
-        "genre": "top-down shooter",
-        "mechanic": "Soul Link",
-        "hook": "\ud83d\udd26 Can you survive?",
-        "timestamp": "2026-05-09T17:16:43.753216",
-        "success": true,
-        "art_prompt": "3D synthwave render of a top-down shooter character for 'Quantum Vector', detailed, 8K",
-        "feedback_score": null
-      },
-      {
-        "name": "Echo Breach",
-        "genre": "top-down shooter",
-        "mechanic": "Gravity Well",
-        "hook": "\ud83e\udde0 Big brain energy",
-        "timestamp": "2026-05-09T17:26:51.673277",
-        "success": true,
-        "art_prompt": "3D graffiti render of a top-down shooter character for 'Echo Breach', detailed, 8K",
-        "feedback_score": null
-      }
-    ]
-  },
-  "analysis": {
-    "best_genre": "top-down shooter",
-    "best_mechanic": null,
-    "best_external_trend": null,
-    "success_rate": 1.0
-  },
-  "feedback": {},
-  "reprogram": {
-    "last_improvement": null,
-    "changes": []
-  }
+  "total_runs": 1,
+  "games": [
+    {
+      "name": "Cyber Zone",
+      "genre": "puzzle game",
+      "mechanic": "Gravity Well",
+      "timestamp": "2026-05-10T08:27:12.943653"
+    }
+  ],
+  "last_game": "Cyber Zone",
+  "last_run": "2026-05-10T08:27:12.943643"
 }

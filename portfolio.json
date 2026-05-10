@@ -16,5 +16,18 @@
     "description": "Master the Gravity Well in this top-down shooter game.",
     "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Echo_Breach/icon.png",
     "repo": "https://github.com/favouradeleke246-maker/daily-echo-breach"
+  },
+  {
+    "date": "2026-05-10T08:27:10.053233",
+    "game": "Cyber Zone",
+    "genre": "puzzle game",
+    "mechanic": "Gravity Well",
+    "description": "Master the Gravity Well in this intense puzzle game experience!",
+    "hook": "\ud83c\udfce\ufe0f Speed meets chaos",
+    "hashtags": "#gamedev #indiegame #puzzlegame",
+    "price_sol": "7",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Cyber_Zone/icon.png",
+    "status": "complete",
+    "art_success": true
   }
 ]
