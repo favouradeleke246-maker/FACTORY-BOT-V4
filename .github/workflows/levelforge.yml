@@ -33,6 +33,14 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
+    - name: Debug - Check portfolio.json after run
+      run: |
+        echo "=== portfolio.json contents (first 500 chars) ==="
+        head -c 500 portfolio.json || echo "File does not exist"
+        echo ""
+        echo "=== File sizes ==="
+        ls -la portfolio.json games_created.txt last_run.txt 2>/dev/null || echo "Some files missing"
+    
     - name: Ensure required files exist
       run: |
         touch last_update.txt
@@ -46,11 +54,11 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add last_update.txt portfolio.json sar_analysis.json learning_data.json last_hook.txt last_style.txt openai_cache.json recent_game_names.json build_info.json build_info.txt games_created.txt 2>/dev/null || true
+        git add last_update.txt portfolio.json sar_analysis.json learning_data.json last_hook.txt last_style.txt openai_cache.json recent_game_names.json build_info.txt games_created.txt last_run.txt 2>/dev/null || true
         git add workspace/ --force
         
         if git diff --staged --quiet; then
-          echo "✅ No changes to commit — portfolio already up to date"
+          echo "✅ No changes to commit"
         else
           git commit -m "Auto update: run ${{ github.run_number }} — $(date '+%Y-%m-%d %H:%M')"
           git push
@@ -75,3 +83,4 @@ jobs:
           recent_game_names.json
           last_update.txt
           games_created.txt
+          last_run.txt
