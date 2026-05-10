@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-LevelForge+ ULTRA – DEATHROLL STUDIO v26.1 – NO CACHING (FIXED)
+LevelForge+ ULTRA – DEATHROLL STUDIO v26.2 – NO CACHING (FULLY FIXED)
 - ALL features: SAR, trends, AI mechanics, combined prompts
 - GUARANTEED portfolio updates
 - NO API caching (calls fresh every time)
-- FIXED: All variable scope issues resolved
+- FIXED: All variable scope and SAR key errors resolved
 """
 
 import os
@@ -22,11 +22,11 @@ from PIL import Image, ImageDraw
 from collections import Counter
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v26.1 – NO CACHING (FIXED)")
+print("🔥 DEATHROLL STUDIO v26.2 – NO CACHING (FULLY FIXED)")
 print("✅ SAR | Trends | AI Mechanics | Fresh API Calls")
 print("=" * 60)
 
-BOT_VERSION = "26.1.0"
+BOT_VERSION = "26.2.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ YOUR CONTACT INFO ============
@@ -67,7 +67,7 @@ def call_api(prompt, max_tokens=120, temperature=0.9, retries=3):
     
     for attempt in range(retries):
         try:
-            time.sleep(1)  # Small delay
+            time.sleep(1)
             response = requests.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
@@ -122,14 +122,7 @@ class SARSystem:
         self.sar_file = Path("sar_analysis.json")
         self.data = self.load()
     def load(self):
-        if self.sar_file.exists():
-            try:
-                return json.loads(self.sar_file.read_text())
-            except:
-                return self.get_default()
-        return self.get_default()
-    def get_default(self):
-        return {
+        default_data = {
             "study": {"total_runs": 0, "successful_art": 0, "failed_art": 0, "games": []},
             "analysis": {
                 "best_genre": None,
@@ -140,6 +133,25 @@ class SARSystem:
             "feedback": {},
             "reprogram": {"last_improvement": None, "changes": []}
         }
+        
+        if self.sar_file.exists():
+            try:
+                content = self.sar_file.read_text().strip()
+                if content:
+                    data = json.loads(content)
+                    # Ensure all required keys exist
+                    if "study" not in data:
+                        data["study"] = default_data["study"]
+                    if "analysis" not in data:
+                        data["analysis"] = default_data["analysis"]
+                    if "feedback" not in data:
+                        data["feedback"] = {}
+                    if "reprogram" not in data:
+                        data["reprogram"] = {"last_improvement": None, "changes": []}
+                    return data
+            except Exception as e:
+                print(f"   ⚠️ Error loading SAR: {e}")
+        return default_data
     def save(self):
         self.sar_file.write_text(json.dumps(self.data, indent=2))
     def record(self, game_name, genre, mechanic, hook, art_success, exec_time, external_trends=None, art_prompt_used=None, feedback_score=None):
@@ -686,7 +698,7 @@ print("\n" + "=" * 60)
 print(f"✅ {game_name} is READY!")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v26.1 FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v26.2 FINISHED!")
 print("✅ ALL features working (NO caching)")
 print("✅ Portfolio guaranteed to save every game")
 print(f"📊 Website: https://{BRAND_GITHUB}.github.io/FACTORY-BOT-V4/")
