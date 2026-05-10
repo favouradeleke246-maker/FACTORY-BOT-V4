@@ -5,177 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeathRoll Studio - Daily AI Games</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
             color: #fff;
             min-height: 100vh;
         }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            padding: 40px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 40px;
-        }
-        
-        h1 {
-            font-size: 3rem;
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .subtitle {
-            color: #888;
-            margin-top: 10px;
-        }
-        
-        .stats {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-        
-        .stat-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 20px 40px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #4ecdc4;
-        }
-        
-        .stat-label {
-            color: #888;
-            margin-top: 5px;
-        }
-        
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-            margin-top: 40px;
-        }
-        
-        .game-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border-color: #4ecdc4;
-        }
-        
-        .game-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            background: linear-gradient(135deg, #2a2a4e, #1a1a2e);
-        }
-        
-        .game-info {
-            padding: 20px;
-        }
-        
-        .game-name {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #fff;
-        }
-        
-        .game-genre {
-            display: inline-block;
-            background: rgba(78,205,196,0.2);
-            color: #4ecdc4;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-bottom: 12px;
-        }
-        
-        .game-mechanic {
-            color: #ff6b6b;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-        
-        .game-description {
-            color: #aaa;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            margin-bottom: 15px;
-        }
-        
-        .game-date {
-            color: #666;
-            font-size: 0.7rem;
-        }
-        
-        .price {
-            font-size: 1.2rem;
-            color: #ffd93d;
-            margin-top: 10px;
-        }
-        
-        .refresh-note {
-            text-align: center;
-            color: #666;
-            margin-top: 40px;
-            padding: 20px;
-            font-size: 0.8rem;
-        }
-        
-        .loading, .error {
-            text-align: center;
-            padding: 50px;
-            color: #888;
-        }
-        
-        .error {
-            color: #ff6b6b;
-        }
-        
-        footer {
-            text-align: center;
-            padding: 40px 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            margin-top: 40px;
-            color: #666;
-        }
-        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 40px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 40px; }
+        h1 { font-size: 3rem; background: linear-gradient(135deg, #ff6b6b, #4ecdc4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: #888; margin-top: 10px; }
+        .stats { display: flex; gap: 30px; justify-content: center; margin: 30px 0; flex-wrap: wrap; }
+        .stat-card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px 40px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .stat-number { font-size: 2.5rem; font-weight: bold; color: #4ecdc4; }
+        .stat-label { color: #888; margin-top: 5px; }
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; margin-top: 40px; }
+        .game-card { background: rgba(255,255,255,0.05); border-radius: 15px; overflow: hidden; transition: transform 0.3s; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .game-card:hover { transform: translateY(-5px); border-color: #4ecdc4; }
+        .game-image { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #2a2a4e, #1a1a2e); }
+        .game-info { padding: 20px; }
+        .game-name { font-size: 1.3rem; font-weight: bold; margin-bottom: 8px; }
+        .game-genre { display: inline-block; background: rgba(78,205,196,0.2); color: #4ecdc4; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 12px; }
+        .game-mechanic { color: #ff6b6b; font-size: 0.9rem; margin-bottom: 10px; }
+        .game-description { color: #aaa; font-size: 0.85rem; line-height: 1.4; margin-bottom: 15px; }
+        .price { font-size: 1.2rem; color: #ffd93d; margin-top: 10px; }
+        .game-date { color: #666; font-size: 0.7rem; margin-top: 8px; }
+        .refresh-note { text-align: center; color: #666; margin-top: 40px; padding: 20px; font-size: 0.8rem; }
+        .loading, .error { text-align: center; padding: 50px; color: #888; }
+        .error { color: #ff6b6b; }
+        footer { text-align: center; padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; color: #666; }
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
             .stat-card { padding: 15px 25px; }
-            .stat-number { font-size: 1.8rem; }
             .games-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -188,104 +50,56 @@
         </header>
         
         <div class="stats" id="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="totalGames">-</div>
-                <div class="stat-label">Games Created</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalGenres">-</div>
-                <div class="stat-label">Genres</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="uniqueMechanics">-</div>
-                <div class="stat-label">Unique Mechanics</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="latestGame">-</div>
-                <div class="stat-label">Latest Game</div>
-            </div>
+            <div class="stat-card"><div class="stat-number" id="totalGames">-</div><div class="stat-label">Games Created</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalGenres">-</div><div class="stat-label">Genres</div></div>
+            <div class="stat-card"><div class="stat-number" id="uniqueMechanics">-</div><div class="stat-label">Unique Mechanics</div></div>
+            <div class="stat-card"><div class="stat-number" id="latestGame">-</div><div class="stat-label">Latest Game</div></div>
         </div>
         
-        <div class="games-grid" id="gamesGrid">
-            <div class="loading">🎮 Loading games...</div>
-        </div>
+        <div class="games-grid" id="gamesGrid"><div class="loading">🎮 Loading games...</div></div>
         
         <div class="refresh-note">
             🔄 Auto-refresh: 30 seconds | Last updated: <span id="lastUpdated">-</span>
-            <br>
-            <small>📊 Total games in portfolio: <span id="totalCount">-</span></small>
+            <br><small>💰 Price: $7 SOL | 🔵 Trust: 6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3</small>
         </div>
         
         <footer>
             <p>© 2025 DeathRoll Studio | Powered by AI | Built with ❤️</p>
-            <p>📱 Telegram: @deathroll1 | 🐦 TikTok: @deathroll.co | 💰 Price: $7 SOL</p>
-            <p>🔵 Trust Wallet: 6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3</p>
+            <p>📱 Telegram: @deathroll1 | 🐦 TikTok: @deathroll.co</p>
         </footer>
     </div>
     
     <script>
-        let gamesData = [];
-        
         async function loadGames() {
-            const timestamp = Date.now();
-            const url = `portfolio.json?t=${timestamp}`;
-            
             try {
-                console.log('Loading games from:', url);
-                const response = await fetch(url, {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache'
-                    }
-                });
+                const response = await fetch(`portfolio.json?t=${Date.now()}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Failed to load');
+                const games = await response.json();
+                if (!Array.isArray(games)) throw new Error('Invalid data');
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+                games.sort((a, b) => new Date(b.date) - new Date(a.date));
                 
-                gamesData = await response.json();
-                console.log(`Loaded ${gamesData.length} games`);
+                document.getElementById('totalGames').textContent = games.length;
+                document.getElementById('totalGenres').textContent = new Set(games.map(g => g.genre)).size;
+                document.getElementById('uniqueMechanics').textContent = new Set(games.map(g => g.mechanic)).size;
+                document.getElementById('latestGame').textContent = games[0]?.game || '-';
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
                 
-                if (!Array.isArray(gamesData)) {
-                    gamesData = [];
-                }
-                
-                // Sort by date (newest first)
-                gamesData.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                updateStats();
-                updateGamesGrid();
-                
-                const now = new Date();
-                document.getElementById('lastUpdated').textContent = now.toLocaleTimeString();
-                document.getElementById('totalCount').textContent = gamesData.length;
-                
+                document.getElementById('gamesGrid').innerHTML = games.map(game => `
+                    <div class="game-card">
+                        <img class="game-image" src="${game.image_url || ''}" onerror="this.src='https://via.placeholder.com/300x200?text=${encodeURIComponent(game.game)}'" alt="${game.game}">
+                        <div class="game-info">
+                            <div class="game-name">${escapeHtml(game.game)}</div>
+                            <div class="game-genre">🎭 ${escapeHtml(game.genre || 'Unknown')}</div>
+                            <div class="game-mechanic">⚡ ${escapeHtml(game.mechanic || 'No mechanic')}</div>
+                            <div class="game-description">${escapeHtml(game.description || 'No description')}</div>
+                            <div class="price">💰 $${game.price_sol || '7'} SOL</div>
+                            <div class="game-date">📅 ${new Date(game.date).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                `).join('');
             } catch (error) {
-                console.error('Error loading games:', error);
-                document.getElementById('gamesGrid').innerHTML = `<div class="error">⚠️ Error loading games: ${error.message}<br><br>Make sure portfolio.json exists and is valid JSON.</div>`;
-                document.getElementById('totalGames').textContent = 'Error';
-            }
-        }
-        
-        function updateStats() {
-            const totalGames = gamesData.length;
-            const uniqueGenres = new Set(gamesData.map(g => g.genre).filter(Boolean)).size;
-            const uniqueMechanics = new Set(gamesData.map(g => g.mechanic).filter(Boolean)).size;
-            const latestGame = gamesData[0]?.game || '-';
-            
-            document.getElementById('totalGames').textContent = totalGames;
-            document.getElementById('totalGenres').textContent = uniqueGenres;
-            document.getElementById('uniqueMechanics').textContent = uniqueMechanics;
-            document.getElementById('latestGame').textContent = latestGame;
-        }
-        
-        function formatDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-            } catch {
-                return dateString || 'Unknown date';
+                document.getElementById('gamesGrid').innerHTML = `<div class="error">⚠️ Error loading games: ${error.message}</div>`;
             }
         }
         
@@ -296,36 +110,7 @@
             return div.innerHTML;
         }
         
-        function updateGamesGrid() {
-            const grid = document.getElementById('gamesGrid');
-            
-            if (!gamesData || gamesData.length === 0) {
-                grid.innerHTML = '<div class="loading">🎮 No games yet. Check back soon for daily game drops!</div>';
-                return;
-            }
-            
-            grid.innerHTML = gamesData.map(game => `
-                <div class="game-card">
-                    <img class="game-image" src="${escapeHtml(game.image_url) || 'https://via.placeholder.com/300x200?text=Game+Art'}" 
-                         onerror="this.src='https://via.placeholder.com/300x200?text=' + encodeURIComponent('${escapeHtml(game.game)}')"
-                         alt="${escapeHtml(game.game)}">
-                    <div class="game-info">
-                        <div class="game-name">${escapeHtml(game.game)}</div>
-                        <div class="game-genre">🎭 ${escapeHtml(game.genre || 'Unknown')}</div>
-                        <div class="game-mechanic">⚡ ${escapeHtml(game.mechanic || 'No mechanic')}</div>
-                        <div class="game-description">${escapeHtml(game.description || 'No description available')}</div>
-                        <div class="price">💰 $${game.price_sol || '7'} SOL</div>
-                        <div class="game-date">📅 ${formatDate(game.date)}</div>
-                        ${game.hook ? `<div class="game-date" style="color:#4ecdc4">🔥 ${escapeHtml(game.hook)}</div>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // Load on page load
         loadGames();
-        
-        // Auto-refresh every 30 seconds
         setInterval(loadGames, 30000);
     </script>
 </body>
