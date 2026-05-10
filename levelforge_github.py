@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v26.0 - COMPLETE REWRITE WITH AI
+DEATHROLL STUDIO v26.1 - COMPLETE REWRITE WITH AI
 - AI-generated mechanics, names, descriptions
 - SAR self-learning system
 - Real-time trends from Reddit/X
 - Weekly Best Of, monthly changelog, feedback polls
 - GUARANTEED portfolio updates on EVERY run
+- FIXED: Handles empty/corrupted JSON files
 """
 
 import os
@@ -21,11 +22,11 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v26.0 - COMPLETE WITH AI")
+print("🔥 DEATHROLL STUDIO v26.1 - COMPLETE WITH AI")
 print("✅ AI Mechanics | SAR Learning | Real-time Trends | Guaranteed Portfolio")
 print("=" * 60)
 
-BOT_VERSION = "26.0.0"
+BOT_VERSION = "26.1.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ CONFIGURATION ============
@@ -176,7 +177,7 @@ all_trends = reddit_trends + x_trends
 real_time_trends = list(dict.fromkeys(all_trends))[:3] if all_trends else []
 print(f"   🌍 Final trends: {real_time_trends if real_time_trends else 'none (using defaults)'}")
 
-# ============ SAR SYSTEM (Self-Learning) ============
+# ============ SAR SYSTEM (Self-Learning) - FIXED ============
 print("\n🧠 Initializing SAR System...")
 
 class SARSystem:
@@ -185,15 +186,8 @@ class SARSystem:
         self.data = self.load()
     
     def load(self):
-        if self.sar_file.exists():
-            try:
-                return json.loads(self.sar_file.read_text())
-            except:
-                return self.get_default()
-        return self.get_default()
-    
-    def get_default(self):
-        return {
+        # Default structure
+        default_data = {
             "total_runs": 0,
             "successful_art": 0,
             "failed_art": 0,
@@ -205,16 +199,37 @@ class SARSystem:
             "trend_performance": {},
             "feedback": {}
         }
+        
+        if not self.sar_file.exists():
+            return default_data
+        
+        try:
+            content = self.sar_file.read_text().strip()
+            if not content:
+                return default_data
+            
+            data = json.loads(content)
+            # Ensure all required keys exist
+            for key in default_data:
+                if key not in data:
+                    data[key] = default_data[key]
+            return data
+        except Exception as e:
+            print(f"   ⚠️ Error loading SAR file: {e}, using defaults")
+            return default_data
     
     def save(self):
-        self.sar_file.write_text(json.dumps(self.data, indent=2))
+        try:
+            self.sar_file.write_text(json.dumps(self.data, indent=2))
+        except Exception as e:
+            print(f"   ⚠️ Error saving SAR: {e}")
     
     def record(self, game_name, genre, mechanic, art_success, trends_used=None):
-        self.data["total_runs"] += 1
+        self.data["total_runs"] = self.data.get("total_runs", 0) + 1
         if art_success:
-            self.data["successful_art"] += 1
+            self.data["successful_art"] = self.data.get("successful_art", 0) + 1
         else:
-            self.data["failed_art"] += 1
+            self.data["failed_art"] = self.data.get("failed_art", 0) + 1
         
         # Track genre performance
         if genre not in self.data["genre_performance"]:
@@ -271,13 +286,13 @@ class SARSystem:
         return self.data.get("best_mechanic")
     
     def get_success_rate(self):
-        total = self.data["successful_art"] + self.data["failed_art"]
+        total = self.data.get("successful_art", 0) + self.data.get("failed_art", 0)
         if total > 0:
-            return self.data["successful_art"] / total
+            return self.data.get("successful_art", 0) / total
         return 0
 
 sar = SARSystem()
-print(f"   ✅ SAR ready ({sar.data['total_runs']} runs)")
+print(f"   ✅ SAR ready ({sar.data.get('total_runs', 0)} runs)")
 print(f"   📊 Success rate: {sar.get_success_rate()*100:.1f}%")
 if sar.get_best_genre():
     print(f"   🏆 Best genre so far: {sar.get_best_genre()}")
@@ -358,7 +373,7 @@ def generate_ai_mechanic():
         return random.choice(creative_fallbacks)
     
     # Get recently used mechanics to avoid repetition
-    recent_mechanics = [g.get("mechanic", "") for g in sar.data["games"][-5:]]
+    recent_mechanics = [g.get("mechanic", "") for g in sar.data.get("games", [])[-5:]]
     avoid_list = creative_fallbacks[:3] + recent_mechanics
     
     prompt = f"""Invent a unique, creative game mechanic for a {selected_type} game.
@@ -726,7 +741,7 @@ if telegram_token:
 if datetime.now().strftime("%A") == "Sunday":
     print("\n🏆 Weekly Best Of...")
     try:
-        recent_games = sar.data["games"][-7:]
+        recent_games = sar.data.get("games", [])[-7:]
         if recent_games:
             best = max(recent_games, key=lambda g: g.get("feedback_score", 0) if g.get("feedback_score") else 0)
             best_msg = f"🏆 *Game of the Week* 🏆\n\n{best['name']}\nGenre: {best['genre']}\nMechanic: {best['mechanic']}"
@@ -745,8 +760,8 @@ if datetime.now().day == 1:
     try:
         changelog = f"""📅 *DeathRoll Studio – Monthly Report*
 
-✅ Games created this month: {len([g for g in sar.data['games'] if datetime.fromisoformat(g['timestamp']).month == datetime.now().month])}
-✅ Total games ever: {sar.data['total_runs']}
+✅ Games created this month: {len([g for g in sar.data.get('games', []) if datetime.fromisoformat(g['timestamp']).month == datetime.now().month])}
+✅ Total games ever: {sar.data.get('total_runs', 0)}
 ✅ Best genre: {sar.get_best_genre() or 'N/A'}
 ✅ Best mechanic: {sar.get_best_mechanic() or 'N/A'}
 ✅ Success rate: {sar.get_success_rate()*100:.1f}%
@@ -766,7 +781,7 @@ Thanks for supporting DeathRoll Studio! 💪
 print("\n🧠 Updating SAR system...")
 
 sar.record(game_name, selected_type, selected_mechanic, art_success, real_time_trends)
-print(f"   ✅ SAR updated (run #{sar.data['total_runs']})")
+print(f"   ✅ SAR updated (run #{sar.data.get('total_runs', 0)})")
 print(f"   📊 Success rate: {sar.get_success_rate()*100:.1f}%")
 
 # ============ LEARNING DATA UPDATE ============
@@ -781,7 +796,7 @@ learning_data = {
     "trends_used": real_time_trends,
     "art_success": art_success,
     "total_games": len(existing_games),
-    "sar_runs": sar.data["total_runs"],
+    "sar_runs": sar.data.get("total_runs", 0),
     "success_rate": sar.get_success_rate()
 }
 Path("learning_data.json").write_text(json.dumps(learning_data, indent=2))
@@ -800,13 +815,13 @@ Trends used: {real_time_trends}
 Art success: {art_success}
 Art style: {trending_style}
 Total portfolio games: {len(existing_games)}
-SAR total runs: {sar.data['total_runs']}
+SAR total runs: {sar.data.get('total_runs', 0)}
 SAR success rate: {sar.get_success_rate()*100:.1f}%
 """)
 print(f"   ✅ Build info saved")
 
 # ============ last_update.txt for git ============
-Path("last_update.txt").write_text(f"Last update: {datetime.now().isoformat()}\nGame: {game_name}\nRun: {sar.data['total_runs']}")
+Path("last_update.txt").write_text(f"Last update: {datetime.now().isoformat()}\nGame: {game_name}\nRun: {sar.data.get('total_runs', 0)}")
 
 # ============ FINAL VERIFICATION ============
 print("\n" + "=" * 60)
@@ -817,7 +832,7 @@ print(f"   ✅ Game: {game_name}")
 print(f"   ✅ Genre: {selected_type}")
 print(f"   ✅ Mechanic: {selected_mechanic}")
 print(f"   ✅ Portfolio entries: {len(existing_games)}")
-print(f"   ✅ SAR runs: {sar.data['total_runs']}")
+print(f"   ✅ SAR runs: {sar.data.get('total_runs', 0)}")
 print(f"   ✅ Art: {'Success' if art_success else 'Fallback'}")
 
 # Verify portfolio.json contains the new game
@@ -840,7 +855,7 @@ print("\n" + "=" * 60)
 print(f"✅ {game_name} is COMPLETE!")
 print("=" * 60)
 
-print("\n🎉 DEATHROLL STUDIO v26.0 FINISHED!")
+print("\n🎉 DEATHROLL STUDIO v26.1 FINISHED!")
 print("✅ AI mechanics & descriptions")
 print("✅ SAR self-learning system")
 print("✅ Real-time trends from Reddit/X")
