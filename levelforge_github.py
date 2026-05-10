@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v29.0 - COMPLETE FULL FEATURES
+DEATHROLL STUDIO v29.1 - COMPLETE FULL FEATURES (FIXED)
 - AI-generated mechanics, names, descriptions (with fallbacks)
 - SAR self-learning system with performance tracking
 - Real-time trends from Reddit
@@ -17,6 +17,7 @@ DEATHROLL STUDIO v29.0 - COMPLETE FULL FEATURES
 import os
 import json
 import random
+import hashlib  # <-- THIS WAS MISSING!
 import requests
 import time
 import shutil
@@ -26,10 +27,10 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 print("=" * 60)
-print("🔥 DEATHROLL STUDIO v29.0 - COMPLETE FULL FEATURES")
+print("🔥 DEATHROLL STUDIO v29.1 - COMPLETE FULL FEATURES")
 print("=" * 60)
 
-BOT_VERSION = "29.0.0"
+BOT_VERSION = "29.1.0"
 print(f"🤖 Bot Version: {BOT_VERSION}")
 
 # ============ CONFIGURATION ============
@@ -321,7 +322,7 @@ genre_emojis = {
 emojis = genre_emojis.get(selected_type, ["🎮", "🔥", "⚡", "💀", "🎯"])
 selected_emojis = " ".join(random.sample(emojis, min(4, len(emojis))))
 
-# ============ AI MECHANIC GENERATION (with fallback) ============
+# ============ MECHANIC GENERATION (with fallback) ============
 print("\n⚙️ Generating unique mechanic...")
 
 creative_fallbacks = [
@@ -340,7 +341,11 @@ creative_fallbacks = [
 ]
 
 def generate_mechanic():
-    if openai_key and random.random() > 0.3:
+    # Use fallback if no OpenAI
+    if not openai_key:
+        return random.choice(creative_fallbacks)
+    
+    try:
         recent = [g.get("mechanic", "") for g in sar.data.get("games", [])[-3:] if g.get("mechanic")]
         avoid = ', '.join(recent) if recent else "none"
         
@@ -362,6 +367,9 @@ DESCRIPTION: <one sentence, max 80 chars>"""
                     desc = line.replace("DESCRIPTION:", "").strip()
             if name and desc and len(name) > 2:
                 return name, desc[:100]
+    except Exception as e:
+        print(f"   ⚠️ AI mechanic generation failed: {e}")
+    
     return random.choice(creative_fallbacks)
 
 mechanic_name, mechanic_desc = generate_mechanic()
@@ -372,15 +380,18 @@ print(f"   📖 {mechanic_desc}")
 # ============ GAME NAME GENERATION ============
 print("\n🎮 Generating game name...")
 
-prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Crimson", "Shadow", "Phantom", "Eclipse", "Solar", "Nova", "Dark", "Light", "Storm", "Thunder", "Frost", "Ember"]
-suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone", "Realm", "Fury", "Strike", "Blade", "Force", "Hunter", "Seeker", "Warden", "Ghost", "Wraith", "Phantom"]
+prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Crimson", "Shadow", "Phantom", "Eclipse", "Solar", "Nova", "Dark", "Light", "Storm", "Thunder"]
+suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone", "Realm", "Fury", "Strike", "Blade", "Force", "Hunter", "Seeker", "Warden", "Ghost", "Wraith"]
 
 if openai_key and random.random() > 0.3:
-    prompt = f"Generate a cool name for a {selected_type} game. Return ONLY the name, 1-3 words, max 25 chars:"
-    ai_name = cached_generate(prompt, temperature=0.9, max_tokens=20)
-    if ai_name and len(ai_name) > 2 and len(ai_name) < 30:
-        game_name = ai_name
-    else:
+    try:
+        prompt = f"Generate a cool name for a {selected_type} game. Return ONLY the name, 1-3 words, max 25 chars:"
+        ai_name = cached_generate(prompt, temperature=0.9, max_tokens=20)
+        if ai_name and len(ai_name) > 2 and len(ai_name) < 30:
+            game_name = ai_name
+        else:
+            game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
+    except:
         game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
 else:
     game_name = f"{random.choice(prefixes)} {random.choice(suffixes)}"
@@ -406,10 +417,13 @@ if real_time_trends:
     hashtag_string += f" #{real_time_trends[0].replace(' ', '')}"
 
 if openai_key and random.random() > 0.5:
-    prompt = f"Write a ONE-SENTENCE hype description for '{game_name}' ({selected_type}) with mechanic '{selected_mechanic}'. Max 120 chars:"
-    ai_desc = cached_generate(prompt, temperature=0.8, max_tokens=80)
-    if ai_desc and len(ai_desc) > 20:
-        ai_description = ai_desc[:120]
+    try:
+        prompt = f"Write a ONE-SENTENCE hype description for '{game_name}' ({selected_type}) with mechanic '{selected_mechanic}'. Max 120 chars:"
+        ai_desc = cached_generate(prompt, temperature=0.8, max_tokens=80)
+        if ai_desc and len(ai_desc) > 20:
+            ai_description = ai_desc[:120]
+    except:
+        pass
 
 print(f"   📝 {ai_description}")
 print(f"   #️⃣ {hashtag_string[:80]}...")
