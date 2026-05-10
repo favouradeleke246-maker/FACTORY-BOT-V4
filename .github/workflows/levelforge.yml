@@ -33,19 +33,32 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
+    - name: Create .nojekyll for GitHub Pages
+      run: touch .nojekyll
+    
+    - name: Verify portfolio.json
+      run: |
+        echo "=== portfolio.json content preview ==="
+        head -100 portfolio.json
+        echo ""
+        echo "=== Total games in portfolio ==="
+        grep -c '"game"' portfolio.json || echo "0"
+    
     - name: Commit and push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt 2>/dev/null || true
+        git add .nojekyll portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt 2>/dev/null || true
         git add workspace/ --force
+        git add index.html dashboard.html 2>/dev/null || true
         
         if git diff --staged --quiet; then
-          echo "No changes"
+          echo "No changes to commit"
         else
-          git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M')"
+          git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M:%S')"
           git push
+          echo "Changes pushed successfully"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -59,4 +72,5 @@ jobs:
           games_log.txt
           sar_analysis.json
           learning_data.json
+          build_info.txt
           workspace/
