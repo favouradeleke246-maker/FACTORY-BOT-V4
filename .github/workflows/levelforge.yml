@@ -1,4 +1,4 @@
-name: LevelForge+ Daily Game Factory
+name: DeathRoll Studio Daily Game Factory
 
 on:
   schedule:
@@ -21,7 +21,8 @@ jobs:
         python-version: '3.11'
     
     - name: Install dependencies
-      run: pip install pillow requests
+      run: |
+        pip install pillow requests
     
     - name: Run Game Factory
       env:
@@ -33,54 +34,49 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
-    - name: Debug - Check portfolio.json after run
+    - name: Show verification
       run: |
-        echo "=== portfolio.json contents (first 500 chars) ==="
-        head -c 500 portfolio.json || echo "File does not exist"
+        echo "=== portfolio.json (first 3 games) ==="
+        head -100 portfolio.json
         echo ""
-        echo "=== File sizes ==="
-        ls -la portfolio.json games_created.txt last_run.txt 2>/dev/null || echo "Some files missing"
+        echo "=== games_log.txt ==="
+        tail -5 games_log.txt
+        echo ""
+        echo "=== last_run.txt ==="
+        cat last_run.txt
+        echo ""
+        echo "=== SAR stats ==="
+        cat sar_analysis.json | head -20
     
-    - name: Ensure required files exist
-      run: |
-        touch last_update.txt
-        touch portfolio.json 2>/dev/null || true
-        touch sar_analysis.json 2>/dev/null || true
-        touch learning_data.json 2>/dev/null || true
-        mkdir -p workspace
-    
-    - name: Commit and push all assets
+    - name: Commit and push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add last_update.txt portfolio.json sar_analysis.json learning_data.json last_hook.txt last_style.txt openai_cache.json recent_game_names.json build_info.txt games_created.txt last_run.txt 2>/dev/null || true
+        git add portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt openai_cache.json 2>/dev/null || true
         git add workspace/ --force
         
         if git diff --staged --quiet; then
-          echo "✅ No changes to commit"
+          echo "No changes to commit"
         else
-          git commit -m "Auto update: run ${{ github.run_number }} — $(date '+%Y-%m-%d %H:%M')"
+          git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M')"
           git push
-          echo "✅ Changes pushed successfully"
+          echo "Changes pushed successfully"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Upload results
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: game-output
         path: |
-          sprite.png
           portfolio.json
-          build_info.txt
-          learning_data.json
+          games_log.txt
           sar_analysis.json
-          workspace/
-          last_hook.txt
-          last_style.txt
-          recent_game_names.json
-          last_update.txt
-          games_created.txt
+          learning_data.json
+          build_info.txt
           last_run.txt
+          last_update.txt
+          sprite.png
+          workspace/
