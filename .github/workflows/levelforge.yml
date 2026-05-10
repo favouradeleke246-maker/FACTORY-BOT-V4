@@ -21,8 +21,7 @@ jobs:
         python-version: '3.11'
     
     - name: Install dependencies
-      run: |
-        pip install pillow requests
+      run: pip install pillow requests
     
     - name: Run Game Factory
       env:
@@ -34,34 +33,19 @@ jobs:
         GAME_PRICE: ${{ secrets.GAME_PRICE }}
       run: python levelforge_github.py
     
-    - name: Verify outputs
-      run: |
-        echo "=== portfolio.json (first 3 games) ==="
-        head -50 portfolio.json
-        echo ""
-        echo "=== games_log.txt (last 5 entries) ==="
-        tail -5 games_log.txt
-        echo ""
-        echo "=== SAR stats ==="
-        head -20 sar_analysis.json
-        echo ""
-        echo "=== File sizes ==="
-        ls -la portfolio.json sar_analysis.json learning_data.json games_log.txt
-    
-    - name: Commit and push all assets
+    - name: Commit and push
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt openai_cache.json recent_names.txt last_hook.txt last_style.txt 2>/dev/null || true
+        git add portfolio.json games_log.txt last_run.txt last_update.txt sar_analysis.json learning_data.json build_info.txt 2>/dev/null || true
         git add workspace/ --force
         
         if git diff --staged --quiet; then
-          echo "✅ No changes to commit"
+          echo "No changes"
         else
-          git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M') - Run ${{ github.run_number }}"
+          git commit -m "Auto update: $(date '+%Y-%m-%d %H:%M')"
           git push
-          echo "✅ Changes pushed successfully"
         fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,8 +59,4 @@ jobs:
           games_log.txt
           sar_analysis.json
           learning_data.json
-          build_info.txt
-          last_run.txt
-          last_update.txt
-          sprite.png
           workspace/
