@@ -29,5 +29,21 @@
     "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Cyber_Zone/icon.png",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-10T08:54:27.484475",
+    "game": "Cyber Runner",
+    "genre": "puzzle game",
+    "mechanic": "Dark Ritual",
+    "mechanic_description": "Use Dark Ritual to gain advantage in combat",
+    "description": "Master the Dark Ritual in this intense puzzle game experience! Use Dark Ritual to gain advantage in combat",
+    "hook": "\u2694\ufe0f Your next obsession",
+    "hashtags": "#gamedev #indiegame #puzzlegame #DarkRitual #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Cyber_Runner/icon.png",
+    "price_sol": "7",
+    "trends_used": [],
+    "status": "complete",
+    "version": "28.1.0",
+    "art_success": true
   }
 ]

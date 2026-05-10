@@ -1,0 +1,3 @@
+[application]
+config/name="Cyber Runner"
+config/icon="res://icon.png"

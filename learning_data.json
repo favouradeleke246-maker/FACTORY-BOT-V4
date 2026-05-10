@@ -1,8 +1,11 @@
 {
-  "last_run": "2026-05-10T08:27:12.943802",
-  "last_game": "Cyber Zone",
+  "last_run": "2026-05-10T08:54:31.186735",
+  "last_game": "Cyber Runner",
   "genre": "puzzle game",
-  "mechanic": "Gravity Well",
+  "mechanic": "Dark Ritual",
   "art_success": true,
-  "total_games": 3
+  "total_games": 4,
+  "sar_runs": 2,
+  "success_rate": 50.0,
+  "best_genre": "puzzle game"
 }

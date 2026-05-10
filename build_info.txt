@@ -1,8 +1,9 @@
 
-DEATHROLL STUDIO v27.1.0
-Game: Cyber Zone
+DEATHROLL STUDIO v28.1.0
+Game: Cyber Runner
 Genre: puzzle game
-Mechanic: Gravity Well
-Date: 2026-05-10T08:27:12.943918
+Mechanic: Dark Ritual
+Date: 2026-05-10T08:54:31.186906
 Art success: True
-Total games: 3
+Total portfolio: 4
+SAR runs: 2
