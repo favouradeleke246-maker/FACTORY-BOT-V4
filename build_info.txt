@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Crimson Blade
+Game: Quantum Strike
 Genre: survival horror
-Mechanic: Soul Link
-Date: 2026-05-10T17:35:54.810220
+Mechanic: Gravity Well
+Date: 2026-05-11T09:50:46.036280
 Art success: True
-Total portfolio: 8
-SAR runs: 2
+Total portfolio: 9
+SAR runs: 3
