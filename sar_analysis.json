@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 3,
-    "successful_art": 3,
+    "total_runs": 4,
+    "successful_art": 4,
     "failed_art": 0,
     "games": [
       {
@@ -23,6 +23,13 @@
         "genre": "survival horror",
         "mechanic": "Gravity Well",
         "timestamp": "2026-05-11T09:50:46.035894",
+        "success": true
+      },
+      {
+        "name": "Cyber Vector",
+        "genre": "puzzle game",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-12T08:47:17.360142",
         "success": true
       }
     ]

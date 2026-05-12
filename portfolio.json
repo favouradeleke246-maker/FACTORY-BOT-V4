@@ -108,5 +108,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-12T08:47:15.046610",
+    "game": "Cyber Vector",
+    "genre": "puzzle game",
+    "mechanic": "Soul Link",
+    "mechanic_description": "share damage with an enemy",
+    "description": "Master the Soul Link in this intense puzzle game experience!",
+    "hook": "\ud83c\udfce\ufe0f Speed meets chaos",
+    "hashtags": "#gamedev #indiegame #puzzlegame #SoulLink #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Cyber_Vector/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

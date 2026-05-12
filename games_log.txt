@@ -4,3 +4,4 @@
 2026-05-10T17:23:50.133587 | Solar Blade | survival horror | Soul Link
 2026-05-10T17:35:50.505916 | Crimson Blade | survival horror | Soul Link
 2026-05-11T09:50:41.990430 | Quantum Strike | survival horror | Gravity Well
+2026-05-12T08:47:15.046887 | Cyber Vector | puzzle game | Soul Link
