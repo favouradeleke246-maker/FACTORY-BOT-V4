@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 4,
-    "successful_art": 4,
+    "total_runs": 5,
+    "successful_art": 5,
     "failed_art": 0,
     "games": [
       {
@@ -30,6 +30,13 @@
         "genre": "puzzle game",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-12T08:47:17.360142",
+        "success": true
+      },
+      {
+        "name": "Shadow Zone",
+        "genre": "strategy game",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-13T08:51:03.754842",
         "success": true
       }
     ]

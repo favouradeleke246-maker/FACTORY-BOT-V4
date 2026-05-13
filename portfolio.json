@@ -122,5 +122,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-13T08:51:00.752657",
+    "game": "Shadow Zone",
+    "genre": "strategy game",
+    "mechanic": "Soul Link",
+    "mechanic_description": "share damage with an enemy",
+    "description": "Master the Soul Link in this intense strategy game experience!",
+    "hook": "\ud83d\udc80 This game haunted me",
+    "hashtags": "#gamedev #indiegame #strategygame #SoulLink #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Shadow_Zone/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
