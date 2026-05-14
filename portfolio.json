@@ -136,5 +136,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-14T08:44:10.517199",
+    "game": "Nova Drifter",
+    "genre": "extraction shooter",
+    "mechanic": "Phase Echo",
+    "mechanic_description": "leave behind a short-lived decoy",
+    "description": "Master the Phase Echo in this intense extraction shooter experience!",
+    "hook": "\ud83d\udd26 Can you survive?",
+    "hashtags": "#gamedev #indiegame #extractionshooter #PhaseEcho #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Nova_Drifter/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

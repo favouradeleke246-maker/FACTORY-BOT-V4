@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Shadow Zone
-Genre: strategy game
-Mechanic: Soul Link
-Date: 2026-05-13T08:51:03.755220
+Game: Nova Drifter
+Genre: extraction shooter
+Mechanic: Phase Echo
+Date: 2026-05-14T08:44:14.435869
 Art success: True
-Total portfolio: 11
-SAR runs: 5
+Total portfolio: 12
+SAR runs: 6

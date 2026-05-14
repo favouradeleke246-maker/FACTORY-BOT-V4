@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 5,
-    "successful_art": 5,
+    "total_runs": 6,
+    "successful_art": 6,
     "failed_art": 0,
     "games": [
       {
@@ -37,6 +37,13 @@
         "genre": "strategy game",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-13T08:51:03.754842",
+        "success": true
+      },
+      {
+        "name": "Nova Drifter",
+        "genre": "extraction shooter",
+        "mechanic": "Phase Echo",
+        "timestamp": "2026-05-14T08:44:14.435421",
         "success": true
       }
     ]
