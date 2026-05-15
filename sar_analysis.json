@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 6,
-    "successful_art": 6,
+    "total_runs": 7,
+    "successful_art": 7,
     "failed_art": 0,
     "games": [
       {
@@ -44,6 +44,13 @@
         "genre": "extraction shooter",
         "mechanic": "Phase Echo",
         "timestamp": "2026-05-14T08:44:14.435421",
+        "success": true
+      },
+      {
+        "name": "Astral Zone",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "timestamp": "2026-05-15T08:54:53.387752",
         "success": true
       }
     ]

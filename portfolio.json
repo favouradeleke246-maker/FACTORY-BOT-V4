@@ -150,5 +150,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-15T08:54:51.307992",
+    "game": "Astral Zone",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "mechanic_description": "leave behind a short-lived decoy",
+    "description": "Master the Phase Echo in this intense survival horror experience!",
+    "hook": "\ud83d\udc4a One combo to rule them all",
+    "hashtags": "#gamedev #indiegame #survivalhorror #PhaseEcho #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Astral_Zone/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
