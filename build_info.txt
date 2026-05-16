@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Astral Zone
+Game: Solar Edge
 Genre: survival horror
-Mechanic: Phase Echo
-Date: 2026-05-15T08:54:53.388140
+Mechanic: Soul Link
+Date: 2026-05-16T08:10:07.169508
 Art success: True
-Total portfolio: 13
-SAR runs: 7
+Total portfolio: 14
+SAR runs: 8

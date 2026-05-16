@@ -8,3 +8,4 @@
 2026-05-13T08:51:00.752920 | Shadow Zone | strategy game | Soul Link
 2026-05-14T08:44:10.517527 | Nova Drifter | extraction shooter | Phase Echo
 2026-05-15T08:54:51.308321 | Astral Zone | survival horror | Phase Echo
+2026-05-16T08:10:03.113028 | Solar Edge | survival horror | Soul Link

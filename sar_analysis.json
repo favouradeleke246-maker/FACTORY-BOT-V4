@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 7,
-    "successful_art": 7,
+    "total_runs": 8,
+    "successful_art": 8,
     "failed_art": 0,
     "games": [
       {
@@ -51,6 +51,13 @@
         "genre": "survival horror",
         "mechanic": "Phase Echo",
         "timestamp": "2026-05-15T08:54:53.387752",
+        "success": true
+      },
+      {
+        "name": "Solar Edge",
+        "genre": "survival horror",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-16T08:10:07.169062",
         "success": true
       }
     ]
