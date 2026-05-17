@@ -178,5 +178,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-17T08:26:51.139322",
+    "game": "Rogue Core",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "mechanic_description": "teleport through short walls",
+    "description": "Master the Void Step in this intense survival horror experience!",
+    "hook": "\u2694\ufe0f Your next obsession",
+    "hashtags": "#gamedev #indiegame #survivalhorror #VoidStep #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Rogue_Core/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

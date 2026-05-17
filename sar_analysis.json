@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 8,
-    "successful_art": 8,
+    "total_runs": 9,
+    "successful_art": 9,
     "failed_art": 0,
     "games": [
       {
@@ -58,6 +58,13 @@
         "genre": "survival horror",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-16T08:10:07.169062",
+        "success": true
+      },
+      {
+        "name": "Rogue Core",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "timestamp": "2026-05-17T08:26:54.864218",
         "success": true
       }
     ]

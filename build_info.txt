@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Solar Edge
+Game: Rogue Core
 Genre: survival horror
-Mechanic: Soul Link
-Date: 2026-05-16T08:10:07.169508
+Mechanic: Void Step
+Date: 2026-05-17T08:26:54.864847
 Art success: True
-Total portfolio: 14
-SAR runs: 8
+Total portfolio: 15
+SAR runs: 9
