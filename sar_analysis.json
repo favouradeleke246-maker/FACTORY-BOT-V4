@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 9,
-    "successful_art": 9,
+    "total_runs": 10,
+    "successful_art": 10,
     "failed_art": 0,
     "games": [
       {
@@ -65,6 +65,13 @@
         "genre": "survival horror",
         "mechanic": "Void Step",
         "timestamp": "2026-05-17T08:26:54.864218",
+        "success": true
+      },
+      {
+        "name": "Rogue Zone",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "timestamp": "2026-05-18T10:14:40.387400",
         "success": true
       }
     ]

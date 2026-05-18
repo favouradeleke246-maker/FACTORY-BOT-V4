@@ -192,5 +192,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-18T10:14:36.174130",
+    "game": "Rogue Zone",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "mechanic_description": "create a time bubble",
+    "description": "Master the Chrono Fracture in this intense survival horror experience!",
+    "hook": "\ud83d\udc4a One combo to rule them all",
+    "hashtags": "#gamedev #indiegame #survivalhorror #ChronoFracture #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Rogue_Zone/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
