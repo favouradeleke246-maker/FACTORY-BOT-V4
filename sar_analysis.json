@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 10,
-    "successful_art": 10,
+    "total_runs": 11,
+    "successful_art": 11,
     "failed_art": 0,
     "games": [
       {
@@ -72,6 +72,13 @@
         "genre": "survival horror",
         "mechanic": "Chrono Fracture",
         "timestamp": "2026-05-18T10:14:40.387400",
+        "success": true
+      },
+      {
+        "name": "Neon Blade",
+        "genre": "racing game",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-19T09:55:27.445052",
         "success": true
       }
     ]
