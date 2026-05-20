@@ -220,5 +220,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-20T09:43:09.390545",
+    "game": "Phantom Runner",
+    "genre": "fighting game",
+    "mechanic": "Soul Link",
+    "mechanic_description": "share damage with an enemy",
+    "description": "Master the Soul Link in this intense fighting game experience!",
+    "hook": "\ud83d\udc4a One combo to rule them all",
+    "hashtags": "#gamedev #indiegame #fightinggame #SoulLink #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Phantom_Runner/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

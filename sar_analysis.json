@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 11,
-    "successful_art": 11,
+    "total_runs": 12,
+    "successful_art": 12,
     "failed_art": 0,
     "games": [
       {
@@ -79,6 +79,13 @@
         "genre": "racing game",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-19T09:55:27.445052",
+        "success": true
+      },
+      {
+        "name": "Phantom Runner",
+        "genre": "fighting game",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-20T09:43:14.082376",
         "success": true
       }
     ]

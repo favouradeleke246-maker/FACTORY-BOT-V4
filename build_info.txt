@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Neon Blade
-Genre: racing game
+Game: Phantom Runner
+Genre: fighting game
 Mechanic: Soul Link
-Date: 2026-05-19T09:55:27.445486
+Date: 2026-05-20T09:43:14.082817
 Art success: True
-Total portfolio: 17
-SAR runs: 11
+Total portfolio: 18
+SAR runs: 12
