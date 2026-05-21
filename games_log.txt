@@ -13,3 +13,4 @@
 2026-05-18T10:14:36.174642 | Rogue Zone | survival horror | Chrono Fracture
 2026-05-19T09:55:22.779027 | Neon Blade | racing game | Soul Link
 2026-05-20T09:43:09.390940 | Phantom Runner | fighting game | Soul Link
+2026-05-21T09:52:03.614965 | Flux Force | survival horror | Soul Link

@@ -234,5 +234,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-21T09:52:03.614587",
+    "game": "Flux Force",
+    "genre": "survival horror",
+    "mechanic": "Soul Link",
+    "mechanic_description": "share damage with an enemy",
+    "description": "Master the Soul Link in this intense survival horror experience!",
+    "hook": "\ud83c\udfce\ufe0f Speed meets chaos",
+    "hashtags": "#gamedev #indiegame #survivalhorror #SoulLink #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Flux_Force/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
