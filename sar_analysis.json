@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 13,
-    "successful_art": 13,
+    "total_runs": 14,
+    "successful_art": 14,
     "failed_art": 0,
     "games": [
       {
@@ -93,6 +93,13 @@
         "genre": "survival horror",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-21T09:52:07.603246",
+        "success": true
+      },
+      {
+        "name": "Astral Shift",
+        "genre": "fighting game",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-22T09:37:32.553330",
         "success": true
       }
     ]
