@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Astral Shift
+Game: Flux Runner
 Genre: fighting game
 Mechanic: Soul Link
-Date: 2026-05-22T09:37:32.554350
+Date: 2026-05-23T08:25:17.718955
 Art success: True
-Total portfolio: 20
-SAR runs: 14
+Total portfolio: 21
+SAR runs: 15

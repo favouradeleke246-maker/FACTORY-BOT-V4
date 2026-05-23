@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 14,
-    "successful_art": 14,
+    "total_runs": 15,
+    "successful_art": 15,
     "failed_art": 0,
     "games": [
       {
@@ -100,6 +100,13 @@
         "genre": "fighting game",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-22T09:37:32.553330",
+        "success": true
+      },
+      {
+        "name": "Flux Runner",
+        "genre": "fighting game",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-05-23T08:25:17.718524",
         "success": true
       }
     ]
