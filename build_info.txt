@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Flux Runner
-Genre: fighting game
-Mechanic: Soul Link
-Date: 2026-05-23T08:25:17.718955
+Game: Astral Vector
+Genre: cozy builder
+Mechanic: Gravity Well
+Date: 2026-05-24T08:35:49.866407
 Art success: True
-Total portfolio: 21
-SAR runs: 15
+Total portfolio: 22
+SAR runs: 16

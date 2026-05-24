@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 15,
-    "successful_art": 15,
+    "total_runs": 16,
+    "successful_art": 16,
     "failed_art": 0,
     "games": [
       {
@@ -107,6 +107,13 @@
         "genre": "fighting game",
         "mechanic": "Soul Link",
         "timestamp": "2026-05-23T08:25:17.718524",
+        "success": true
+      },
+      {
+        "name": "Astral Vector",
+        "genre": "cozy builder",
+        "mechanic": "Gravity Well",
+        "timestamp": "2026-05-24T08:35:49.865927",
         "success": true
       }
     ]
