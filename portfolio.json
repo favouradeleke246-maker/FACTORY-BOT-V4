@@ -290,5 +290,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-25T10:18:40.508354",
+    "game": "Astral Breach",
+    "genre": "puzzle game",
+    "mechanic": "Gravity Well",
+    "mechanic_description": "pull enemies toward you",
+    "description": "Master the Gravity Well in this intense puzzle game experience!",
+    "hook": "\ud83e\udde0 1000 IQ required",
+    "hashtags": "#gamedev #indiegame #puzzlegame #GravityWell #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Astral_Breach/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

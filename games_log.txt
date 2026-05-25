@@ -17,3 +17,4 @@
 2026-05-22T09:37:29.213761 | Astral Shift | fighting game | Soul Link
 2026-05-23T08:25:14.020184 | Flux Runner | fighting game | Soul Link
 2026-05-24T08:35:47.401935 | Astral Vector | cozy builder | Gravity Well
+2026-05-25T10:18:40.508750 | Astral Breach | puzzle game | Gravity Well

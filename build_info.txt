@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Astral Vector
-Genre: cozy builder
+Game: Astral Breach
+Genre: puzzle game
 Mechanic: Gravity Well
-Date: 2026-05-24T08:35:49.866407
+Date: 2026-05-25T10:18:44.776519
 Art success: True
-Total portfolio: 22
-SAR runs: 16
+Total portfolio: 23
+SAR runs: 17
