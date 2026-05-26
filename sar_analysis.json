@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 17,
-    "successful_art": 17,
+    "total_runs": 18,
+    "successful_art": 18,
     "failed_art": 0,
     "games": [
       {
@@ -121,6 +121,13 @@
         "genre": "puzzle game",
         "mechanic": "Gravity Well",
         "timestamp": "2026-05-25T10:18:44.776086",
+        "success": true
+      },
+      {
+        "name": "Flux Realm",
+        "genre": "survival horror",
+        "mechanic": "Mirror Shell",
+        "timestamp": "2026-05-26T10:05:08.078701",
         "success": true
       }
     ]

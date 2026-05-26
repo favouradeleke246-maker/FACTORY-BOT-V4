@@ -304,5 +304,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-26T10:05:03.720204",
+    "game": "Flux Realm",
+    "genre": "survival horror",
+    "mechanic": "Mirror Shell",
+    "mechanic_description": "reflect projectiles",
+    "description": "Master the Mirror Shell in this intense survival horror experience!",
+    "hook": "\ud83c\udfce\ufe0f Speed meets chaos",
+    "hashtags": "#gamedev #indiegame #survivalhorror #MirrorShell #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Flux_Realm/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
