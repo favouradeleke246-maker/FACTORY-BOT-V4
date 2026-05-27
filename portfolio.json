@@ -318,5 +318,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-27T10:03:10.173811",
+    "game": "Cyber Drifter",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "mechanic_description": "teleport through short walls",
+    "description": "Master the Void Step in this intense survival horror experience!",
+    "hook": "\ud83e\udde0 1000 IQ required",
+    "hashtags": "#gamedev #indiegame #survivalhorror #VoidStep #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Cyber_Drifter/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

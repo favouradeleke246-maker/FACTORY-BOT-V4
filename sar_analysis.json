@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 18,
-    "successful_art": 18,
+    "total_runs": 19,
+    "successful_art": 19,
     "failed_art": 0,
     "games": [
       {
@@ -128,6 +128,13 @@
         "genre": "survival horror",
         "mechanic": "Mirror Shell",
         "timestamp": "2026-05-26T10:05:08.078701",
+        "success": true
+      },
+      {
+        "name": "Cyber Drifter",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "timestamp": "2026-05-27T10:03:13.316942",
         "success": true
       }
     ]
