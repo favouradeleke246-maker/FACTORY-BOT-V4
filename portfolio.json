@@ -332,5 +332,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-28T10:13:16.058965",
+    "game": "Astral Edge",
+    "genre": "fighting game",
+    "mechanic": "Gravity Well",
+    "mechanic_description": "pull enemies toward you",
+    "description": "Master the Gravity Well in this intense fighting game experience!",
+    "hook": "\ud83c\udfc3\u200d\u2642\ufe0f Run or die",
+    "hashtags": "#gamedev #indiegame #fightinggame #GravityWell #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Astral_Edge/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]
