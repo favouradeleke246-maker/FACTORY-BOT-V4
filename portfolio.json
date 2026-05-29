@@ -346,5 +346,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-29T10:02:06.906419",
+    "game": "Cyber Force",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "mechanic_description": "leave behind a short-lived decoy",
+    "description": "Master the Phase Echo in this intense survival horror experience!",
+    "hook": "\u2694\ufe0f Your next obsession",
+    "hashtags": "#gamedev #indiegame #survivalhorror #PhaseEcho #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Cyber_Force/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

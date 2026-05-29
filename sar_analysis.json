@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 20,
-    "successful_art": 20,
+    "total_runs": 21,
+    "successful_art": 21,
     "failed_art": 0,
     "games": [
       {
@@ -142,6 +142,13 @@
         "genre": "fighting game",
         "mechanic": "Gravity Well",
         "timestamp": "2026-05-28T10:13:20.862033",
+        "success": true
+      },
+      {
+        "name": "Cyber Force",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "timestamp": "2026-05-29T10:02:11.326144",
         "success": true
       }
     ]

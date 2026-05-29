@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Astral Edge
-Genre: fighting game
-Mechanic: Gravity Well
-Date: 2026-05-28T10:13:20.862565
+Game: Cyber Force
+Genre: survival horror
+Mechanic: Phase Echo
+Date: 2026-05-29T10:02:11.326689
 Art success: True
-Total portfolio: 26
-SAR runs: 20
+Total portfolio: 27
+SAR runs: 21
