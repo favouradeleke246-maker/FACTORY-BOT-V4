@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Cyber Force
+Game: Neon Strike
 Genre: survival horror
-Mechanic: Phase Echo
-Date: 2026-05-29T10:02:11.326689
+Mechanic: Mirror Shell
+Date: 2026-05-30T08:33:22.165638
 Art success: True
-Total portfolio: 27
-SAR runs: 21
+Total portfolio: 28
+SAR runs: 22

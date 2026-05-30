@@ -360,5 +360,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-05-30T08:33:16.380258",
+    "game": "Neon Strike",
+    "genre": "survival horror",
+    "mechanic": "Mirror Shell",
+    "mechanic_description": "reflect projectiles",
+    "description": "Master the Mirror Shell in this intense survival horror experience!",
+    "hook": "\ud83d\udd2b I built a shooter in 24 hours",
+    "hashtags": "#gamedev #indiegame #survivalhorror #MirrorShell #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Neon_Strike/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

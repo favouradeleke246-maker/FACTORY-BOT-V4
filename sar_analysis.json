@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 21,
-    "successful_art": 21,
+    "total_runs": 22,
+    "successful_art": 22,
     "failed_art": 0,
     "games": [
       {
@@ -149,6 +149,13 @@
         "genre": "survival horror",
         "mechanic": "Phase Echo",
         "timestamp": "2026-05-29T10:02:11.326144",
+        "success": true
+      },
+      {
+        "name": "Neon Strike",
+        "genre": "survival horror",
+        "mechanic": "Mirror Shell",
+        "timestamp": "2026-05-30T08:33:22.165167",
         "success": true
       }
     ]
