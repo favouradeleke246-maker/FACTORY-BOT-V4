@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 22,
-    "successful_art": 22,
+    "total_runs": 23,
+    "successful_art": 23,
     "failed_art": 0,
     "games": [
       {
@@ -156,6 +156,13 @@
         "genre": "survival horror",
         "mechanic": "Mirror Shell",
         "timestamp": "2026-05-30T08:33:22.165167",
+        "success": true
+      },
+      {
+        "name": "Rogue Force",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "timestamp": "2026-05-31T08:52:54.817587",
         "success": true
       }
     ]
