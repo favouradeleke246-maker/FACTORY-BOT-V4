@@ -1,9 +1,9 @@
 
 DEATHROLL STUDIO v28.0.0
-Game: Rogue Force
-Genre: survival horror
-Mechanic: Void Step
-Date: 2026-05-31T08:52:54.818147
+Game: Phantom Pulse
+Genre: fighting game
+Mechanic: Phase Echo
+Date: 2026-06-01T11:44:58.147723
 Art success: True
-Total portfolio: 29
-SAR runs: 23
+Total portfolio: 30
+SAR runs: 24

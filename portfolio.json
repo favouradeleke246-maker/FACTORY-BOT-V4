@@ -388,5 +388,19 @@
     "price_sol": "7",
     "status": "complete",
     "art_success": true
+  },
+  {
+    "date": "2026-06-01T11:44:53.764524",
+    "game": "Phantom Pulse",
+    "genre": "fighting game",
+    "mechanic": "Phase Echo",
+    "mechanic_description": "leave behind a short-lived decoy",
+    "description": "Master the Phase Echo in this intense fighting game experience!",
+    "hook": "\ud83d\udd26 Can you survive?",
+    "hashtags": "#gamedev #indiegame #fightinggame #PhaseEcho #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Phantom_Pulse/icon.png",
+    "price_sol": "7",
+    "status": "complete",
+    "art_success": true
   }
 ]

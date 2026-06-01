@@ -24,3 +24,4 @@
 2026-05-29T10:02:06.906865 | Cyber Force | survival horror | Phase Echo
 2026-05-30T08:33:16.380680 | Neon Strike | survival horror | Mirror Shell
 2026-05-31T08:52:51.202600 | Rogue Force | survival horror | Void Step
+2026-06-01T11:44:53.764961 | Phantom Pulse | fighting game | Phase Echo
