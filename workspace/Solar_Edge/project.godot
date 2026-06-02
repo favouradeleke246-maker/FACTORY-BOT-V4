@@ -1,0 +1,3 @@
+[application]
+config/name="Solar Edge"
+config/icon="res://icon.png"

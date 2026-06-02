@@ -1,0 +1,3 @@
+[application]
+config/name="Flux Runner"
+config/icon="res://icon.png"
