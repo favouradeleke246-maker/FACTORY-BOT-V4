@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 24,
-    "successful_art": 24,
+    "total_runs": 25,
+    "successful_art": 25,
     "failed_art": 0,
     "games": [
       {
@@ -170,6 +170,13 @@
         "genre": "fighting game",
         "mechanic": "Phase Echo",
         "timestamp": "2026-06-01T11:44:58.147204",
+        "success": true
+      },
+      {
+        "name": "Echo Breach",
+        "genre": "survival horror",
+        "mechanic": "Soul Link",
+        "timestamp": "2026-06-02T10:44:41.501992",
         "success": true
       }
     ]

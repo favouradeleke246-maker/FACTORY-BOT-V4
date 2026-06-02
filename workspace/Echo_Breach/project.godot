@@ -1,0 +1,3 @@
+[application]
+config/name="Echo Breach"
+config/icon="res://icon.png"
