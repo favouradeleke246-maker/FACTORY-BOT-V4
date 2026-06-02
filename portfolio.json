@@ -1,9 +1,29 @@
 {
-  "games": [],
+  "games": [
+    {
+      "id": "2026-06-02-lost-shard-reborn",
+      "name": "Lost Shard Reborn",
+      "genre": "action",
+      "mechanic": "The final boss strength scales with current score",
+      "description": "Fast-paced mayhem awaits in Lost Shard Reborn. Every second counts as you fight through relentless waves of enemies. The final boss strength scales with current score",
+      "viral_hook": "⚡ One mechanic. Infinite possibilities.",
+      "price_sol": 0.0455,
+      "license_key": "DRS-CVZI-HAAL-HEYA-UC8R",
+      "date": "2026-06-02",
+      "timestamp": "20260602_223641",
+      "zip_sha256": "3e9de37fd0624a79f29c226c3a4f379b2e65c0e2663de1f56632f704d0fc6f5f",
+      "play_url": "/workspace/2026-06-02-lost-shard-reborn/index.html",
+      "art_url": "/workspace/2026-06-02-lost-shard-reborn/cover.png",
+      "sales": 0,
+      "revenue_sol": 0.0
+    }
+  ],
   "stats": {
-    "total_games": 0,
+    "total_games": 1,
     "total_revenue_sol": 0.0,
-    "genres_generated": {},
-    "last_updated": null
+    "genres_generated": {
+      "action": 1
+    },
+    "last_updated": "2026-06-02T22:36:42.040580"
   }
 }
