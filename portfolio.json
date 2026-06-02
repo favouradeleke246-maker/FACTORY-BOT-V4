@@ -16,14 +16,32 @@
       "art_url": "/workspace/2026-06-02-lost-shard-reborn/cover.png",
       "sales": 0,
       "revenue_sol": 0.0
+    },
+    {
+      "id": "2026-06-02-phantom-breach-rising",
+      "name": "Phantom Breach Rising",
+      "genre": "platformer",
+      "mechanic": "Every missed shot adds an enemy to the arena",
+      "description": "Leap, dash, and survive in Phantom Breach Rising's beautifully crafted worlds. Precision platforming at its finest. Every missed shot adds an enemy to the arena",
+      "viral_hook": "💎 Indie gem. Handcrafted by a bot with taste.",
+      "price_sol": 0.0513,
+      "license_key": "DRS-0PNT-QN7X-V57W-GB8M",
+      "date": "2026-06-02",
+      "timestamp": "20260602_223928",
+      "zip_sha256": "9629b0ad6d7833837eaf2630a57566723e1ec391aea70613ad6c8262f86fdf1c",
+      "play_url": "/workspace/2026-06-02-phantom-breach-rising/index.html",
+      "art_url": "/workspace/2026-06-02-phantom-breach-rising/cover.png",
+      "sales": 0,
+      "revenue_sol": 0.0
     }
   ],
   "stats": {
-    "total_games": 1,
+    "total_games": 2,
     "total_revenue_sol": 0.0,
     "genres_generated": {
-      "action": 1
+      "action": 1,
+      "platformer": 1
     },
-    "last_updated": "2026-06-02T22:36:42.040580"
+    "last_updated": "2026-06-02T22:39:29.046963"
   }
 }
