@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crimson Drift — DeathRoll Studio</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #fff; font-family: 'Courier New', monospace;
+         display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+  #header { width: 100%; padding: 12px 20px; background: rgba(255,255,255,0.03);
+             border-bottom: 1px solid rgba(255,255,255,0.08); display: flex;
+             justify-content: space-between; align-items: center; }
+  #header .title { font-size: 18px; font-weight: bold; letter-spacing: 2px; }
+  #header .studio { font-size: 11px; color: #555; letter-spacing: 1px; }
+  #gameContainer { position: relative; margin: 20px auto; }
+  canvas { display: block; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+  #ui { width: 540px; display: flex; justify-content: space-between;
+         padding: 8px 0; font-size: 13px; color: #888; }
+  #mechanic { width: 540px; padding: 12px 16px; margin-bottom: 10px;
+               background: rgba(255,255,255,0.03); border-left: 3px solid #444;
+               font-size: 12px; color: #666; line-height: 1.5; }
+  
+</style>
+</head>
+<body>
+<div id="header">
+  <div>
+    <div class="title">Crimson Drift</div>
+    <div class="studio">DeathRoll Studio · PLATFORMER</div>
+  </div>
+  <div style="text-align:right; font-size:12px; color:#444;">
+    0.055 SOL<br>
+    <span style="font-size:10px;">DRS-BL5R-1OPO-6HIH-7IPB</span>
+  </div>
+</div>
+<div id="gameContainer">
+  <div id="ui"><span>Use WASD/Arrows to move · Auto-fires at nearest enemy</span><span></span></div>
+  <canvas id="c" width="540" height="480"></canvas>
+  <div id="mechanic">⚙️ The final boss strength scales with current score</div>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// ── ACTION GAME ──
+let player = {x:270, y:400, w:28, h:28, hp:100, maxHp:100, speed:4, score:0, deaths:0};
+let bullets=[], enemies=[], particles=[], keys={}, frame=0, gameOver=false, wave=1;
+let deathUpgrade = {speed:0, fireRate:0}; // mechanic: death upgrades
+
+function spawnEnemy() {
+  let side = Math.random()<0.5 ? 0 : W;
+  enemies.push({x:side, y:Math.random()*300+50, w:22, h:22, hp:2+wave,
+                vx:(270-side>0?1:-1)*(1+wave*0.1), vy:(Math.random()-0.5)*1.5,
+                color:`hsl(${Math.random()*60},80%,50%)`});
+}
+function fireBullet() {
+  let closest = enemies.reduce((a,e)=>{
+    let d=Math.hypot(e.x-player.x,e.y-player.y);
+    return d<(a?Math.hypot(a.x-player.x,a.y-player.y):Infinity)?e:a;
+  }, null);
+  if(!closest) return;
+  let dx=closest.x-player.x, dy=closest.y-player.y, len=Math.hypot(dx,dy)||1;
+  bullets.push({x:player.x,y:player.y,vx:dx/len*8,vy:dy/len*8,life:60});
+}
+function particle(x,y,color) {
+  for(let i=0;i<6;i++) particles.push({x,y,vx:(Math.random()-0.5)*5,
+    vy:(Math.random()-0.5)*5, life:25, color});
+}
+document.addEventListener('keydown',e=>{keys[e.key]=true});
+document.addEventListener('keyup',e=>{keys[e.key]=false});
+let lastFire=0;
+function update() {
+  if(gameOver) return;
+  frame++;
+  if(keys['ArrowLeft']||keys['a']) player.x=Math.max(14,player.x-(player.speed+deathUpgrade.speed));
+  if(keys['ArrowRight']||keys['d']) player.x=Math.min(W-14,player.x+(player.speed+deathUpgrade.speed));
+  if(keys['ArrowUp']||keys['w']) player.y=Math.max(14,player.y-(player.speed+deathUpgrade.speed));
+  if(keys['ArrowDown']||keys['s']) player.y=Math.min(H-14,player.y+(player.speed+deathUpgrade.speed));
+  let fireInterval = Math.max(8, 18-deathUpgrade.fireRate);
+  if(frame-lastFire>fireInterval) { fireBullet(); lastFire=frame; }
+  if(frame%(Math.max(40,120-wave*8))===0) spawnEnemy();
+  if(frame%600===0) { wave++; }
+  bullets = bullets.filter(b=>{
+    b.x+=b.vx; b.y+=b.vy; b.life--;
+    enemies = enemies.filter(e=>{
+      if(Math.abs(b.x-e.x)<14&&Math.abs(b.y-e.y)<14) {
+        e.hp--; particle(e.x,e.y,'#ff0'); b.life=0;
+        if(e.hp<=0){player.score+=10*(1+deathUpgrade.speed); particle(e.x,e.y,'#f80'); return false;}
+        return true;
+      } return true;
+    });
+    return b.life>0&&b.x>0&&b.x<W&&b.y>0&&b.y<H;
+  });
+  enemies.forEach(e=>{e.x+=e.vx;e.y+=e.vy;
+    if(e.x<0||e.x>W)e.vx*=-1; if(e.y<50||e.y>H)e.vy*=-1;
+    if(Math.abs(e.x-player.x)<20&&Math.abs(e.y-player.y)<20) {
+      player.hp-=0.5; particle(player.x,player.y,'#f00');
+    }
+  });
+  particles = particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0;});
+  if(player.hp<=0) {
+    player.deaths++; deathUpgrade.speed+=0.3; deathUpgrade.fireRate+=1;
+    player.hp=player.maxHp; enemies=[];
+    if(player.deaths>=10) gameOver=true;
+  }
+  document.getElementById('ui').innerHTML =
+    `<span>SCORE: ${player.score}</span><span>HP: ${Math.ceil(player.hp)}</span><span>WAVE: ${wave}</span><span>DEATHS: ${player.deaths}/10</span>`;
+}
+function draw() {
+  ctx.fillStyle='#050508'; ctx.fillRect(0,0,W,H);
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.03)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Bullets
+  bullets.forEach(b=>{ctx.fillStyle='#ff0';ctx.beginPath();ctx.arc(b.x,b.y,3,0,Math.PI*2);ctx.fill();});
+  // Enemies
+  enemies.forEach(e=>{ctx.fillStyle=e.color;ctx.fillRect(e.x-e.w/2,e.y-e.h/2,e.w,e.h);});
+  // Player
+  let grd=ctx.createRadialGradient(player.x,player.y,0,player.x,player.y,20);
+  grd.addColorStop(0,'#00ffcc'); grd.addColorStop(1,'#005544');
+  ctx.fillStyle=grd; ctx.fillRect(player.x-14,player.y-14,28,28);
+  // Particles
+  particles.forEach(p=>{ctx.fillStyle=p.color;ctx.globalAlpha=p.life/25;
+    ctx.fillRect(p.x-2,p.y-2,4,4);});
+  ctx.globalAlpha=1;
+  // HP bar
+  ctx.fillStyle='#222'; ctx.fillRect(10,10,120,8);
+  ctx.fillStyle=`hsl(${player.hp*1.2},80%,50%)`; ctx.fillRect(10,10,player.hp*1.2,8);
+  // Death upgrades display
+  if(deathUpgrade.speed>0) {
+    ctx.fillStyle='rgba(0,255,200,0.15)';
+    ctx.fillRect(W-130,10,120,18);
+    ctx.fillStyle='#0fc';ctx.font='10px Courier New';
+    ctx.fillText(`+SPD:${deathUpgrade.speed.toFixed(1)} +FR:${deathUpgrade.fireRate}`,W-125,23);
+  }
+  if(gameOver) {
+    ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#f00'; ctx.font='bold 48px Courier New'; ctx.textAlign='center';
+    ctx.fillText('GAME OVER',W/2,H/2-20);
+    ctx.fillStyle='#fff'; ctx.font='20px Courier New';
+    ctx.fillText(`Score: ${player.score}`,W/2,H/2+20);
+    ctx.font='14px Courier New'; ctx.fillStyle='#888';
+    ctx.fillText('Refresh to play again',W/2,H/2+55);
+    ctx.textAlign='left';
+  }
+}
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+loop();
+
+</script>
+</body>
+</html>

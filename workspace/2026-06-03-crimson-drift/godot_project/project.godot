@@ -1,0 +1,8 @@
+[gd_scene load_steps=1 format=3]
+[configuration]
+config_version=5
+[application]
+config/name="Crimson Drift"
+config/version="1.0"
+config/tags=PackedStringArray("platformer")
+run/main_scene="res://Main.tscn"

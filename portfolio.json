@@ -33,15 +33,32 @@
       "art_url": "/workspace/2026-06-02-phantom-breach-rising/cover.png",
       "sales": 0,
       "revenue_sol": 0.0
+    },
+    {
+      "id": "2026-06-03-crimson-drift",
+      "name": "Crimson Drift",
+      "genre": "platformer",
+      "mechanic": "The final boss strength scales with current score",
+      "description": "Leap, dash, and survive in Crimson Drift's beautifully crafted worlds. Precision platforming at its finest. The final boss strength scales with current score",
+      "viral_hook": "🎮 Pick up in 10 seconds. Master in 10 hours.",
+      "price_sol": 0.055,
+      "license_key": "DRS-BL5R-1OPO-6HIH-7IPB",
+      "date": "2026-06-03",
+      "timestamp": "20260603_110902",
+      "zip_sha256": "0da858af46299f1fe97a2f1ccdfc08889113b7785259b6369a2048621aae5af7",
+      "play_url": "/workspace/2026-06-03-crimson-drift/index.html",
+      "art_url": "/workspace/2026-06-03-crimson-drift/cover.png",
+      "sales": 0,
+      "revenue_sol": 0.0
     }
   ],
   "stats": {
-    "total_games": 2,
+    "total_games": 3,
     "total_revenue_sol": 0.0,
     "genres_generated": {
       "action": 1,
-      "platformer": 1
+      "platformer": 2
     },
-    "last_updated": "2026-06-02T22:39:29.046963"
+    "last_updated": "2026-06-03T11:09:03.290868"
   }
 }
