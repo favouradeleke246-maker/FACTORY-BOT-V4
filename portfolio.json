@@ -50,15 +50,33 @@
       "art_url": "/workspace/2026-06-03-crimson-drift/cover.png",
       "sales": 0,
       "revenue_sol": 0.0
+    },
+    {
+      "id": "2026-06-04-phantom-warden-unleashed",
+      "name": "Phantom Warden Unleashed",
+      "genre": "tower_defense",
+      "mechanic": "Every missed shot adds an enemy to the arena",
+      "description": "Fortify your defenses in Phantom Warden Unleashed and hold the line against endless onslaughts. Strategy meets action. Every missed shot adds an enemy to the arena",
+      "viral_hook": "🧠 Deceptively simple. Dangerously deep.",
+      "price_sol": 0.0591,
+      "license_key": "DRS-KZ3X-2Z2N-GQF2-WVFQ",
+      "date": "2026-06-04",
+      "timestamp": "20260604_100312",
+      "zip_sha256": "78b8003901af3c410aac2e6f634ea85e03d365ed4f0b461037a63742ae8d335e",
+      "play_url": "/workspace/2026-06-04-phantom-warden-unleashed/index.html",
+      "art_url": "/workspace/2026-06-04-phantom-warden-unleashed/cover.png",
+      "sales": 0,
+      "revenue_sol": 0.0
     }
   ],
   "stats": {
-    "total_games": 3,
+    "total_games": 4,
     "total_revenue_sol": 0.0,
     "genres_generated": {
       "action": 1,
-      "platformer": 2
+      "platformer": 2,
+      "tower_defense": 1
     },
-    "last_updated": "2026-06-03T11:09:03.290868"
+    "last_updated": "2026-06-04T10:03:12.741816"
   }
 }
