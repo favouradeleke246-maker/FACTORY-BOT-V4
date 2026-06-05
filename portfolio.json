@@ -67,16 +67,33 @@
       "art_url": "/workspace/2026-06-04-phantom-warden-unleashed/cover.png",
       "sales": 0,
       "revenue_sol": 0.0
+    },
+    {
+      "id": "2026-06-05-phantom-verdict",
+      "name": "Phantom Verdict",
+      "genre": "platformer",
+      "mechanic": "Collecting items shrinks the playfield boundary",
+      "description": "Leap, dash, and survive in Phantom Verdict's beautifully crafted worlds. Precision platforming at its finest. Collecting items shrinks the playfield boundary",
+      "viral_hook": "🚀 Daily drop — today only at this price.",
+      "price_sol": 0.0475,
+      "license_key": "DRS-PF4O-53VT-7563-J72K",
+      "date": "2026-06-05",
+      "timestamp": "20260605_100025",
+      "zip_sha256": "d2f695020703356fa7a71edb160f85cbecf8924074c7754940c70515a83f474d",
+      "play_url": "/workspace/2026-06-05-phantom-verdict/index.html",
+      "art_url": "/workspace/2026-06-05-phantom-verdict/cover.png",
+      "sales": 0,
+      "revenue_sol": 0.0
     }
   ],
   "stats": {
-    "total_games": 4,
+    "total_games": 5,
     "total_revenue_sol": 0.0,
     "genres_generated": {
       "action": 1,
-      "platformer": 2,
+      "platformer": 3,
       "tower_defense": 1
     },
-    "last_updated": "2026-06-04T10:03:12.741816"
+    "last_updated": "2026-06-05T10:00:26.018197"
   }
 }
