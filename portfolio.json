@@ -101,16 +101,33 @@
       "art_url": "/workspace/2026-06-06-forgotten-cipher-reborn/cover.png",
       "sales": 0,
       "revenue_sol": 0.0
+    },
+    {
+      "id": "2026-06-07-rusted-pulse-unleashed",
+      "name": "Rusted Pulse Unleashed",
+      "genre": "action",
+      "mechanic": "Every death upgrades one random stat permanently",
+      "description": "Fast-paced mayhem awaits in Rusted Pulse Unleashed. Every second counts as you fight through relentless waves of enemies. Every death upgrades one random stat permanently",
+      "viral_hook": "🔑 Limited license keys — first come, first served.",
+      "price_sol": 0.0546,
+      "license_key": "DRS-VDFL-YETK-Z0KE-BHY1",
+      "date": "2026-06-07",
+      "timestamp": "20260607_092156",
+      "zip_sha256": "18b10fa9110c3d6acd3ec0b66bc63bbb16dbfe826da61c2807ba7667eb305a51",
+      "play_url": "/workspace/2026-06-07-rusted-pulse-unleashed/index.html",
+      "art_url": "/workspace/2026-06-07-rusted-pulse-unleashed/cover.png",
+      "sales": 0,
+      "revenue_sol": 0.0
     }
   ],
   "stats": {
-    "total_games": 6,
+    "total_games": 7,
     "total_revenue_sol": 0.0,
     "genres_generated": {
-      "action": 2,
+      "action": 3,
       "platformer": 3,
       "tower_defense": 1
     },
-    "last_updated": "2026-06-06T08:39:54.293894"
+    "last_updated": "2026-06-07T09:21:56.849104"
   }
 }
