@@ -19,23 +19,18 @@ permissions:
 
 jobs:
   create-game:
-    name: Build Daily Game
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GH_TOKEN }}
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-
       - run: pip install --upgrade pip && pip install pillow requests
-
       - name: Run Game Factory
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -44,8 +39,7 @@ jobs:
           GH_TOKEN:           ${{ secrets.GH_TOKEN }}
           GAME_PRICE:         ${{ github.event.inputs.game_price || secrets.GAME_PRICE || '7' }}
         run: python levelforge_github.py
-
-      - name: Commit and push source changes
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -54,7 +48,6 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -70,7 +63,6 @@ jobs:
             workspace/
 
   deploy-pages:
-    name: Deploy Storefront to GitHub Pages
     needs: create-game
     runs-on: ubuntu-latest
     steps:
@@ -79,7 +71,6 @@ jobs:
           fetch-depth: 1
           token: ${{ secrets.GH_TOKEN }}
           ref: main
-
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -92,15 +83,10 @@ jobs:
           commit_message: 'Deploy storefront and games'
 
   notify-failure:
-    name: Failure Alert
     needs: [create-game, deploy-pages]
-    runs-on: ubuntu-latest
     if: failure()
+    runs-on: ubuntu-latest
     steps:
-      - name: Send failure alert to Telegram
-        run: |
+      - run: |
           MESSAGE="⚠️ *DeathRoll Studio* — Build failed%0A%0ARun: \`${{ github.run_number }}\`%0ATime: $(date -u +'%Y-%m-%d %H:%M UTC')%0A%0ACheck: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d "text=${MESSAGE}" \
-            -d "parse_mode=Markdown" || true
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" -d "text=${MESSAGE}" -d "parse_mode=Markdown" || true
