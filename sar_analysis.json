@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 30,
-    "art_ok": 5,
+    "total_runs": 31,
+    "art_ok": 6,
     "art_fail": 0,
     "games": [
       {
@@ -213,6 +213,13 @@
         "mechanic": "Chrono Fracture",
         "art": true,
         "ts": "2026-06-09T15:43:25.665051"
+      },
+      {
+        "name": "Scarlet Gulch",
+        "genre": "survival horror",
+        "mechanic": "Fracture Line",
+        "art": true,
+        "ts": "2026-06-09T16:36:17.529159"
       }
     ],
     "successful_art": 25,
@@ -220,7 +227,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.167,
+    "rate": 0.194,
     "best_mechanic": null,
     "success_rate": 0
   }

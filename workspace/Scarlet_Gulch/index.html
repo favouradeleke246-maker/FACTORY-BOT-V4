@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scarlet Gulch</title>
+<style>
+:root{--acc:#33ff99;--bg:#000d04;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;touch-action:none;}
+#wrap{width:100%;max-width:480px;height:100vh;display:flex;flex-direction:column;}
+#hud{display:flex;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,.7);border-bottom:1px solid var(--acc);}
+canvas{flex:1;width:100%;}
+#joy-zone{position:absolute;bottom:0;left:0;width:50%;height:44%;display:flex;align-items:center;justify-content:center;}
+#joy-outer{width:90px;height:90px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.35);position:relative;}
+#joy-inner{width:38px;height:38px;border-radius:50%;background:var(--acc);opacity:.85;position:absolute;}
+#btn-zone{position:absolute;bottom:0;right:0;width:50%;height:44%;display:flex;align-items:center;justify-content:center;gap:18px;}
+.abtn{width:56px;height:56px;border-radius:50%;border:2px solid var(--acc);background:rgba(0,0,0,.5);color:var(--acc);font-size:20px;display:flex;align-items:center;justify-content:center;}
+.screen{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99;}
+.screen.hidden{display:none;}
+.bigbtn{padding:14px 36px;background:var(--acc);color:#000;border:none;margin-top:20px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud"><div>SCORE <span id="score">0</span></div><div>LIVES <span id="lives">3</span></div><div>WAVE <span id="wave">1</span></div></div>
+  <canvas id="gameCanvas"></canvas>
+  
+<div id="start-screen" class="screen">
+  <h1>Scarlet Gulch</h1>
+  <h2>survival horror</h2>
+  <div>Fracture Line: Draw a line — anything that crosses it takes 3x damage</div>
+  <button class="bigbtn" onclick="startGame()">PLAY FREE</button>
+</div>
+<div id="gameover-screen" class="screen hidden">
+  <h1>GAME OVER</h1>
+  <button class="bigbtn" onclick="restartGame()">PLAY AGAIN</button>
+</div>
+  <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
+  <div id="btn-zone"><div class="abtn" id="shootBtn">🔫</div><div class="abtn" id="specialBtn">💥</div></div>
+</div>
+<script>
+
+const joyZone=document.getElementById('joy-zone'),joyOuter=document.getElementById('joy-outer'),joyInner=document.getElementById('joy-inner');
+let JOY={x:0,y:0,active:false,id:-1,ox:0,oy:0,r:36};
+joyZone.addEventListener('touchstart',e=>{if(JOY.active)return;const t=e.touches[0],rc=joyOuter.getBoundingClientRect();JOY.active=true;JOY.id=t.identifier;JOY.ox=rc.left+rc.width/2;JOY.oy=rc.top+rc.height/2;});
+joyZone.addEventListener('touchmove',e=>{if(!JOY.active)return;for(const t of e.touches)if(t.identifier===JOY.id){const dx=t.clientX-JOY.ox,dy=t.clientY-JOY.oy,d=Math.hypot(dx,dy),c=Math.min(d,JOY.r);JOY.x=(dx/d||0)*c/JOY.r;JOY.y=(dy/d||0)*c/JOY.r;joyInner.style.transform=`translate(${JOY.x*JOY.r}px,${JOY.y*JOY.r}px`;break;}});
+joyZone.addEventListener('touchend',e=>{JOY.active=false;JOY.x=0;JOY.y=0;joyInner.style.transform='translate(0,0)';});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')JOY.x=1;if(e.key==='ArrowLeft')JOY.x=-1;if(e.key==='ArrowDown')JOY.y=1;if(e.key==='ArrowUp')JOY.y=-1;});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft')JOY.x=0;if(e.key==='ArrowDown'||e.key==='ArrowUp')JOY.y=0;});
+
+const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
+let W,H,player,enemies,bullets,score,lives,wave,frame,specialCharge,gameRunning;
+function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;}
+window.addEventListener('resize',resize);resize();
+function init(){player={x:W/2,y:H-80,r:15,speed:5,invincible:0};enemies=[];bullets=[];score=0;lives=3;wave=1;frame=0;specialCharge=0;gameRunning=true;updateUI();requestAnimationFrame(gameLoop);}
+function startGame(){document.getElementById('start-screen').classList.add('hidden');init();}
+function restartGame(){document.getElementById('gameover-screen').classList.add('hidden');init();}
+function updateUI(){document.getElementById('score').innerText=score;document.getElementById('lives').innerText=lives;document.getElementById('wave').innerText=wave;}
+function spawnEnemy(){let side=Math.floor(Math.random()*4);let x,y;if(side===0){x=Math.random()*W;y=-20;}else if(side===1){x=W+20;y=Math.random()*H;}else if(side===2){x=Math.random()*W;y=H+20;}else{x=-20;y=Math.random()*H;}enemies.push({x:x,y:y,r:15,hp:1+Math.floor(wave/3)});}
+function shoot(){let ang=Math.atan2(player.y+10-(player.y),player.x+10-(player.x));bullets.push({x:player.x,y:player.y-10,dx:Math.cos(ang)*8,dy:Math.sin(ang)*8,r:4});}
+function special(){if(specialCharge>=100){specialCharge=0;enemies.forEach(e=>e.hp-=2);}}
+document.getElementById('shootBtn').addEventListener('click',()=>{if(gameRunning)shoot();});
+document.getElementById('specialBtn').addEventListener('click',()=>{if(gameRunning)special();});
+function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame++;
+  if(player.invincible>0)player.invincible--;
+  player.x+=JOY.x*player.speed;player.y+=JOY.y*player.speed;
+  player.x=Math.max(player.r,Math.min(W-player.r,player.x));player.y=Math.max(player.r,Math.min(H-player.r,player.y));
+  if(frame%20===0&&enemies.length<10+wave)spawnEnemy();
+  if(frame%15===0)shoot();
+  specialCharge=Math.min(100,specialCharge+0.5);
+  for(let e of enemies){let ang=Math.atan2(player.y-e.y,player.x-e.x);e.x+=Math.cos(ang)*2;e.y+=Math.sin(ang)*2;}
+  for(let i=0;i<bullets.length;i++){bullets[i].x+=bullets[i].dx;bullets[i].y+=bullets[i].dy;if(bullets[i].x<-50||bullets[i].x>W+50||bullets[i].y<-50||bullets[i].y>H+50)bullets.splice(i,1),i--;}
+  for(let i=0;i<bullets.length;i++)for(let j=0;j<enemies.length;j++){if(Math.hypot(bullets[i].x-enemies[j].x,bullets[i].y-enemies[j].y)<enemies[j].r+bullets[i].r){enemies[j].hp--;bullets.splice(i,1);i--;if(enemies[j].hp<=0){score+=10;enemies.splice(j,1);j--;}break;}}
+  for(let j=0;j<enemies.length;j++){if(player.invincible===0&&Math.hypot(player.x-enemies[j].x,player.y-enemies[j].y)<player.r+enemies[j].r){lives--;player.invincible=60;enemies.splice(j,1);j--;updateUI();if(lives<=0){gameRunning=false;document.getElementById('gameover-screen').classList.remove('hidden');}}}
+  if(score>0&&score%500<20)wave=Math.min(10,1+Math.floor(score/500));
+  ctx.fillStyle='#000d04';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='white';ctx.beginPath();ctx.arc(player.x,player.y,player.r,0,Math.PI*2);ctx.fill();
+  for(let e of enemies){ctx.fillStyle='red';ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();}
+  for(let b of bullets){ctx.fillStyle='yellow';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();}
+  updateUI();
+}
+</script>
+</body></html>

@@ -103,5 +103,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0006",
+    "date": "2026-06-09T16:36:15.797795",
+    "game": "Scarlet Gulch",
+    "genre": "survival horror",
+    "mechanic": "Fracture Line",
+    "mech_desc": "Draw a line \u2014 anything that crosses it takes 3x damage",
+    "description": "Master Fracture Line in this survival horror \u2014 no two sessions are the same.",
+    "hook": "Run. Or die trying",
+    "hashtags": "#gamedev #indiegame #mobilegame #survivalhorror #FractureLine #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Scarlet_Gulch/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Scarlet_Gulch/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-06A081FC640E2376",
+    "color": "#33ff99",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "shooter"
   }
 ]
