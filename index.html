@@ -1,4 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DeathRoll Studio</title><style>body{background:#04040c;color:#fff;font-family:monospace;}</style></head>
-<body><h1>DeathRoll Studio</h1><p>Check back daily for new games.</p></body></html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>DeathRoll Studio – Daily AI Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #04040c;
+    --surface: #0a0a18;
+    --card: #0f0f20;
+    --border: rgba(255,255,255,0.05);
+    --accent: #00ffcc;
+    --accent2: #ff2d55;
+    --text: #d0d0f0;
+    --muted: #6a6a8a;
+    --success: #00cc88;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(0,255,204,0.015) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,255,204,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 20px; }
+  header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+  .logo { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 2px; }
+  .logo span { color: var(--accent); background: none; -webkit-background-clip: unset; background-clip: unset; }
+  .nav a { color: var(--muted); text-decoration: none; margin-left: 24px; font-size: 0.8rem; letter-spacing: 1px; transition: color 0.2s; }
+  .nav a:hover { color: var(--accent); }
+  .live-badge { background: rgba(0,255,204,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; letter-spacing: 1px; }
+  .hero { text-align: center; padding: 60px 20px; background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(0,255,204,0.08), transparent); border-radius: 32px; margin-bottom: 40px; }
+  .hero h1 { font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 8vw, 4rem); font-weight: 900; background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 16px; }
+  .hero p { color: var(--muted); max-width: 600px; margin: 0 auto 24px; line-height: 1.6; }
+  .stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin: 32px 0; }
+  .stat-card { background: rgba(255,255,255,0.02); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 16px; padding: 20px 32px; text-align: center; }
+  .stat-number { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; font-weight: 900; color: var(--accent); }
+  .stat-label { font-size: 0.7rem; letter-spacing: 2px; color: var(--muted); margin-top: 4px; }
+  .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin: 40px 0; }
+  .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform 0.2s, border-color 0.2s; }
+  .game-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .game-image { height: 180px; background-size: cover; background-position: center; position: relative; }
+  .game-badge { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; color: var(--accent); border: 1px solid var(--accent); }
+  .game-info { padding: 20px; }
+  .game-name { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; margin-bottom: 4px; }
+  .game-genre { color: var(--accent); font-size: 0.7rem; letter-spacing: 1px; margin-bottom: 12px; text-transform: uppercase; }
+  .game-mechanic { background: rgba(0,255,204,0.1); display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; margin-bottom: 12px; }
+  .game-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+  .price { font-size: 1.2rem; color: var(--accent); font-weight: bold; }
+  .game-date { font-size: 0.6rem; color: #444; margin-top: 12px; }
+  .buy-section { background: var(--surface); border-radius: 24px; padding: 40px; margin: 40px 0; text-align: center; border: 1px solid var(--border); }
+  .buy-section h2 { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; margin-bottom: 24px; }
+  .wallet-box { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 20px; margin: 20px auto; max-width: 500px; word-break: break-all; font-family: monospace; font-size: 0.7rem; }
+  .wallet-row { display: flex; gap: 12px; align-items: center; justify-content: center; margin: 12px 0; }
+  .btn { display: inline-block; background: var(--accent); color: #000; padding: 12px 28px; border-radius: 40px; text-decoration: none; font-weight: bold; letter-spacing: 1px; transition: opacity 0.2s; margin-top: 16px; }
+  .btn:hover { opacity: 0.8; }
+  footer { text-align: center; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 40px; font-size: 0.7rem; color: var(--muted); }
+  @media (max-width: 768px) { .nav { display: none; } .stats { gap: 16px; } .stat-card { padding: 12px 20px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">DEATH<span>ROLL</span></div>
+    <div class="nav">
+      <a href="#games">GAMES</a>
+      <a href="#buy">BUY</a>
+      <a href="https://t.me/drolltech" target="_blank">TELEGRAM</a>
+    </div>
+    <div class="live-badge">● LIVE DAILY</div>
+  </header>
+
+  <div class="hero">
+    <h1>NEW MOBILE GAME<br>EVERY DAY</h1>
+    <p>AI‑generated mechanics, unique art, and full source code – all playable in your browser.<br>Own the game for <span id="priceDisplay">7</span> SOL.</p>
+    <div class="stats" id="stats">
+      <div class="stat-card"><div class="stat-number" id="totalGames">-</div><div class="stat-label">GAMES</div></div>
+      <div class="stat-card"><div class="stat-number" id="totalGenres">-</div><div class="stat-label">GENRES</div></div>
+      <div class="stat-card"><div class="stat-number" id="latestDate">-</div><div class="stat-label">LATEST</div></div>
+    </div>
+  </div>
+
+  <div class="games-grid" id="gamesGrid"><div class="stat-card">Loading games...</div></div>
+
+  <div class="buy-section" id="buy">
+    <h2>⚡ GET FULL SOURCE CODE</h2>
+    <p>Send <strong id="buyPrice">7</strong> SOL to either wallet below, then DM <strong>@deathroll1</strong> with your @username.<br>You'll receive the complete Godot 4 project + HTML5 build + license key instantly.</p>
+    <div class="wallet-box">
+      <div class="wallet-row">🔵 <strong>Trust Wallet (Solana)</strong><br><code id="trustAddr">6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3</code></div>
+      <div class="wallet-row">🟣 <strong>Phantom Wallet (Solana)</strong><br><code id="phantomAddr">Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb</code></div>
+    </div>
+    <a href="https://t.me/deathroll1" class="btn" target="_blank">📩 DM @deathroll1</a>
+  </div>
+
+  <footer>
+    <p>© 2025 DeathRoll Studio — Automated Game Factory v30.0</p>
+    <p>Built with AI & Solana | <a href="https://t.me/drolltech" style="color:var(--accent);">Join Telegram</a></p>
+  </footer>
+</div>
+
+<script>
+  async function loadGames() {
+    try {
+      const res = await fetch('portfolio.json?t='+Date.now());
+      if (!res.ok) throw new Error();
+      let games = await res.json();
+      if (!Array.isArray(games)) games = [];
+      games.sort((a,b) => new Date(b.date) - new Date(a.date));
+      const total = games.length;
+      const genres = new Set(games.map(g => g.genre)).size;
+      const latest = games[0] ? new Date(games[0].date).toLocaleDateString() : '-';
+      document.getElementById('totalGames').innerText = total;
+      document.getElementById('totalGenres').innerText = genres;
+      document.getElementById('latestDate').innerText = latest;
+      const price = games[0]?.price_sol || '7';
+      document.getElementById('priceDisplay').innerText = price;
+      document.getElementById('buyPrice').innerText = price;
+      document.getElementById('trustAddr').innerText = '6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3';
+      document.getElementById('phantomAddr').innerText = 'Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb';
+      const grid = document.getElementById('gamesGrid');
+      grid.innerHTML = games.slice(0, 20).map(g => `
+        <div class="game-card">
+          <div class="game-image" style="background-image: url('${g.image_url || ''}'); background-color:#111;">
+            <div class="game-badge">${escapeHtml(g.genre || '?')}</div>
+          </div>
+          <div class="game-info">
+            <div class="game-name">${escapeHtml(g.game)}</div>
+            <div class="game-genre">${escapeHtml(g.genre)}</div>
+            <div class="game-mechanic">⚡ ${escapeHtml(g.mechanic)}</div>
+            <div class="game-desc">${escapeHtml(g.description || g.mech_desc || '')}</div>
+            <div class="price">💰 ${g.price_sol || price} SOL</div>
+            <div class="game-date">📅 ${new Date(g.date).toLocaleDateString()}</div>
+            <a href="${g.play_url || '#'}" target="_blank" style="display:inline-block; margin-top:12px; color:var(--accent); font-size:0.7rem;">▶ Play Free</a>
+          </div>
+        </div>
+      `).join('');
+      if (!games.length) grid.innerHTML = '<div class="stat-card">No games yet. First game will appear at 6AM UTC tomorrow.</div>';
+    } catch(e) {
+      document.getElementById('gamesGrid').innerHTML = '<div class="stat-card">⚠️ Error loading games. Check back soon.</div>';
+    }
+  }
+  function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+  loadGames();
+  setInterval(loadGames, 60000);
+</script>
+</body>
+</html>
