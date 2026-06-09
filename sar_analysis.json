@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 27,
-    "art_ok": 2,
+    "total_runs": 28,
+    "art_ok": 3,
     "art_fail": 0,
     "games": [
       {
@@ -192,6 +192,13 @@
         "mechanic": "Bleed Aura",
         "art": true,
         "ts": "2026-06-09T13:55:55.276480"
+      },
+      {
+        "name": "Wraith Peak",
+        "genre": "action RPG",
+        "mechanic": "Chrono Fracture",
+        "art": true,
+        "ts": "2026-06-09T15:30:33.740159"
       }
     ],
     "successful_art": 25,
@@ -199,7 +206,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.074,
+    "rate": 0.107,
     "best_mechanic": null,
     "success_rate": 0
   }

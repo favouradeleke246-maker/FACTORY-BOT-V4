@@ -40,5 +40,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0003",
+    "date": "2026-06-09T15:30:31.871140",
+    "game": "Wraith Peak",
+    "genre": "action RPG",
+    "mechanic": "Chrono Fracture",
+    "mech_desc": "Hold to freeze all enemies in a 3-second time bubble",
+    "description": "Master Chrono Fracture in this action RPG \u2014 no two sessions are the same.",
+    "hook": "I built this in 24 hours",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #ChronoFracture #DeathRollStudio #solanagaming",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Wraith_Peak/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Wraith_Peak/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-4F22B4EEDB256986",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
