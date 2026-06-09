@@ -16,8 +16,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   create-game:
@@ -47,7 +45,7 @@ jobs:
           GAME_PRICE:         ${{ github.event.inputs.game_price || secrets.GAME_PRICE || '7' }}
         run: python levelforge_github.py
 
-      - name: Commit and push
+      - name: Commit and push source changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -75,9 +73,6 @@ jobs:
     name: Deploy Storefront to GitHub Pages
     needs: create-game
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -85,14 +80,16 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           ref: main
 
-      - uses: actions/configure-pages@v4
-
-      - uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: '.'
-
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GH_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
+          keep_files: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy storefront and games'
 
   notify-failure:
     name: Failure Alert
