@@ -2,6 +2,7 @@
 """
 DEATHROLL STUDIO v30.0 — COMPLETE GAME FACTORY (ALL 5 GENRES)
 Generates a new mobile game every day with AI mechanics, art, and full HTML5 games.
+Fixed: Telegram HTML parse mode (no Markdown errors)
 """
 import os, json, random, requests, shutil, zipfile, hashlib, math
 from datetime import datetime
@@ -30,14 +31,20 @@ WHATSAPP_WEBHOOK_URL = os.getenv("WHATSAPP_WEBHOOK_URL", "")
 BASE_URL = f"https://{BRAND_GITHUB}.github.io/{BRAND_REPO}"
 RAW_URL = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/{BRAND_REPO}/main"
 
-# ---------- TELEGRAM HELPERS ----------
+# ---------- TELEGRAM HELPERS (HTML parse mode) ----------
 def tg_send_photo(chat_id, photo_path, caption):
     if not TG_TOKEN: return False
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendPhoto"
     try:
         with open(photo_path, "rb") as f:
-            r = requests.post(url, files={"photo": f},
-                              data={"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"}, timeout=40)
+            files = {"photo": f}
+            data = {
+                "chat_id": chat_id,
+                "caption": caption,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": True
+            }
+            r = requests.post(url, files=files, data=data, timeout=40)
         if r.status_code == 200:
             print(f"  ✅ Telegram photo sent to {chat_id}")
             return True
@@ -53,10 +60,18 @@ def tg_send_doc(chat_id, doc_path, caption):
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendDocument"
     try:
         with open(doc_path, "rb") as f:
-            r = requests.post(url, files={"document": f},
-                              data={"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"}, timeout=90)
-        return r.status_code == 200
-    except: return False
+            files = {"document": f}
+            data = {"chat_id": chat_id, "caption": caption, "parse_mode": "HTML"}
+            r = requests.post(url, files=files, data=data, timeout=90)
+        if r.status_code == 200:
+            print(f"  ✅ Document sent to {chat_id}")
+            return True
+        else:
+            print(f"  ❌ Document error: {r.text[:200]}")
+            return False
+    except Exception as e:
+        print(f"  ❌ Document exception: {e}")
+        return False
 
 def send_to_whatsapp(text, image_url=None):
     if not WHATSAPP_WEBHOOK_URL: return False
@@ -664,17 +679,39 @@ loadGames();setInterval(loadGames,60000);
 Path("index.html").write_text(storefront_html, encoding="utf-8")
 print("  ✅ Storefront updated")
 
-# ---------- TELEGRAM POST ----------
-sales_post = f"{EMOJI_STR} *{HOOK}* {EMOJI_STR}\n\n✨ *{GAME_NAME}* — {GENRE}\n_{DESCRIPTION}_\n\n⚡ *Mechanic:* `{MECHANIC}`\n🕹️ *Play FREE:* {PLAY_URL}\n\n💰 *Full source:* ${GAME_PRICE} SOL\n🔵 Trust: `{SOLANA_TRUST}`\n🟣 Phantom: `{SOLANA_PHANTOM}`\n\nSend ${GAME_PRICE} SOL + @username → instant delivery\n\n{TAGS}"
+# ---------- TELEGRAM POST (HTML format) ----------
+sales_post = f"""
+<b>{EMOJI_STR} {HOOK} {EMOJI_STR}</b>
+
+✨ <b>{GAME_NAME}</b> — {GENRE}
+<i>{DESCRIPTION}</i>
+
+⚡ <b>Mechanic:</b> <code>{MECHANIC}</code>
+🕹️ <b>Play FREE:</b> {PLAY_URL}
+
+💰 <b>Full source:</b> ${GAME_PRICE} SOL
+🔵 Trust: <code>{SOLANA_TRUST}</code>
+🟣 Phantom: <code>{SOLANA_PHANTOM}</code>
+
+Send ${GAME_PRICE} SOL + @username → instant delivery
+
+{TAGS}
+""".strip()
+
 if TG_TOKEN and sprite.exists():
     print(f"  📤 Sending to channel {TELEGRAM_CHANNEL}...")
     ok = tg_send_photo(TELEGRAM_CHANNEL, sprite, sales_post)
-    if ok: print("  ✅ Channel post sent")
-    else: print("  ❌ Channel post failed. Ensure bot is admin in channel.")
+    if ok:
+        print("  ✅ Channel post sent")
+    else:
+        print("  ❌ Channel post failed. Ensure bot is admin in channel.")
 else:
     print("  ⚠️  Missing TG_TOKEN or sprite.png")
+
+# Admin bundle (HTML format)
 if TG_TOKEN and TG_ADMIN and zip_path.exists():
-    tg_send_doc(TG_ADMIN, zip_path, f"🎮 {GAME_NAME} — {GAME_TYPE}\nGenre: {GENRE}\nArt: {'✅' if art_ok else '⚠️'}\nKey: `{LICENSE_KEY}`")
+    admin_caption = f"<b>🎮 {GAME_NAME}</b> — {GAME_TYPE}<br>Genre: {GENRE}<br>Mechanic: {MECHANIC}<br>Art: {'✅' if art_ok else '⚠️'}<br>Key: <code>{LICENSE_KEY}</code>"
+    tg_send_doc(TG_ADMIN, zip_path, admin_caption)
     print("  ✅ Admin bundle sent")
 
 # WhatsApp
