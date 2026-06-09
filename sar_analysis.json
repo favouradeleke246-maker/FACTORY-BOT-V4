@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 26,
-    "art_ok": 1,
+    "total_runs": 27,
+    "art_ok": 2,
     "art_fail": 0,
     "games": [
       {
@@ -185,14 +185,21 @@
         "mechanic": "Phase Echo",
         "art": true,
         "ts": "2026-06-09T13:26:52.524660"
+      },
+      {
+        "name": "Jinx Siege",
+        "genre": "action RPG",
+        "mechanic": "Bleed Aura",
+        "art": true,
+        "ts": "2026-06-09T13:55:55.276480"
       }
     ],
     "successful_art": 25,
     "failed_art": 0
   },
   "analysis": {
-    "best_genre": "survival horror",
-    "rate": 0.038,
+    "best_genre": "action RPG",
+    "rate": 0.074,
     "best_mechanic": null,
     "success_rate": 0
   }

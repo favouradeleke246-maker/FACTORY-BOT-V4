@@ -19,5 +19,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "shooter"
+  },
+  {
+    "id": "game_0002",
+    "date": "2026-06-09T13:55:53.481421",
+    "game": "Jinx Siege",
+    "genre": "action RPG",
+    "mechanic": "Bleed Aura",
+    "mech_desc": "Moving fast leaves a damage trail that hurts anything following",
+    "description": "Master Bleed Aura in this action RPG \u2014 no two sessions are the same.",
+    "hook": "Indie gold just dropped",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #BleedAura #DeathRollStudio #solanagaming",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Jinx_Siege/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Jinx_Siege/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-B2DF39DA972D1D8E",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
