@@ -166,5 +166,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0009",
+    "date": "2026-06-09T17:14:41.596453",
+    "game": "Null Xenith",
+    "genre": "action RPG",
+    "mechanic": "Chrono Fracture",
+    "mech_desc": "Hold to freeze all enemies in a 3-second time bubble",
+    "description": "Master Chrono Fracture in this action RPG \u2014 no two sessions are the same.",
+    "hook": "Indie gold just dropped",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #ChronoFracture #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Null_Xenith/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Null_Xenith/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-F18119F610FA87E3",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]

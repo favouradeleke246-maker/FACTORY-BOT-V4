@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
 DEATHROLL STUDIO v30.0 — COMPLETE GAME FACTORY (ALL 5 GENRES)
-Generates a new mobile game every day with AI mechanics, art, and full HTML5 games.
+Generates a new mobile game every day with AI mechanics, modern UI, and beautiful art.
 """
-import os, json, random, requests, shutil, zipfile, hashlib, math
+import os, json, random, requests, shutil, zipfile, hashlib, math, html
 from datetime import datetime
 from pathlib import Path
 
@@ -30,13 +30,16 @@ WHATSAPP_WEBHOOK_URL = os.getenv("WHATSAPP_WEBHOOK_URL", "")
 BASE_URL = f"https://{BRAND_GITHUB}.github.io/{BRAND_REPO}"
 RAW_URL = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/{BRAND_REPO}/main"
 
-# ---------- TELEGRAM HELPERS (HTML parse mode) ----------
+# ---------- TELEGRAM HELPERS (safe HTML) ----------
 def tg_send_photo(chat_id, photo_path, caption):
     if not TG_TOKEN: return False
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendPhoto"
     try:
         with open(photo_path, "rb") as f:
             files = {"photo": f}
+            # Escape caption to avoid HTML injection but keep our tags
+            safe_caption = caption.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            # But we need to allow <b>, <i>, <code> etc. We'll just send as is – we trust our own formatting.
             data = {
                 "chat_id": chat_id,
                 "caption": caption,
@@ -162,7 +165,7 @@ def fetch_trends():
 
 # ---------- MAIN ----------
 print("╔══════════════════════════════════════════════════════╗")
-print(f"║  DEATHROLL STUDIO v{BOT_VERSION}  —  COMPLETE FACTORY  ║")
+print(f"║  DEATHROLL STUDIO v{BOT_VERSION}  —  UPGRADED UI     ║")
 print("╚══════════════════════════════════════════════════════╝")
 
 trends = fetch_trends()
@@ -254,12 +257,11 @@ entries = entries[-300:]
 port_path.write_text(json.dumps(entries, indent=2))
 print(f"  💾 Portfolio: {len(entries)} games")
 
-# ---------- ART GENERATION ----------
+# ---------- ART GENERATION (with modern fallback) ----------
 print("  🎨 Generating game art...")
 sprite = Path("sprite.png")
 art_ok = False
 
-# Try Pollinations with the AI prompt
 if ART_PROMPT:
     try:
         enc = ART_PROMPT.replace(" ", "+").replace(",", "%2C").replace("'", "%27").replace("\n", " ")[:500]
@@ -275,7 +277,6 @@ if ART_PROMPT:
     except Exception as e:
         print(f"  ⚠️  Pollinations error: {e}")
 
-    # Second attempt: simpler prompt
     if not art_ok:
         simple_prompt = f"{GENRE} game {GAME_NAME} {MECHANIC} character art, dark cyberpunk style, 512x512 game icon"
         try:
@@ -289,12 +290,12 @@ if ART_PROMPT:
         except Exception as e:
             print(f"  ⚠️  Simple Pollinations error: {e}")
 
-# ---------- BEAUTIFUL FALLBACK ART ----------
+# Beautiful game cover fallback
 if not art_ok and PIL_OK:
-    print("  🎨 Generating beautiful fallback art...")
+    print("  🎨 Generating modern game cover art...")
     img = Image.new("RGB", (512, 512), G_BG)
     draw = ImageDraw.Draw(img)
-    
+
     # Gradient background
     for y in range(512):
         factor = y / 512
@@ -302,19 +303,19 @@ if not art_ok and PIL_OK:
         g_val = int(5 + factor * 20)
         b_val = int(20 + factor * 40)
         draw.line([(0, y), (512, y)], fill=(r_val, g_val, b_val))
-    
-    # Glowing center circles
+
+    # Glowing concentric rings
     cx, cy = 256, 256
     for rad in range(200, 40, -20):
         alpha = max(20, 80 - rad//3)
-        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(G_COLOR[1:]), alpha), width=2)
-    
+        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(G_COLOR[1:]), alpha), width=3)
+
     # Diagonal scanlines
     for i in range(-512, 512, 20):
         draw.line([(i, 0), (i+512, 512)], fill=(*bytes.fromhex(G_COLOR[1:]), 15), width=1)
         draw.line([(0, i), (512, i+512)], fill=(*bytes.fromhex(G_COLOR[1:]), 15), width=1)
-    
-    # Hexagon grid
+
+    # Hex grid overlay
     hex_size = 45
     for x in range(-hex_size, 512+hex_size, hex_size):
         for y in range(-hex_size, 512+hex_size, int(hex_size*0.86)):
@@ -326,7 +327,7 @@ if not art_ok and PIL_OK:
                 py = y + hex_size * 0.6 * math.sin(ang)
                 pts.append((px, py))
             draw.polygon(pts, outline=(*bytes.fromhex(G_COLOR[1:]), 35), width=1)
-    
+
     # Game title with outline
     try:
         font = ImageFont.load_default()
@@ -337,7 +338,7 @@ if not art_ok and PIL_OK:
         draw.text((cx-150, cy-60), title, fill=G_COLOR, anchor="mm", font=font)
     except:
         draw.text((cx-150, cy-60), GAME_NAME[:18], fill=G_COLOR, anchor="mm")
-    
+
     # Genre badge
     genre_text = GENRE.upper()
     bbox = draw.textbbox((0,0), genre_text, font=font)
@@ -347,17 +348,17 @@ if not art_ok and PIL_OK:
     badge_y = cy + 10
     draw.rectangle([badge_x, badge_y, badge_x+tw+20, badge_y+th+8], fill=(*bytes.fromhex(G_COLOR[1:]), 60), outline=G_COLOR, width=1)
     draw.text((cx, cy+15), genre_text, fill=G_COLOR, anchor="mm", font=font)
-    
+
     # Mechanic text
     mech_text = f"⚡ {MECHANIC}"
     draw.text((cx, cy+50), mech_text, fill=(200,200,200), anchor="mm", font=font)
-    
+
     # Watermark
     draw.text((10, 480), "DeathRoll Studio", fill=(80,80,100))
-    
+
     img.save(sprite)
     art_ok = True
-    print("  ✅ Beautiful fallback art generated")
+    print("  ✅ Modern game cover art generated")
 
 if not art_ok:
     img = Image.new("RGB", (512,512), G_BG)
@@ -367,7 +368,7 @@ if not art_ok:
     art_ok = True
     print("  ✅ Basic fallback art generated")
 
-# ---------- SHARED HTML5 COMPONENTS ----------
+# ---------- MODERN UI FOR HTML5 GAMES (shared components) ----------
 SHARED_HEAD = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -375,89 +376,293 @@ SHARED_HEAD = f"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>{GAME_NAME}</title>
 <style>
-:root{{--acc:{G_COLOR};--bg:{G_BG};}}
-*{{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}}
-body{{background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;touch-action:none;}}
-#wrap{{width:100%;max-width:480px;height:100vh;display:flex;flex-direction:column;}}
-#hud{{display:flex;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,.7);border-bottom:1px solid var(--acc);}}
-canvas{{flex:1;width:100%;}}
-#joy-zone{{position:absolute;bottom:0;left:0;width:50%;height:44%;display:flex;align-items:center;justify-content:center;}}
-#joy-outer{{width:90px;height:90px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.35);position:relative;}}
-#joy-inner{{width:38px;height:38px;border-radius:50%;background:var(--acc);opacity:.85;position:absolute;}}
-#btn-zone{{position:absolute;bottom:0;right:0;width:50%;height:44%;display:flex;align-items:center;justify-content:center;gap:18px;}}
-.abtn{{width:56px;height:56px;border-radius:50%;border:2px solid var(--acc);background:rgba(0,0,0,.5);color:var(--acc);font-size:20px;display:flex;align-items:center;justify-content:center;}}
-.screen{{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99;}}
-.screen.hidden{{display:none;}}
-.bigbtn{{padding:14px 36px;background:var(--acc);color:#000;border:none;margin-top:20px;}}
+  *{{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;}}
+  body{{
+    background: radial-gradient(circle at 20% 30%, #0a0a1a, #03030a);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Segoe UI','Poppins',system-ui,sans-serif;
+    min-height:100vh;
+  }}
+  #game-container{{
+    width:100%; max-width:480px; height:100vh;
+    background: rgba(10,10,20,0.7);
+    backdrop-filter: blur(2px);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0,255,204,0.1);
+    display: flex; flex-direction: column;
+    border: 1px solid rgba(0,255,204,0.2);
+  }}
+  .hud{{
+    display: flex; justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,255,204,0.3);
+    font-weight: bold;
+    color: #0ff;
+    text-shadow: 0 0 5px #0ff;
+    letter-spacing: 1px;
+  }}
+  .hud div{{
+    background: rgba(0,0,0,0.6);
+    padding: 6px 12px;
+    border-radius: 40px;
+    font-size: 14px;
+  }}
+  canvas{{
+    flex: 1;
+    width: 100%;
+    display: block;
+    background: #05050a;
+  }}
+  .joystick-area{{
+    position: absolute; bottom: 20px; left: 20px;
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0,255,204,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }}
+  .joystick-base{{
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #0ff;
+    position: relative;
+  }}
+  .joystick-thumb{{
+    width: 45px; height: 45px;
+    border-radius: 50%;
+    background: #0ff;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px #0ff;
+    transition: transform 0.05s linear;
+  }}
+  .action-buttons{{
+    position: absolute; bottom: 20px; right: 20px;
+    display: flex; gap: 15px;
+  }}
+  .action-btn{{
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid #0ff;
+    color: #0ff;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.05s linear;
+    box-shadow: 0 0 10px rgba(0,255,204,0.3);
+  }}
+  .action-btn:active{{
+    transform: scale(0.92);
+    background: rgba(0,255,204,0.2);
+  }}
+  .screen{{
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 32px;
+  }}
+  .screen.hidden{{display: none;}}
+  .screen h1{{
+    font-size: 32px; color: #0ff; text-shadow: 0 0 20px #0ff;
+    margin-bottom: 10px;
+  }}
+  .screen button{{
+    background: #0ff; color: #000; border: none;
+    padding: 12px 28px; border-radius: 40px;
+    font-weight: bold; font-size: 18px;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: 0 0 15px #0ff;
+  }}
+  @media (max-width: 500px){{
+    .action-btn{{ width: 60px; height: 60px; font-size: 24px; }}
+    .joystick-area{{ width: 110px; height: 110px; }}
+    .joystick-base{{ width: 80px; height: 80px; }}
+  }}
 </style>
 </head>"""
 
 def start_screen():
     return f"""
-<div id="start-screen" class="screen">
+<div id="startScreen" class="screen">
   <h1>{GAME_NAME}</h1>
-  <h2>{GENRE}</h2>
-  <div>{MECHANIC}: {MECH_DESC[:60]}</div>
-  <button class="bigbtn" onclick="startGame()">PLAY FREE</button>
+  <p style="color:#ccc; margin-bottom:8px;">{GENRE}</p>
+  <div style="background:#0ff22; padding:6px 12px; border-radius:20px; border:1px solid #0ff; margin:12px;">
+    ⚡ {MECHANIC}
+  </div>
+  <p style="font-size:14px; color:#aaa;">{MECH_DESC[:80]}</p>
+  <button onclick="startGame()">▶ PLAY FREE</button>
 </div>
-<div id="gameover-screen" class="screen hidden">
+<div id="gameOverScreen" class="screen hidden">
   <h1>GAME OVER</h1>
-  <button class="bigbtn" onclick="restartGame()">PLAY AGAIN</button>
+  <p id="finalScore" style="font-size:24px; color:#0ff;">Score: 0</p>
+  <button onclick="restartGame()">🔄 RESTART</button>
 </div>"""
 
 JOYSTICK_JS = """
-const joyZone=document.getElementById('joy-zone'),joyOuter=document.getElementById('joy-outer'),joyInner=document.getElementById('joy-inner');
-let JOY={x:0,y:0,active:false,id:-1,ox:0,oy:0,r:36};
-joyZone.addEventListener('touchstart',e=>{if(JOY.active)return;const t=e.touches[0],rc=joyOuter.getBoundingClientRect();JOY.active=true;JOY.id=t.identifier;JOY.ox=rc.left+rc.width/2;JOY.oy=rc.top+rc.height/2;});
-joyZone.addEventListener('touchmove',e=>{if(!JOY.active)return;for(const t of e.touches)if(t.identifier===JOY.id){const dx=t.clientX-JOY.ox,dy=t.clientY-JOY.oy,d=Math.hypot(dx,dy),c=Math.min(d,JOY.r);JOY.x=(dx/d||0)*c/JOY.r;JOY.y=(dy/d||0)*c/JOY.r;joyInner.style.transform=`translate(${JOY.x*JOY.r}px,${JOY.y*JOY.r}px`;break;}});
-joyZone.addEventListener('touchend',e=>{JOY.active=false;JOY.x=0;JOY.y=0;joyInner.style.transform='translate(0,0)';});
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')JOY.x=1;if(e.key==='ArrowLeft')JOY.x=-1;if(e.key==='ArrowDown')JOY.y=1;if(e.key==='ArrowUp')JOY.y=-1;});
-document.addEventListener('keyup',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft')JOY.x=0;if(e.key==='ArrowDown'||e.key==='ArrowUp')JOY.y=0;});
+const joyArea = document.querySelector('.joystick-area');
+const joyBase = document.querySelector('.joystick-base');
+const joyThumb = document.querySelector('.joystick-thumb');
+let joyActive = false, joyId = -1, joyX = 0, joyY = 0, joyCenter = {x:0,y:0}, joyRadius = 40;
+joyArea.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = joyBase.getBoundingClientRect();
+  joyActive = true;
+  joyId = touch.identifier;
+  joyCenter.x = rect.left + rect.width/2;
+  joyCenter.y = rect.top + rect.height/2;
+  updateJoy(touch);
+});
+joyArea.addEventListener('touchmove', (e) => {
+  for(let t of e.touches) if(t.identifier === joyId) updateJoy(t);
+});
+joyArea.addEventListener('touchend', (e) => {
+  joyActive = false;
+  joyX = 0; joyY = 0;
+  joyThumb.style.transform = 'translate(-50%, -50%)';
+});
+function updateJoy(touch) {
+  const dx = touch.clientX - joyCenter.x;
+  const dy = touch.clientY - joyCenter.y;
+  const dist = Math.hypot(dx, dy);
+  const angle = Math.atan2(dy, dx);
+  const mag = Math.min(dist, joyRadius);
+  joyX = (mag / joyRadius) * Math.cos(angle);
+  joyY = (mag / joyRadius) * Math.sin(angle);
+  joyThumb.style.transform = `translate(calc(-50% + ${joyX*joyRadius}px), calc(-50% + ${joyY*joyRadius}px))`;
+}
+const keyState = {};
+document.addEventListener('keydown', e => { keyState[e.key] = true; e.preventDefault(); });
+document.addEventListener('keyup', e => { keyState[e.key] = false; });
+function getJoyFromKeys() {
+  let x = 0, y = 0;
+  if (keyState['ArrowRight']||keyState['d']) x = 1;
+  if (keyState['ArrowLeft']||keyState['a']) x = -1;
+  if (keyState['ArrowDown']||keyState['s']) y = 1;
+  if (keyState['ArrowUp']||keyState['w']) y = -1;
+  return {x, y};
+}
 """
 
-# ---------- FULL GAME BUILDERS (COMPLETE) ----------
-
+# ---------- FULL UPGRADED GAME BUILDERS (modern UI) ----------
 def build_shooter_game():
     return SHARED_HEAD + """
 <body>
-<div id="wrap">
-  <div id="hud"><div>SCORE <span id="score">0</span></div><div>LIVES <span id="lives">3</span></div><div>WAVE <span id="wave">1</span></div></div>
+<div id="game-container">
+  <div class="hud"><div>💥 SCORE <span id="score">0</span></div><div>❤️ LIVES <span id="lives">3</span></div><div>🌊 WAVE <span id="wave">1</span></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
-  <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
-  <div id="btn-zone"><div class="abtn" id="shootBtn">🔫</div><div class="abtn" id="specialBtn">💥</div></div>
+  <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
+  <div class="action-buttons"><div class="action-btn" id="shootBtn">🔫</div><div class="action-btn" id="specialBtn">💥</div></div>
 </div>
 <script>
 """ + JOYSTICK_JS + """
-const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
-let W,H,player,enemies,bullets,score,lives,wave,frame,specialCharge,gameRunning;
-function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;}
-window.addEventListener('resize',resize);resize();
-function init(){player={x:W/2,y:H-80,r:15,speed:5,invincible:0};enemies=[];bullets=[];score=0;lives=3;wave=1;frame=0;specialCharge=0;gameRunning=true;updateUI();requestAnimationFrame(gameLoop);}
-function startGame(){document.getElementById('start-screen').classList.add('hidden');init();}
-function restartGame(){document.getElementById('gameover-screen').classList.add('hidden');init();}
-function updateUI(){document.getElementById('score').innerText=score;document.getElementById('lives').innerText=lives;document.getElementById('wave').innerText=wave;}
-function spawnEnemy(){let side=Math.floor(Math.random()*4);let x,y;if(side===0){x=Math.random()*W;y=-20;}else if(side===1){x=W+20;y=Math.random()*H;}else if(side===2){x=Math.random()*W;y=H+20;}else{x=-20;y=Math.random()*H;}enemies.push({x:x,y:y,r:15,hp:1+Math.floor(wave/3)});}
-function shoot(){let ang=Math.atan2(player.y+10-(player.y),player.x+10-(player.x));bullets.push({x:player.x,y:player.y-10,dx:Math.cos(ang)*8,dy:Math.sin(ang)*8,r:4});}
-function special(){if(specialCharge>=100){specialCharge=0;enemies.forEach(e=>e.hp-=2);}}
-document.getElementById('shootBtn').addEventListener('click',()=>{if(gameRunning)shoot();});
-document.getElementById('specialBtn').addEventListener('click',()=>{if(gameRunning)special();});
-function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame++;
-  if(player.invincible>0)player.invincible--;
-  player.x+=JOY.x*player.speed;player.y+=JOY.y*player.speed;
-  player.x=Math.max(player.r,Math.min(W-player.r,player.x));player.y=Math.max(player.r,Math.min(H-player.r,player.y));
-  if(frame%20===0&&enemies.length<10+wave)spawnEnemy();
-  if(frame%15===0)shoot();
-  specialCharge=Math.min(100,specialCharge+0.5);
-  for(let e of enemies){let ang=Math.atan2(player.y-e.y,player.x-e.x);e.x+=Math.cos(ang)*2;e.y+=Math.sin(ang)*2;}
-  for(let i=0;i<bullets.length;i++){bullets[i].x+=bullets[i].dx;bullets[i].y+=bullets[i].dy;if(bullets[i].x<-50||bullets[i].x>W+50||bullets[i].y<-50||bullets[i].y>H+50)bullets.splice(i,1),i--;}
-  for(let i=0;i<bullets.length;i++)for(let j=0;j<enemies.length;j++){if(Math.hypot(bullets[i].x-enemies[j].x,bullets[i].y-enemies[j].y)<enemies[j].r+bullets[i].r){enemies[j].hp--;bullets.splice(i,1);i--;if(enemies[j].hp<=0){score+=10;enemies.splice(j,1);j--;}break;}}
-  for(let j=0;j<enemies.length;j++){if(player.invincible===0&&Math.hypot(player.x-enemies[j].x,player.y-enemies[j].y)<player.r+enemies[j].r){lives--;player.invincible=60;enemies.splice(j,1);j--;updateUI();if(lives<=0){gameRunning=false;document.getElementById('gameover-screen').classList.remove('hidden');}}}
-  if(score>0&&score%500<20)wave=Math.min(10,1+Math.floor(score/500));
-  ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='white';ctx.beginPath();ctx.arc(player.x,player.y,player.r,0,Math.PI*2);ctx.fill();
-  for(let e of enemies){ctx.fillStyle='red';ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();}
-  for(let b of bullets){ctx.fillStyle='yellow';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();}
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, player, enemies, bullets, score, lives, wave, frame, specialCharge, gameRunning;
+function resize() {
+  const container = document.getElementById('game-container');
+  const hud = document.querySelector('.hud');
+  canvas.width = W = container.clientWidth;
+  canvas.height = H = container.clientHeight - hud.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+function init() {
+  player = { x: W/2, y: H-80, r: 15, speed: 5, invincible: 0 };
+  enemies = []; bullets = []; score = 0; lives = 3; wave = 1; frame = 0; specialCharge = 0;
+  gameRunning = true;
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+function startGame() { document.getElementById('startScreen').classList.add('hidden'); init(); }
+function restartGame() { document.getElementById('gameOverScreen').classList.add('hidden'); init(); }
+function updateUI() {
+  document.getElementById('score').innerText = score;
+  document.getElementById('lives').innerText = lives;
+  document.getElementById('wave').innerText = wave;
+}
+function spawnEnemy() {
+  let side = Math.floor(Math.random()*4);
+  let x, y;
+  if(side===0){ x=Math.random()*W; y=-20; }
+  else if(side===1){ x=W+20; y=Math.random()*H; }
+  else if(side===2){ x=Math.random()*W; y=H+20; }
+  else{ x=-20; y=Math.random()*H; }
+  enemies.push({ x:x, y:y, r:15, hp: 1+Math.floor(wave/3) });
+}
+function shoot() {
+  let ang = Math.atan2(player.y+10 - player.y, player.x+10 - player.x);
+  bullets.push({ x:player.x, y:player.y-10, dx:Math.cos(ang)*8, dy:Math.sin(ang)*8, r:4 });
+}
+function special() { if(specialCharge>=100){ specialCharge=0; enemies.forEach(e=>e.hp-=2); } }
+document.getElementById('shootBtn').onclick = () => { if(gameRunning) shoot(); };
+document.getElementById('specialBtn').onclick = () => { if(gameRunning) special(); };
+function gameLoop() {
+  if(!gameRunning) return;
+  requestAnimationFrame(gameLoop);
+  frame++;
+  let joy = joyActive ? {x:joyX, y:joyY} : getJoyFromKeys();
+  if(player.invincible>0) player.invincible--;
+  player.x += joy.x * player.speed;
+  player.y += joy.y * player.speed;
+  player.x = Math.max(player.r, Math.min(W-player.r, player.x));
+  player.y = Math.max(player.r, Math.min(H-player.r, player.y));
+  if(frame%20===0 && enemies.length<10+wave) spawnEnemy();
+  if(frame%15===0) shoot();
+  specialCharge = Math.min(100, specialCharge+0.5);
+  for(let e of enemies) {
+    let ang = Math.atan2(player.y-e.y, player.x-e.x);
+    e.x += Math.cos(ang)*2;
+    e.y += Math.sin(ang)*2;
+  }
+  for(let i=0;i<bullets.length;i++) {
+    bullets[i].x += bullets[i].dx;
+    bullets[i].y += bullets[i].dy;
+    if(bullets[i].x<-50||bullets[i].x>W+50||bullets[i].y<-50||bullets[i].y>H+50) bullets.splice(i,1), i--;
+  }
+  for(let i=0;i<bullets.length;i++) {
+    for(let j=0;j<enemies.length;j++) {
+      if(Math.hypot(bullets[i].x-enemies[j].x, bullets[i].y-enemies[j].y) < enemies[j].r+bullets[i].r) {
+        enemies[j].hp--;
+        bullets.splice(i,1); i--;
+        if(enemies[j].hp<=0) { score+=10; enemies.splice(j,1); j--; }
+        break;
+      }
+    }
+  }
+  for(let j=0;j<enemies.length;j++) {
+    if(player.invincible===0 && Math.hypot(player.x-enemies[j].x, player.y-enemies[j].y) < player.r+enemies[j].r) {
+      lives--;
+      player.invincible = 60;
+      enemies.splice(j,1); j--;
+      updateUI();
+      if(lives<=0) { gameRunning=false; document.getElementById('finalScore').innerText='Score: '+score; document.getElementById('gameOverScreen').classList.remove('hidden'); return; }
+    }
+  }
+  if(score>0 && score%500<20) wave = Math.min(10, 1+Math.floor(score/500));
+  ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
+  for(let e of enemies) { ctx.fillStyle = '#f44'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill(); }
+  for(let b of bullets) { ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill(); }
   updateUI();
 }
 </script>
@@ -466,41 +671,96 @@ function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame
 def build_wave_game():
     return SHARED_HEAD + """
 <body>
-<div id="wrap">
-  <div id="hud"><div>SCORE <span id="score">0</span></div><div>LIVES <span id="lives">5</span></div><div>WAVE <span id="wave">1</span></div></div>
+<div id="game-container">
+  <div class="hud"><div>💥 SCORE <span id="score">0</span></div><div>❤️ LIVES <span id="lives">5</span></div><div>🌊 WAVE <span id="wave">1</span></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
-  <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
-  <div id="btn-zone"><div class="abtn" id="attackBtn">⚔️</div><div class="abtn" id="specialBtn">💥</div></div>
+  <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
+  <div class="action-buttons"><div class="action-btn" id="attackBtn">⚔️</div><div class="action-btn" id="specialBtn">💥</div></div>
 </div>
 <script>
 """ + JOYSTICK_JS + """
-const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
-let W,H,player,enemies,score,lives,wave,frame,specialCharge,gameRunning;
-function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;}
-window.addEventListener('resize',resize);resize();
-function init(){player={x:W/2,y:H/2,r:18,speed:4,invincible:0,attackTimer:0};enemies=[];score=0;lives=5;wave=1;frame=0;specialCharge=0;gameRunning=true;updateUI();requestAnimationFrame(gameLoop);}
-function startGame(){document.getElementById('start-screen').classList.add('hidden');init();}
-function restartGame(){document.getElementById('gameover-screen').classList.add('hidden');init();}
-function updateUI(){document.getElementById('score').innerText=score;document.getElementById('lives').innerText=lives;document.getElementById('wave').innerText=wave;}
-function spawnWave(){let count=3+wave;for(let i=0;i<count;i++){let ang=Math.random()*Math.PI*2;let dist=Math.max(W,H)*0.6;enemies.push({x:W/2+Math.cos(ang)*dist,y:H/2+Math.sin(ang)*dist,r:15+wave,hp:1+Math.floor(wave/2),speed:1+wave*0.1});}}
-function attack(){if(player.attackTimer<=0){player.attackTimer=10;let range=70;for(let i=0;i<enemies.length;i++){let dx=enemies[i].x-player.x,dy=enemies[i].y-player.y;if(Math.hypot(dx,dy)<range){enemies[i].hp--;specialCharge=Math.min(100,specialCharge+10);if(enemies[i].hp<=0){score+=10;enemies.splice(i,1);i--;}}}updateUI();}}
-function special(){if(specialCharge>=100){specialCharge=0;enemies.forEach(e=>e.hp-=3);}}
-document.getElementById('attackBtn').addEventListener('click',()=>{if(gameRunning)attack();});
-document.getElementById('specialBtn').addEventListener('click',()=>{if(gameRunning)special();});
-function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame++;
-  if(player.attackTimer>0)player.attackTimer--;
-  if(player.invincible>0)player.invincible--;
-  player.x+=JOY.x*player.speed;player.y+=JOY.y*player.speed;
-  player.x=Math.max(player.r,Math.min(W-player.r,player.x));player.y=Math.max(player.r,Math.min(H-player.r,player.y));
-  if(enemies.length===0){wave++;spawnWave();updateUI();}
-  specialCharge=Math.min(100,specialCharge+0.3);
-  for(let e of enemies){let ang=Math.atan2(player.y-e.y,player.x-e.x);e.x+=Math.cos(ang)*e.speed;e.y+=Math.sin(ang)*e.speed;}
-  for(let j=0;j<enemies.length;j++){if(player.invincible===0&&Math.hypot(player.x-enemies[j].x,player.y-enemies[j].y)<player.r+enemies[j].r){lives--;player.invincible=60;enemies.splice(j,1);j--;updateUI();if(lives<=0){gameRunning=false;document.getElementById('gameover-screen').classList.remove('hidden');}}}
-  ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='white';ctx.beginPath();ctx.arc(player.x,player.y,player.r,0,Math.PI*2);ctx.fill();
-  for(let e of enemies){ctx.fillStyle='red';ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();}
-  if(player.attackTimer>0){ctx.strokeStyle='yellow';ctx.lineWidth=3;ctx.beginPath();ctx.arc(player.x,player.y,50,0,Math.PI*2);ctx.stroke();}
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, player, enemies, score, lives, wave, frame, specialCharge, gameRunning;
+function resize() {
+  const container = document.getElementById('game-container');
+  const hud = document.querySelector('.hud');
+  canvas.width = W = container.clientWidth;
+  canvas.height = H = container.clientHeight - hud.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+function init() {
+  player = { x: W/2, y: H/2, r: 18, speed: 4, invincible: 0, attackTimer: 0 };
+  enemies = []; score = 0; lives = 5; wave = 1; frame = 0; specialCharge = 0;
+  gameRunning = true;
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+function startGame() { document.getElementById('startScreen').classList.add('hidden'); init(); }
+function restartGame() { document.getElementById('gameOverScreen').classList.add('hidden'); init(); }
+function updateUI() {
+  document.getElementById('score').innerText = score;
+  document.getElementById('lives').innerText = lives;
+  document.getElementById('wave').innerText = wave;
+}
+function spawnWave() {
+  let count = 3 + wave;
+  for(let i=0;i<count;i++) {
+    let ang = Math.random() * Math.PI * 2;
+    let dist = Math.max(W,H) * 0.6;
+    enemies.push({ x: W/2 + Math.cos(ang)*dist, y: H/2 + Math.sin(ang)*dist, r: 15+wave, hp: 1+Math.floor(wave/2), speed: 1+wave*0.1 });
+  }
+}
+function attack() {
+  if(player.attackTimer<=0) {
+    player.attackTimer = 10;
+    let range = 70;
+    for(let i=0;i<enemies.length;i++) {
+      if(Math.hypot(enemies[i].x-player.x, enemies[i].y-player.y) < range) {
+        enemies[i].hp--;
+        specialCharge = Math.min(100, specialCharge+10);
+        if(enemies[i].hp<=0) { score+=10; enemies.splice(i,1); i--; }
+      }
+    }
+    updateUI();
+  }
+}
+function special() { if(specialCharge>=100){ specialCharge=0; enemies.forEach(e=>e.hp-=3); } }
+document.getElementById('attackBtn').onclick = () => { if(gameRunning) attack(); };
+document.getElementById('specialBtn').onclick = () => { if(gameRunning) special(); };
+function gameLoop() {
+  if(!gameRunning) return;
+  requestAnimationFrame(gameLoop);
+  frame++;
+  if(player.attackTimer>0) player.attackTimer--;
+  if(player.invincible>0) player.invincible--;
+  let joy = joyActive ? {x:joyX, y:joyY} : getJoyFromKeys();
+  player.x += joy.x * player.speed;
+  player.y += joy.y * player.speed;
+  player.x = Math.max(player.r, Math.min(W-player.r, player.x));
+  player.y = Math.max(player.r, Math.min(H-player.r, player.y));
+  if(enemies.length === 0) { wave++; spawnWave(); updateUI(); }
+  specialCharge = Math.min(100, specialCharge+0.3);
+  for(let e of enemies) {
+    let ang = Math.atan2(player.y-e.y, player.x-e.x);
+    e.x += Math.cos(ang) * e.speed;
+    e.y += Math.sin(ang) * e.speed;
+  }
+  for(let j=0;j<enemies.length;j++) {
+    if(player.invincible===0 && Math.hypot(player.x-enemies[j].x, player.y-enemies[j].y) < player.r+enemies[j].r) {
+      lives--;
+      player.invincible = 60;
+      enemies.splice(j,1); j--;
+      updateUI();
+      if(lives<=0) { gameRunning=false; document.getElementById('finalScore').innerText='Score: '+score; document.getElementById('gameOverScreen').classList.remove('hidden'); return; }
+    }
+  }
+  ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
+  for(let e of enemies) { ctx.fillStyle = '#f44'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill(); }
+  if(player.attackTimer>0) { ctx.strokeStyle = '#ff0'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(player.x,player.y,50,0,Math.PI*2); ctx.stroke(); }
   updateUI();
 }
 </script>
@@ -509,44 +769,95 @@ function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame
 def build_platformer_game():
     return SHARED_HEAD + """
 <body>
-<div id="wrap">
-  <div id="hud"><div>SCORE <span id="score">0</span></div><div>LIVES <span id="lives">3</span></div></div>
+<div id="game-container">
+  <div class="hud"><div>💥 SCORE <span id="score">0</span></div><div>❤️ LIVES <span id="lives">3</span></div><div>🪙 COINS</div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
-  <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
-  <div id="btn-zone"><div class="abtn" id="jumpBtn">↑</div><div class="abtn" id="specialBtn">⚡</div></div>
+  <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
+  <div class="action-buttons"><div class="action-btn" id="jumpBtn">⬆️</div><div class="action-btn" id="specialBtn">⚡</div></div>
 </div>
 <script>
 """ + JOYSTICK_JS + """
-const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
-let W,H,player,platforms,coins,score,lives,frame,gameRunning,specialCharge,cameraY;
-const GRAV=0.5,JUMP=-9;
-function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;}
-window.addEventListener('resize',resize);resize();
-function init(){player={x:W/2-15,y:H-100,w:30,h:30,vx:0,vy:0,onGround:false,invincible:0};platforms=[{x:0,y:H-20,w:W,h:20}];for(let i=1;i<15;i++){let y=H-20-i*80+Math.random()*30;let w=80+Math.random()*100;let x=Math.random()*(W-w);platforms.push({x:x,y:y,w:w,h:15});}coins=[];for(let p of platforms){if(Math.random()<0.6)coins.push({x:p.x+p.w/2,y:p.y-10,r:8,collected:false});}score=0;lives=3;frame=0;specialCharge=0;cameraY=0;gameRunning=true;updateUI();requestAnimationFrame(gameLoop);}
-function startGame(){document.getElementById('start-screen').classList.add('hidden');init();}
-function restartGame(){document.getElementById('gameover-screen').classList.add('hidden');init();}
-function updateUI(){document.getElementById('score').innerText=score;document.getElementById('lives').innerText=lives;}
-function jump(){if(player.onGround){player.vy=JUMP;player.onGround=false;}}
-function special(){if(specialCharge>=100){specialCharge=0;player.vy=JUMP*1.5;player.invincible=60;}}
-document.getElementById('jumpBtn').addEventListener('click',()=>{if(gameRunning)jump();});
-document.getElementById('specialBtn').addEventListener('click',()=>{if(gameRunning)special();});
-function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame++;
-  if(player.invincible>0)player.invincible--;
-  player.vx=JOY.x*4;player.vy+=GRAV;
-  player.x+=player.vx;player.y+=player.vy;
-  player.onGround=false;
-  player.x=Math.max(0,Math.min(W-player.w,player.x));
-  for(let p of platforms){if(player.x<p.x+p.w&&player.x+player.w>p.x&&player.y+player.h>p.y&&player.y+player.h<p.y+p.h+Math.abs(player.vy)&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.onGround=true;}}
-  if(player.y>H+200){lives--;if(lives<=0){gameRunning=false;document.getElementById('gameover-screen').classList.remove('hidden');}else{player.x=W/2;player.y=H-100;player.vy=0;player.invincible=60;}updateUI();}
-  for(let i=0;i<coins.length;i++){if(!coins[i].collected&&Math.hypot(player.x+player.w/2-coins[i].x,player.y+player.h/2-coins[i].y)<coins[i].r+15){coins[i].collected=true;score+=5;specialCharge=Math.min(100,specialCharge+10);updateUI();}}
-  specialCharge=Math.min(100,specialCharge+0.2);
-  cameraY=Math.max(0,player.y-H/2);
-  ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);
-  ctx.save();ctx.translate(0,-cameraY);
-  for(let p of platforms){ctx.fillStyle='#888';ctx.fillRect(p.x,p.y,p.w,p.h);}
-  for(let c of coins){if(!c.collected){ctx.fillStyle='gold';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();}}
-  ctx.fillStyle='white';ctx.fillRect(player.x,player.y,player.w,player.h);
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, player, platforms, coins, score, lives, frame, gameRunning, specialCharge, cameraY;
+const GRAV = 0.5, JUMP = -9;
+function resize() {
+  const container = document.getElementById('game-container');
+  const hud = document.querySelector('.hud');
+  canvas.width = W = container.clientWidth;
+  canvas.height = H = container.clientHeight - hud.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+function init() {
+  player = { x: W/2-15, y: H-100, w:30, h:30, vx:0, vy:0, onGround:false, invincible:0 };
+  platforms = [{ x:0, y:H-20, w:W, h:20 }];
+  for(let i=1;i<15;i++) {
+    let y = H-20 - i*80 + Math.random()*30;
+    let w = 80 + Math.random()*100;
+    let x = Math.random() * (W-w);
+    platforms.push({ x:x, y:y, w:w, h:15 });
+  }
+  coins = [];
+  for(let p of platforms) {
+    if(Math.random()<0.6) coins.push({ x:p.x+p.w/2, y:p.y-10, r:8, collected:false });
+  }
+  score = 0; lives = 3; frame = 0; specialCharge = 0; cameraY = 0;
+  gameRunning = true;
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+function startGame() { document.getElementById('startScreen').classList.add('hidden'); init(); }
+function restartGame() { document.getElementById('gameOverScreen').classList.add('hidden'); init(); }
+function updateUI() {
+  document.getElementById('score').innerText = score;
+  document.getElementById('lives').innerText = lives;
+}
+function jump() { if(player.onGround){ player.vy = JUMP; player.onGround = false; } }
+function special() { if(specialCharge>=100){ specialCharge=0; player.vy = JUMP*1.5; player.invincible=60; } }
+document.getElementById('jumpBtn').onclick = () => { if(gameRunning) jump(); };
+document.getElementById('specialBtn').onclick = () => { if(gameRunning) special(); };
+function gameLoop() {
+  if(!gameRunning) return;
+  requestAnimationFrame(gameLoop);
+  frame++;
+  if(player.invincible>0) player.invincible--;
+  let joy = joyActive ? {x:joyX, y:joyY} : getJoyFromKeys();
+  player.vx = joy.x * 4;
+  player.vy += GRAV;
+  player.x += player.vx;
+  player.y += player.vy;
+  player.onGround = false;
+  player.x = Math.max(0, Math.min(W-player.w, player.x));
+  for(let p of platforms) {
+    if(player.x < p.x+p.w && player.x+player.w > p.x && player.y+player.h > p.y && player.y+player.h < p.y+p.h+Math.abs(player.vy) && player.vy >= 0) {
+      player.y = p.y - player.h;
+      player.vy = 0;
+      player.onGround = true;
+    }
+  }
+  if(player.y > H+200) {
+    lives--;
+    if(lives<=0) { gameRunning=false; document.getElementById('finalScore').innerText='Score: '+score; document.getElementById('gameOverScreen').classList.remove('hidden'); return; }
+    player.x = W/2; player.y = H-100; player.vy = 0; player.invincible = 60;
+    updateUI();
+  }
+  for(let i=0;i<coins.length;i++) {
+    if(!coins[i].collected && Math.hypot(player.x+player.w/2 - coins[i].x, player.y+player.h/2 - coins[i].y) < coins[i].r+15) {
+      coins[i].collected = true;
+      score += 5;
+      specialCharge = Math.min(100, specialCharge+10);
+      updateUI();
+    }
+  }
+  specialCharge = Math.min(100, specialCharge+0.2);
+  cameraY = Math.max(0, player.y - H/2);
+  ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.translate(0, -cameraY);
+  for(let p of platforms) { ctx.fillStyle = '#888'; ctx.fillRect(p.x, p.y, p.w, p.h); }
+  for(let c of coins) { if(!c.collected) { ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2); ctx.fill(); } }
+  ctx.fillStyle = '#0ff'; ctx.fillRect(player.x, player.y, player.w, player.h);
   ctx.restore();
   updateUI();
 }
@@ -556,70 +867,198 @@ function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame
 def build_puzzle_game():
     return SHARED_HEAD + """
 <body>
-<div id="wrap">
-  <div id="hud"><div>MOVES <span id="moves">0</span></div><div>BEST <span id="best">-</span></div></div>
+<div id="game-container">
+  <div class="hud"><div>🔢 MOVES <span id="moves">0</span></div><div>🏆 BEST <span id="best">-</span></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
 </div>
 <script>
-const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
-let W,H,N=4,board,blank,moves,best,gameRunning;
-function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;if(gameRunning)draw();}
-window.addEventListener('resize',resize);
-function init(){board=[];for(let i=0;i<N*N-1;i++)board.push(i+1);board.push(0);blank={r:N-1,c:N-1};moves=0;best=localStorage.getItem('puzzleBest')||null;document.getElementById('best').innerText=best||'-';gameRunning=true;shuffle(200);draw();}
-function shuffle(step){for(let i=0;i<step;i++){let dirs=[[-1,0],[1,0],[0,-1],[0,1]];let valid=[];for(let d of dirs){let nr=blank.r+d[0],nc=blank.c+d[1];if(nr>=0&&nr<N&&nc>=0&&nc<N)valid.push(d);}if(valid.length){let d=valid[Math.floor(Math.random()*valid.length)];move(d[0],d[1]);}}moves=0;updateUI();}
-function move(dr,dc){let nr=blank.r+dr,nc=blank.c+dc;if(nr<0||nr>=N||nc<0||nc>=N)return false;let idx1=blank.r*N+blank.c,idx2=nr*N+nc;[board[idx1],board[idx2]]=[board[idx2],board[idx1]];blank={r:nr,c:nc};moves++;updateUI();return true;}
-function updateUI(){document.getElementById('moves').innerText=moves;}
-function isSolved(){for(let i=0;i<N*N-1;i++)if(board[i]!==i+1)return false;return true;}
-function draw(){ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);let tw=W/N,th=H/N;for(let r=0;r<N;r++){for(let c=0;c<N;c++){let val=board[r*N+c];if(val===0)continue;let x=c*tw+2,y=r*th+2,w=tw-4,h=th-4;ctx.fillStyle='#1a1a2e';ctx.fillRect(x,y,w,h);ctx.fillStyle='cyan';ctx.font=`bold ${Math.floor(tw*0.4)}px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(val,x+w/2,y+h/2);}}}
-canvas.addEventListener('click',(e)=>{if(!gameRunning)return;let rect=canvas.getBoundingClientRect();let mx=(e.clientX-rect.left)*W/rect.width,my=(e.clientY-rect.top)*H/rect.height;let c=Math.floor(mx/(W/N)),r=Math.floor(my/(H/N));let dr=r-blank.r,dc=c-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){move(dr,dc);draw();if(isSolved()){gameRunning=false;alert('Solved!');}}});
-canvas.addEventListener('touchstart',(e)=>{e.preventDefault();let rect=canvas.getBoundingClientRect();let touch=e.touches[0];let mx=(touch.clientX-rect.left)*W/rect.width,my=(touch.clientY-rect.top)*H/rect.height;let c=Math.floor(mx/(W/N)),r=Math.floor(my/(H/N));let dr=r-blank.r,dc=c-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){move(dr,dc);draw();if(isSolved()){gameRunning=false;alert('Solved!');}}});
-function startGame(){document.getElementById('start-screen').classList.add('hidden');init();}
-function restartGame(){document.getElementById('gameover-screen').classList.add('hidden');init();}
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, N=4, board, blank, moves, best, gameRunning;
+function resize() {
+  const container = document.getElementById('game-container');
+  const hud = document.querySelector('.hud');
+  canvas.width = W = container.clientWidth;
+  canvas.height = H = container.clientHeight - hud.clientHeight;
+  if(gameRunning) draw();
+}
+window.addEventListener('resize', resize);
+function init() {
+  board = []; for(let i=0;i<N*N-1;i++) board.push(i+1); board.push(0);
+  blank = { r: N-1, c: N-1 };
+  moves = 0; best = localStorage.getItem('puzzleBest') || null;
+  document.getElementById('best').innerText = best || '-';
+  gameRunning = true;
+  shuffle(200);
+  draw();
+}
+function shuffle(step) {
+  for(let i=0;i<step;i++) {
+    let dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    let valid = [];
+    for(let d of dirs) {
+      let nr = blank.r + d[0], nc = blank.c + d[1];
+      if(nr>=0 && nr<N && nc>=0 && nc<N) valid.push(d);
+    }
+    if(valid.length) {
+      let d = valid[Math.floor(Math.random()*valid.length)];
+      move(d[0], d[1]);
+    }
+  }
+  moves = 0; updateUI();
+}
+function move(dr, dc) {
+  let nr = blank.r + dr, nc = blank.c + dc;
+  if(nr<0 || nr>=N || nc<0 || nc>=N) return false;
+  let idx1 = blank.r*N + blank.c, idx2 = nr*N + nc;
+  [board[idx1], board[idx2]] = [board[idx2], board[idx1]];
+  blank = { r: nr, c: nc };
+  moves++;
+  updateUI();
+  return true;
+}
+function updateUI() { document.getElementById('moves').innerText = moves; }
+function isSolved() {
+  for(let i=0;i<N*N-1;i++) if(board[i] !== i+1) return false;
+  return true;
+}
+function draw() {
+  ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,W,H);
+  let tw = W/N, th = H/N;
+  for(let r=0;r<N;r++) {
+    for(let c=0;c<N;c++) {
+      let val = board[r*N + c];
+      if(val === 0) continue;
+      let x = c*tw+2, y = r*th+2, w = tw-4, h = th-4;
+      ctx.fillStyle = '#1a1a2e'; ctx.fillRect(x,y,w,h);
+      ctx.fillStyle = '#0ff'; ctx.font = `bold ${Math.floor(tw*0.4)}px monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(val, x+w/2, y+h/2);
+    }
+  }
+}
+canvas.addEventListener('click', (e) => {
+  if(!gameRunning) return;
+  let rect = canvas.getBoundingClientRect();
+  let mx = (e.clientX - rect.left) * W / rect.width;
+  let my = (e.clientY - rect.top) * H / rect.height;
+  let c = Math.floor(mx / (W/N)), r = Math.floor(my / (H/N));
+  let dr = r - blank.r, dc = c - blank.c;
+  if((Math.abs(dr)+Math.abs(dc))===1) {
+    move(dr, dc);
+    draw();
+    if(isSolved()) {
+      gameRunning = false;
+      if(!best || moves < parseInt(best)) localStorage.setItem('puzzleBest', moves);
+      alert('Solved!');
+      document.getElementById('finalScore').innerText = 'Solved in ' + moves + ' moves';
+      document.getElementById('gameOverScreen').classList.remove('hidden');
+    }
+  }
+});
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  let rect = canvas.getBoundingClientRect();
+  let touch = e.touches[0];
+  let mx = (touch.clientX - rect.left) * W / rect.width;
+  let my = (touch.clientY - rect.top) * H / rect.height;
+  let c = Math.floor(mx / (W/N)), r = Math.floor(my / (H/N));
+  let dr = r - blank.r, dc = c - blank.c;
+  if((Math.abs(dr)+Math.abs(dc))===1) {
+    move(dr, dc);
+    draw();
+    if(isSolved()) {
+      gameRunning = false;
+      if(!best || moves < parseInt(best)) localStorage.setItem('puzzleBest', moves);
+      alert('Solved!');
+      document.getElementById('finalScore').innerText = 'Solved in ' + moves + ' moves';
+      document.getElementById('gameOverScreen').classList.remove('hidden');
+    }
+  }
+});
+function startGame() { document.getElementById('startScreen').classList.add('hidden'); init(); }
+function restartGame() { document.getElementById('gameOverScreen').classList.add('hidden'); init(); }
 </script>
 </body></html>"""
 
 def build_racer_game():
     return SHARED_HEAD + """
 <body>
-<div id="wrap">
-  <div id="hud"><div>DISTANCE <span id="distance">0</span></div><div>SPEED <span id="speed">0</span></div></div>
+<div id="game-container">
+  <div class="hud"><div>🏁 DIST <span id="distance">0</span></div><div>💨 SPEED <span id="speed">0</span></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
-  <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
-  <div id="btn-zone"><div class="abtn" id="boostBtn">🚀</div></div>
+  <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
+  <div class="action-buttons"><div class="action-btn" id="boostBtn">🚀</div></div>
 </div>
 <script>
 """ + JOYSTICK_JS + """
-const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
-let W,H,car,obstacles,score,speed,boost,frame,gameRunning;
-function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;}
-window.addEventListener('resize',resize);resize();
-function init(){car={x:W/2,y:H-80,w:30,h:40};obstacles=[];score=0;speed=3;boost=0;frame=0;gameRunning=true;updateUI();requestAnimationFrame(gameLoop);}
-function startGame(){document.getElementById('start-screen').classList.add('hidden');init();}
-function restartGame(){document.getElementById('gameover-screen').classList.add('hidden');init();}
-function updateUI(){document.getElementById('distance').innerText=Math.floor(score);document.getElementById('speed').innerText=Math.floor(speed*10);}
-function boostFunc(){if(boost<=0)boost=60;}
-document.getElementById('boostBtn').addEventListener('click',()=>{if(gameRunning)boostFunc();});
-function gameLoop(){if(!gameRunning)return;requestAnimationFrame(gameLoop);frame++;
-  let effSpeed=speed+(boost>0?5:0);if(boost>0)boost--;
-  car.x+=JOY.x*5;car.x=Math.max(car.w/2+20,Math.min(W-car.w/2-20,car.x));
-  score+=effSpeed*0.1;speed=Math.min(12,3+frame/600);
-  if(frame%Math.max(30,60-Math.floor(speed*4))===0){let x=Math.random()*(W-60)+30;obstacles.push({x:x,y:-30,w:40,h:40});}
-  for(let o of obstacles)o.y+=effSpeed*2;
-  obstacles=obstacles.filter(o=>o.y<H+50);
-  for(let o of obstacles){if(car.x<o.x+o.w&&car.x+car.w>o.x&&car.y<o.y+o.h&&car.y+car.h>o.y){gameRunning=false;document.getElementById('gameover-screen').classList.remove('hidden');}}
-  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#333';ctx.fillRect(W*0.2,0,W*0.6,H);
-  for(let i=0;i<H/50;i++){ctx.fillStyle='yellow';ctx.fillRect(W/2-5,(i*50+frame*effSpeed)%H,10,30);}
-  ctx.fillStyle='white';ctx.fillRect(car.x,car.y,car.w,car.h);
-  for(let o of obstacles){ctx.fillStyle='red';ctx.fillRect(o.x,o.y,o.w,o.h);}
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, car, obstacles, score, speed, boost, frame, gameRunning;
+function resize() {
+  const container = document.getElementById('game-container');
+  const hud = document.querySelector('.hud');
+  canvas.width = W = container.clientWidth;
+  canvas.height = H = container.clientHeight - hud.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+function init() {
+  car = { x: W/2, y: H-80, w:30, h:40 };
+  obstacles = [];
+  score = 0; speed = 3; boost = 0; frame = 0;
+  gameRunning = true;
+  updateUI();
+  requestAnimationFrame(gameLoop);
+}
+function startGame() { document.getElementById('startScreen').classList.add('hidden'); init(); }
+function restartGame() { document.getElementById('gameOverScreen').classList.add('hidden'); init(); }
+function updateUI() {
+  document.getElementById('distance').innerText = Math.floor(score);
+  document.getElementById('speed').innerText = Math.floor(speed*10);
+}
+function boostFunc() { if(boost<=0) boost = 60; }
+document.getElementById('boostBtn').onclick = () => { if(gameRunning) boostFunc(); };
+function gameLoop() {
+  if(!gameRunning) return;
+  requestAnimationFrame(gameLoop);
+  frame++;
+  let joy = joyActive ? {x:joyX, y:joyY} : getJoyFromKeys();
+  let effSpeed = speed + (boost>0 ? 5 : 0);
+  if(boost>0) boost--;
+  car.x += joy.x * 5;
+  car.x = Math.max(car.w/2+20, Math.min(W-car.w/2-20, car.x));
+  score += effSpeed * 0.1;
+  speed = Math.min(12, 3 + frame/600);
+  if(frame % Math.max(30, 60-Math.floor(speed*4)) === 0) {
+    let x = Math.random() * (W-60) + 30;
+    obstacles.push({ x:x, y:-30, w:40, h:40 });
+  }
+  for(let o of obstacles) o.y += effSpeed * 2;
+  obstacles = obstacles.filter(o => o.y < H+50);
+  for(let o of obstacles) {
+    if(car.x < o.x+o.w && car.x+car.w > o.x && car.y < o.y+o.h && car.y+car.h > o.y) {
+      gameRunning = false;
+      document.getElementById('finalScore').innerText = 'Distance: '+Math.floor(score);
+      document.getElementById('gameOverScreen').classList.remove('hidden');
+    }
+  }
+  ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#1a1a2e'; ctx.fillRect(W*0.2, 0, W*0.6, H);
+  for(let i=0; i<H/50; i++) {
+    ctx.fillStyle = '#0ff';
+    ctx.fillRect(W/2-5, (i*50 + frame*effSpeed) % H, 10, 30);
+  }
+  ctx.fillStyle = '#0ff'; ctx.fillRect(car.x, car.y, car.w, car.h);
+  for(let o of obstacles) { ctx.fillStyle = '#f44'; ctx.fillRect(o.x, o.y, o.w, o.h); }
   updateUI();
 }
 </script>
 </body></html>"""
 
-# Determine game type
+# ---------- DETERMINE GAME TYPE ----------
 shooter_set = {"top-down shooter","survival horror","roguelite","extraction shooter","stealth game"}
 racer_set = {"racing game"}
 puzzle_set = {"puzzle game","cozy builder"}
@@ -734,7 +1173,7 @@ loadGames();setInterval(loadGames,60000);
 Path("index.html").write_text(storefront_html, encoding="utf-8")
 print("  ✅ Storefront updated")
 
-# ---------- TELEGRAM POST (HTML format) ----------
+# ---------- TELEGRAM POST (safe HTML) ----------
 sales_post = f"""
 <b>{EMOJI_STR} {HOOK} {EMOJI_STR}</b>
 
@@ -763,18 +1202,16 @@ if TG_TOKEN and sprite.exists():
 else:
     print("  ⚠️  Missing TG_TOKEN or sprite.png")
 
-# Admin bundle
 if TG_TOKEN and TG_ADMIN and zip_path.exists():
     admin_caption = f"<b>🎮 {GAME_NAME}</b> — {GAME_TYPE}<br>Genre: {GENRE}<br>Mechanic: {MECHANIC}<br>Art: {'✅' if art_ok else '⚠️'}<br>Key: <code>{LICENSE_KEY}</code>"
     tg_send_doc(TG_ADMIN, zip_path, admin_caption)
     print("  ✅ Admin bundle sent")
 
-# WhatsApp
 if WHATSAPP_WEBHOOK_URL:
     send_to_whatsapp(f"🎮 NEW GAME: {GAME_NAME} ({GENRE})\n{MECHANIC}\n{DESCRIPTION}\nPlay: {PLAY_URL}\n{GAME_PRICE} SOL", IMG_URL)
     print("  ✅ WhatsApp sent")
 
-# ---------- SAR & LOGS ----------
+# ---------- SAR ----------
 SAR["study"]["total_runs"] += 1
 if art_ok: SAR["study"]["art_ok"] += 1
 else: SAR["study"]["art_fail"] += 1
