@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 31,
-    "art_ok": 6,
+    "total_runs": 32,
+    "art_ok": 7,
     "art_fail": 0,
     "games": [
       {
@@ -220,6 +220,13 @@
         "mechanic": "Fracture Line",
         "art": true,
         "ts": "2026-06-09T16:36:17.529159"
+      },
+      {
+        "name": "Xenon Tank",
+        "genre": "action RPG",
+        "mechanic": "Void Step",
+        "art": true,
+        "ts": "2026-06-09T16:46:09.669984"
       }
     ],
     "successful_art": 25,
@@ -227,7 +234,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.194,
+    "rate": 0.219,
     "best_mechanic": null,
     "success_rate": 0
   }
