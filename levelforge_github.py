@@ -2,7 +2,6 @@
 """
 DEATHROLL STUDIO v30.0 — COMPLETE GAME FACTORY (ALL 5 GENRES)
 Generates a new mobile game every day with AI mechanics, art, and full HTML5 games.
-Fixed: Telegram HTML parse mode (no Markdown errors)
 """
 import os, json, random, requests, shutil, zipfile, hashlib, math
 from datetime import datetime
@@ -259,52 +258,107 @@ print(f"  💾 Portfolio: {len(entries)} games")
 print("  🎨 Generating game art...")
 sprite = Path("sprite.png")
 art_ok = False
+
+# Try Pollinations with the AI prompt
 if ART_PROMPT:
     try:
-        enc = ART_PROMPT.replace(" ", "+").replace(",", "%2C").replace("'", "%27").replace("\n", " ")
+        enc = ART_PROMPT.replace(" ", "+").replace(",", "%2C").replace("'", "%27").replace("\n", " ")[:500]
         url = f"https://image.pollinations.ai/prompt/{enc}?width=512&height=512&seed={random.randint(1,999999)}&nologo=true"
-        r = requests.get(url, timeout=50)
-        if r.status_code == 200 and len(r.content) > 8000:
+        print(f"  🖼️  Trying Pollinations...")
+        r = requests.get(url, timeout=60)
+        if r.status_code == 200 and r.headers.get('content-type', '').startswith('image'):
             sprite.write_bytes(r.content)
             art_ok = True
             print("  ✅ AI‑generated art from custom prompt")
+        else:
+            print(f"  ⚠️  Pollinations returned {r.status_code}")
     except Exception as e:
         print(f"  ⚠️  Pollinations error: {e}")
+
+    # Second attempt: simpler prompt
+    if not art_ok:
+        simple_prompt = f"{GENRE} game {GAME_NAME} {MECHANIC} character art, dark cyberpunk style, 512x512 game icon"
+        try:
+            enc = simple_prompt.replace(" ", "+")
+            url = f"https://image.pollinations.ai/prompt/{enc}?width=512&height=512&seed={random.randint(1,999999)}&nologo=true"
+            r = requests.get(url, timeout=60)
+            if r.status_code == 200 and r.headers.get('content-type', '').startswith('image'):
+                sprite.write_bytes(r.content)
+                art_ok = True
+                print("  ✅ AI‑generated art (simple prompt)")
+        except Exception as e:
+            print(f"  ⚠️  Simple Pollinations error: {e}")
+
+# ---------- BEAUTIFUL FALLBACK ART ----------
 if not art_ok and PIL_OK:
-    print("  🎨 Generating enhanced fallback art...")
+    print("  🎨 Generating beautiful fallback art...")
     img = Image.new("RGB", (512, 512), G_BG)
     draw = ImageDraw.Draw(img)
+    
+    # Gradient background
     for y in range(512):
-        r_val = int((y/512)*30) + int(G_BG[1:3], 16) if G_BG[1:3].isalnum() else 10
-        g_val = int((y/512)*20) + int(G_BG[3:5], 16) if G_BG[3:5].isalnum() else 5
-        b_val = int((y/512)*40) + int(G_BG[5:7], 16) if G_BG[5:7].isalnum() else 20
-        draw.line([(0,y),(512,y)], fill=(r_val,g_val,b_val))
-    hex_size = 40
+        factor = y / 512
+        r_val = int(10 + factor * 30)
+        g_val = int(5 + factor * 20)
+        b_val = int(20 + factor * 40)
+        draw.line([(0, y), (512, y)], fill=(r_val, g_val, b_val))
+    
+    # Glowing center circles
+    cx, cy = 256, 256
+    for rad in range(200, 40, -20):
+        alpha = max(20, 80 - rad//3)
+        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(G_COLOR[1:]), alpha), width=2)
+    
+    # Diagonal scanlines
+    for i in range(-512, 512, 20):
+        draw.line([(i, 0), (i+512, 512)], fill=(*bytes.fromhex(G_COLOR[1:]), 15), width=1)
+        draw.line([(0, i), (512, i+512)], fill=(*bytes.fromhex(G_COLOR[1:]), 15), width=1)
+    
+    # Hexagon grid
+    hex_size = 45
     for x in range(-hex_size, 512+hex_size, hex_size):
         for y in range(-hex_size, 512+hex_size, int(hex_size*0.86)):
             xc = x + (y % (hex_size*2)) * 0.5
             pts = []
             for i in range(6):
                 ang = math.radians(60*i - 30)
-                px = xc + hex_size * math.cos(ang)
-                py = y + hex_size * math.sin(ang)
-                pts.append((px,py))
-            draw.polygon(pts, outline=(*bytes.fromhex(G_COLOR[1:]), 40), width=1)
-    cx, cy = 256, 256
-    for rad in [200,160,120,80,40]:
-        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(G_COLOR[1:]), max(30,100-rad//2)), width=3)
-    for i in range(-512,512,30):
-        draw.line([(i,0),(i+512,512)], fill=(*bytes.fromhex(G_COLOR[1:]),20), width=2)
-        draw.line([(0,i),(512,i+512)], fill=(*bytes.fromhex(G_COLOR[1:]),20), width=2)
-    try: font = ImageFont.load_default()
-    except: font = None
-    draw.text((cx, cy-60), GAME_NAME[:20], fill=G_COLOR, anchor="mm", font=font)
-    draw.text((cx, cy+20), GENRE.upper(), fill=(*bytes.fromhex(G_COLOR[1:]),200), anchor="mm", font=font)
-    draw.text((cx, cy+60), f"⚡ {MECHANIC}", fill=(200,200,200), anchor="mm", font=font)
-    draw.text((10,480), "DeathRoll Studio", fill=(100,100,100))
+                px = xc + hex_size * 0.6 * math.cos(ang)
+                py = y + hex_size * 0.6 * math.sin(ang)
+                pts.append((px, py))
+            draw.polygon(pts, outline=(*bytes.fromhex(G_COLOR[1:]), 35), width=1)
+    
+    # Game title with outline
+    try:
+        font = ImageFont.load_default()
+        title = GAME_NAME[:18]
+        for offset in range(-2, 3):
+            for oy in range(-2, 3):
+                draw.text((cx-150+offset, cy-60+oy), title, fill=(0,0,0), anchor="mm", font=font)
+        draw.text((cx-150, cy-60), title, fill=G_COLOR, anchor="mm", font=font)
+    except:
+        draw.text((cx-150, cy-60), GAME_NAME[:18], fill=G_COLOR, anchor="mm")
+    
+    # Genre badge
+    genre_text = GENRE.upper()
+    bbox = draw.textbbox((0,0), genre_text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    badge_x = cx - tw//2 - 10
+    badge_y = cy + 10
+    draw.rectangle([badge_x, badge_y, badge_x+tw+20, badge_y+th+8], fill=(*bytes.fromhex(G_COLOR[1:]), 60), outline=G_COLOR, width=1)
+    draw.text((cx, cy+15), genre_text, fill=G_COLOR, anchor="mm", font=font)
+    
+    # Mechanic text
+    mech_text = f"⚡ {MECHANIC}"
+    draw.text((cx, cy+50), mech_text, fill=(200,200,200), anchor="mm", font=font)
+    
+    # Watermark
+    draw.text((10, 480), "DeathRoll Studio", fill=(80,80,100))
+    
     img.save(sprite)
     art_ok = True
-    print("  ✅ Enhanced fallback art generated")
+    print("  ✅ Beautiful fallback art generated")
+
 if not art_ok:
     img = Image.new("RGB", (512,512), G_BG)
     draw = ImageDraw.Draw(img)
@@ -510,7 +564,7 @@ def build_puzzle_game():
 <script>
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
 let W,H,N=4,board,blank,moves,best,gameRunning;
-function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;gameRunning?draw():null;}
+function resize(){const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');canvas.width=W=wrap.clientWidth;canvas.height=H=wrap.clientHeight-hud.clientHeight;if(gameRunning)draw();}
 window.addEventListener('resize',resize);
 function init(){board=[];for(let i=0;i<N*N-1;i++)board.push(i+1);board.push(0);blank={r:N-1,c:N-1};moves=0;best=localStorage.getItem('puzzleBest')||null;document.getElementById('best').innerText=best||'-';gameRunning=true;shuffle(200);draw();}
 function shuffle(step){for(let i=0;i<step;i++){let dirs=[[-1,0],[1,0],[0,-1],[0,1]];let valid=[];for(let d of dirs){let nr=blank.r+d[0],nc=blank.c+d[1];if(nr>=0&&nr<N&&nc>=0&&nc<N)valid.push(d);}if(valid.length){let d=valid[Math.floor(Math.random()*valid.length)];move(d[0],d[1]);}}moves=0;updateUI();}
@@ -518,7 +572,8 @@ function move(dr,dc){let nr=blank.r+dr,nc=blank.c+dc;if(nr<0||nr>=N||nc<0||nc>=N
 function updateUI(){document.getElementById('moves').innerText=moves;}
 function isSolved(){for(let i=0;i<N*N-1;i++)if(board[i]!==i+1)return false;return true;}
 function draw(){ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);let tw=W/N,th=H/N;for(let r=0;r<N;r++){for(let c=0;c<N;c++){let val=board[r*N+c];if(val===0)continue;let x=c*tw+2,y=r*th+2,w=tw-4,h=th-4;ctx.fillStyle='#1a1a2e';ctx.fillRect(x,y,w,h);ctx.fillStyle='cyan';ctx.font=`bold ${Math.floor(tw*0.4)}px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(val,x+w/2,y+h/2);}}}
-canvas.addEventListener('click',(e)=>{if(!gameRunning)return;let rect=canvas.getBoundingClientRect();let mx=(e.clientX-rect.left)*W/rect.width,my=(e.clientY-rect.top)*H/rect.height;let c=Math.floor(mx/(W/N)),r=Math.floor(my/(H/N));let dr=r-blank.r,dc=c-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){move(dr,dc);draw();if(isSolved()){gameRunning=false;alert('Solved!');}}});canvas.addEventListener('touchstart',(e)=>{e.preventDefault();let rect=canvas.getBoundingClientRect();let touch=e.touches[0];let mx=(touch.clientX-rect.left)*W/rect.width,my=(touch.clientY-rect.top)*H/rect.height;let c=Math.floor(mx/(W/N)),r=Math.floor(my/(H/N));let dr=r-blank.r,dc=c-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){move(dr,dc);draw();if(isSolved()){gameRunning=false;alert('Solved!');}}});
+canvas.addEventListener('click',(e)=>{if(!gameRunning)return;let rect=canvas.getBoundingClientRect();let mx=(e.clientX-rect.left)*W/rect.width,my=(e.clientY-rect.top)*H/rect.height;let c=Math.floor(mx/(W/N)),r=Math.floor(my/(H/N));let dr=r-blank.r,dc=c-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){move(dr,dc);draw();if(isSolved()){gameRunning=false;alert('Solved!');}}});
+canvas.addEventListener('touchstart',(e)=>{e.preventDefault();let rect=canvas.getBoundingClientRect();let touch=e.touches[0];let mx=(touch.clientX-rect.left)*W/rect.width,my=(touch.clientY-rect.top)*H/rect.height;let c=Math.floor(mx/(W/N)),r=Math.floor(my/(H/N));let dr=r-blank.r,dc=c-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){move(dr,dc);draw();if(isSolved()){gameRunning=false;alert('Solved!');}}});
 function startGame(){document.getElementById('start-screen').classList.add('hidden');init();}
 function restartGame(){document.getElementById('gameover-screen').classList.add('hidden');init();}
 </script>
@@ -708,7 +763,7 @@ if TG_TOKEN and sprite.exists():
 else:
     print("  ⚠️  Missing TG_TOKEN or sprite.png")
 
-# Admin bundle (HTML format)
+# Admin bundle
 if TG_TOKEN and TG_ADMIN and zip_path.exists():
     admin_caption = f"<b>🎮 {GAME_NAME}</b> — {GAME_TYPE}<br>Genre: {GENRE}<br>Mechanic: {MECHANIC}<br>Art: {'✅' if art_ok else '⚠️'}<br>Key: <code>{LICENSE_KEY}</code>"
     tg_send_doc(TG_ADMIN, zip_path, admin_caption)

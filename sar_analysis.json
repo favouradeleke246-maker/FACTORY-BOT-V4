@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 32,
-    "art_ok": 7,
+    "total_runs": 33,
+    "art_ok": 8,
     "art_fail": 0,
     "games": [
       {
@@ -227,6 +227,13 @@
         "mechanic": "Void Step",
         "art": true,
         "ts": "2026-06-09T16:46:09.669984"
+      },
+      {
+        "name": "Ironskin Ops",
+        "genre": "fighting game",
+        "mechanic": "Death Bloom",
+        "art": true,
+        "ts": "2026-06-09T16:58:34.078755"
       }
     ],
     "successful_art": 25,
@@ -234,7 +241,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.219,
+    "rate": 0.242,
     "best_mechanic": null,
     "success_rate": 0
   }
