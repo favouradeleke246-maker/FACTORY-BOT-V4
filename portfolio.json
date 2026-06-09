@@ -61,5 +61,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0004",
+    "date": "2026-06-09T15:37:17.874680",
+    "game": "Blaze Yonder",
+    "genre": "fighting game",
+    "mechanic": "Fracture Line",
+    "mech_desc": "Draw a line \u2014 anything that crosses it takes 3x damage",
+    "description": "Master Fracture Line in this fighting game \u2014 no two sessions are the same.",
+    "hook": "1000 IQ moves only",
+    "hashtags": "#gamedev #indiegame #mobilegame #fightinggame #FractureLine #DeathRollStudio #solanagaming",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Blaze_Yonder/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Blaze_Yonder/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-F63A83A22B87DA51",
+    "color": "#ff6600",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]

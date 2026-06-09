@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 28,
-    "art_ok": 3,
+    "total_runs": 29,
+    "art_ok": 4,
     "art_fail": 0,
     "games": [
       {
@@ -199,6 +199,13 @@
         "mechanic": "Chrono Fracture",
         "art": true,
         "ts": "2026-06-09T15:30:33.740159"
+      },
+      {
+        "name": "Blaze Yonder",
+        "genre": "fighting game",
+        "mechanic": "Fracture Line",
+        "art": true,
+        "ts": "2026-06-09T15:37:19.808671"
       }
     ],
     "successful_art": 25,
@@ -206,7 +213,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.107,
+    "rate": 0.138,
     "best_mechanic": null,
     "success_rate": 0
   }
