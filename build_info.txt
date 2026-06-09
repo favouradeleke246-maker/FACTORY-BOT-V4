@@ -1,0 +1,9 @@
+
+DEATHROLL STUDIO v28.0.0
+Game: Echo Breach
+Genre: survival horror
+Mechanic: Soul Link
+Date: 2026-06-02T10:44:41.502494
+Art success: True
+Total portfolio: 31
+SAR runs: 25

@@ -1,0 +1,5 @@
+delivery_state.json
+buyers.json
+__pycache__/
+*.pyc
+workspace/latest_game.zip
