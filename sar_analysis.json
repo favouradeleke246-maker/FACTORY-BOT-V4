@@ -1,8 +1,8 @@
 {
   "study": {
-    "total_runs": 25,
-    "successful_art": 25,
-    "failed_art": 0,
+    "total_runs": 26,
+    "art_ok": 1,
+    "art_fail": 0,
     "games": [
       {
         "name": "Solar Blade",
@@ -178,13 +178,22 @@
         "mechanic": "Soul Link",
         "timestamp": "2026-06-02T10:44:41.501992",
         "success": true
+      },
+      {
+        "name": "Flux Lock",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "art": true,
+        "ts": "2026-06-09T13:26:52.524660"
       }
-    ]
+    ],
+    "successful_art": 25,
+    "failed_art": 0
   },
   "analysis": {
     "best_genre": "survival horror",
+    "rate": 0.038,
     "best_mechanic": null,
     "success_rate": 0
-  },
-  "feedback": {}
+  }
 }
