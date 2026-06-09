@@ -1,29 +1,31 @@
-name: Auto Delivery
+name: Daily Game Factory
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+    - cron: '0 6 * * *'   # once per day at 06:00 UTC
+  workflow_dispatch:       # manual trigger
 
 jobs:
-  deliver:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install dependencies
-        run: pip install requests
-
-      - name: Run auto-delivery script
+      - run: pip install -r requirements.txt
+      - name: Generate new game
         env:
-          SOLANA_WALLET: ${{ secrets.SOLANA_WALLET }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
-          GAME_ZIP_PATH: ${{ secrets.GAME_ZIP_PATH }}
-        run: python auto_delivery.py
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+          OPENAI_API_KEY:     ${{ secrets.OPENAI_API_KEY }}
+          GH_TOKEN:           ${{ secrets.GH_TOKEN }}
+          GAME_PRICE:         ${{ secrets.GAME_PRICE }}
+        run: python levelforge_github.py
+      - name: Commit & push
+        run: |
+          git config user.name "DeathRoll Bot"
+          git config user.email "bot@deathroll.co"
+          git add portfolio.json workspace/ index.html learning_data.json sar_analysis.json
+          git diff --staged --quiet || git commit -m "Auto: new game $(date +'%Y-%m-%d')"
+          git push
