@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Warp Mire</title>
+<style>
+:root{--acc:#44ffbb;--bg:#000d07;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Courier New',monospace;color:#e8e8e8;touch-action:none;}
+#wrap{position:relative;width:100%;max-width:480px;height:100vh;max-height:820px;overflow:hidden;display:flex;flex-direction:column;}
+#hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,.7);border-bottom:1px solid var(--acc);font-size:13px;gap:8px;flex-shrink:0;}
+canvas{flex:1;width:100%;display:block;}
+#joy-zone{position:absolute;bottom:0;left:0;width:50%;height:44%;display:flex;align-items:center;justify-content:center;}
+#joy-outer{width:90px;height:90px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:rgba(0,0,0,.35);position:relative;display:flex;align-items:center;justify-content:center;}
+#joy-inner{width:38px;height:38px;border-radius:50%;background:var(--acc);opacity:.85;position:absolute;box-shadow:0 0 14px var(--acc);pointer-events:none;}
+#btn-zone{position:absolute;bottom:0;right:0;width:50%;height:44%;display:flex;align-items:center;justify-content:center;gap:18px;}
+.abtn{width:56px;height:56px;border-radius:50%;border:2px solid var(--acc);background:rgba(0,0,0,.5);color:var(--acc);font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px var(--acc)44;cursor:pointer;user-select:none;}
+.abtn:active{background:var(--acc)33;transform:scale(.93);}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:99;text-align:center;padding:24px;}
+.screen.hidden{display:none;}
+.screen h1{font-size:clamp(22px,6vw,36px);color:var(--acc);text-shadow:0 0 20px var(--acc);margin-bottom:10px;letter-spacing:2px;}
+.screen h2{font-size:clamp(16px,4vw,24px);color:#fff;margin-bottom:8px;}
+.screen p{font-size:13px;color:#aaa;margin:4px 0;line-height:1.5;}
+.screen .mechanic-pill{margin:12px auto;padding:8px 18px;border:1px solid var(--acc);border-radius:20px;color:var(--acc);font-size:12px;max-width:280px;}
+.bigbtn{margin-top:16px;padding:14px 36px;background:var(--acc);color:#000;font-family:inherit;font-size:16px;font-weight:bold;border:none;cursor:pointer;text-transform:uppercase;}
+.bigbtn:active{opacity:.8;transform:scale(.97);}
+#score-ring{width:72px;height:72px;border-radius:50%;border:3px solid var(--acc);display:flex;align-items:center;justify-content:center;flex-direction:column;}
+#score-ring .num{font-size:20px;color:var(--acc);line-height:1;}
+#score-ring .lbl{font-size:8px;color:#888;}
+#lives-row{display:flex;gap:4px;}
+.life-pip{width:10px;height:10px;border-radius:50%;background:var(--acc);box-shadow:0 0 6px var(--acc);}
+.life-pip.dead{background:#333;box-shadow:none;}
+#special-bar{flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden;}
+#special-fill{height:100%;background:var(--acc);width:0%;transition:width .1s;box-shadow:0 0 4px var(--acc);}
+#brand-strip{position:absolute;top:0;right:0;font-size:9px;color:#333;padding:3px 6px;letter-spacing:1px;}
+@media(orientation:landscape){
+  #wrap{flex-direction:row;max-width:none;max-height:480px;height:100%;}
+  #hud{flex-direction:column;width:80px;border-bottom:none;border-right:1px solid var(--acc);}
+  #joy-zone{width:25%;height:100%;}
+  #btn-zone{width:25%;height:100%;}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <div id="score-ring"><div class="num" id="sc">0</div><div class="lbl">SCORE</div></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;"><div id="lives-row"><div class="life-pip" id="lp0"></div><div class="life-pip" id="lp1"></div><div class="life-pip" id="lp2"></div><div class="life-pip" id="lp3"></div><div class="life-pip" id="lp4"></div></div><div id="special-bar"><div id="special-fill"></div></div></div>
+    <div style="font-size:11px;color:#666;text-align:right;">Warp Mire<br><span style="color:var(--acc);font-size:9px;">WAVE <span id="wv">1</span></span></div>
+  </div>
+  <canvas id="c"></canvas>
+  
+<div id="start-screen" class="screen">
+  <h1>WARP MIRE</h1>
+  <h2>TOWER DEFENSE</h2>
+  <div class="mechanic-pill">⚡ Chrono Fracture: Hold to freeze all enemies in a 3-second time bubble</div>
+  <p style="color:#666;font-size:11px;margin-top:8px;">🕹️ Joystick + buttons | Works on any device</p>
+  <button class="bigbtn" onclick="startGame()">PLAY FREE</button>
+  <p style="margin-top:20px;font-size:11px;color:#555;">tower defense · $7 SOL for full Godot source<br><a href="https://t.me/drolltech" style="color:var(--acc);">@drolltech</a></p>
+</div>
+<div id="over-screen" class="screen hidden">
+  <h1>GAME OVER</h1>
+  <p style="font-size:28px;color:#fff;margin:10px 0;" id="final-score"></p>
+  <div class="mechanic-pill">⚡ Chrono Fracture</div>
+  <p style="margin-top:12px;font-size:12px;color:#666;">Get full Godot source for $7 SOL</p>
+  <button class="bigbtn" onclick="restartGame()">PLAY AGAIN</button>
+</div>
+  <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
+  <div id="btn-zone"><div class="abtn" ontouchstart="activateSpecial()">⚡</div><div class="abtn" ontouchstart="slash()">⚔️</div></div>
+  <div id="brand-strip">DeathRoll</div>
+</div>
+<script>
+
+const joyZone=document.getElementById('joy-zone'),joyOuter=document.getElementById('joy-outer'),joyInner=document.getElementById('joy-inner');
+const JOY={x:0,y:0,active:false,id:-1,ox:0,oy:0,r:36};
+function joyStart(e){if(JOY.active)return;const t=e.changedTouches[0],rc=joyOuter.getBoundingClientRect();JOY.active=true;JOY.id=t.identifier;JOY.ox=rc.left+rc.width/2;JOY.oy=rc.top+rc.height/2;joyMove(e);}
+function joyMove(e){if(!JOY.active)return;for(const t of e.changedTouches){if(t.identifier!==JOY.id)continue;const dx=t.clientX-JOY.ox,dy=t.clientY-JOY.oy,d=Math.sqrt(dx*dx+dy*dy),c=Math.min(d,JOY.r);JOY.x=(dx/Math.max(d,1))*c/JOY.r;JOY.y=(dy/Math.max(d,1))*c/JOY.r;joyInner.style.transform=`translate(${JOY.x*JOY.r}px,${JOY.y*JOY.r}px)`;}}
+function joyEnd(e){for(const t of e.changedTouches){if(t.identifier===JOY.id){JOY.active=false;JOY.x=0;JOY.y=0;JOY.id=-1;joyInner.style.transform='translate(0,0)';}}}
+joyZone.addEventListener('touchstart',joyStart,{passive:false});joyZone.addEventListener('touchmove',joyMove,{passive:false});joyZone.addEventListener('touchend',joyEnd,{passive:false});
+const KB={};document.addEventListener('keydown',e=>{KB[e.key]=true;e.preventDefault();});document.addEventListener('keyup',e=>{KB[e.key]=false;});
+function kbJoy(){JOY.x=((KB['ArrowRight']||KB['d'])?1:0)-((KB['ArrowLeft']||KB['a'])?1:0);JOY.y=((KB['ArrowDown']||KB['s'])?1:0)-((KB['ArrowUp']||KB['w'])?1:0);}
+
+const C=document.getElementById('c'),ctx=C.getContext('2d'); let W,H;
+function resize(){{const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');C.width=W=wrap.offsetWidth;C.height=H=wrap.offsetHeight-hud.offsetHeight;}}
+window.addEventListener('resize',resize);resize();
+let player,enemies,particles,slashes,score,lives,wave,frame,running,charge,waveTimer,waveActive;
+function R(a,b){{return Math.random()*(b-a)+a;}}
+function dist(a,b){{return Math.hypot(a.x-b.x,a.y-b.y);}}
+function mkP(x,y,c,n=8){{for(let i=0;i<n;i++){{const a=R(0,Math.PI*2),s=R(2,6);particles.push({{x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:R(25,45),color:c,r:R(2,5)}});}}}}
+function startGame(){{document.getElementById('start-screen').classList.add('hidden');init();}}
+function restartGame(){{document.getElementById('over-screen').classList.add('hidden');init();}}
+function init(){{
+  player={{x:W/2,y:H/2,r:16,speed:3.5,invincible:0,facingAngle:0}};
+  enemies=[];particles=[];slashes=[];score=0;lives=5;wave=1;frame=0;running=true;charge=0;waveTimer=120;waveActive=false;
+  updateHUD();loop();
+}}
+function updateHUD(){{
+  document.getElementById('sc').textContent=score;
+  document.getElementById('wv').textContent=wave;
+  document.getElementById('special-fill').style.width=(charge/300*100)+'%';
+  for(let i=0;i<5;i++){{const p=document.getElementById('lp'+i);if(p)p.className='life-pip'+(i>=lives?' dead':'');}}
+}}
+function spawnWave(){{
+  const count=3+wave*2;
+  for(let i=0;i<count;i++){{
+    const ang=R(0,Math.PI*2),d=Math.max(W,H)*0.6;
+    const hp=1+Math.floor(wave/2);
+    enemies.push({{x:W/2+Math.cos(ang)*d,y:H/2+Math.sin(ang)*d,r:12+hp*3,hp,maxHp:hp,speed:R(1,1.8+wave*0.1),color:`hsl(${R(0,360)},70%,55%)`,invincible:0}});
+  }}
+  waveActive=true;
+}}
+function slash(){{
+  const range=70;
+  slashes.push({{x:player.x,y:player.y,angle:player.facingAngle,life:14,range}});
+  enemies.forEach((e,i)=>{{
+    const ang=Math.atan2(e.y-player.y,e.x-player.x);
+    const diff=Math.abs(ang-player.facingAngle);
+    if(dist(player,e)<range+e.r && diff<1.1){{
+      e.hp--;charge=Math.min(300,charge+30);
+      mkP(e.x,e.y,e.color,6);
+      if(e.hp<=0){{score+=15+wave*3;mkP(e.x,e.y,e.color,14);enemies.splice(i,1);}}
+    }}
+  }});
+  updateHUD();
+}}
+function activateSpecial(){{
+  if(charge<300)return;
+  charge=0;
+  enemies.forEach((e,i)=>{{if(dist(player,e)<200){{mkP(e.x,e.y,e.color,12);score+=10;enemies.splice(i,1);}}}});
+  mkP(player.x,player.y,'#44ffbb',30);
+  player.invincible=120;
+  updateHUD();
+}}
+document.getElementById('btn-zone').querySelectorAll('.abtn')[0].addEventListener('touchstart',e=>{{e.preventDefault();activateSpecial();}},{{passive:false}});
+document.getElementById('btn-zone').querySelectorAll('.abtn')[1].addEventListener('touchstart',e=>{{e.preventDefault();slash();}},{{passive:false}});
+document.addEventListener('keydown',e=>{{if(e.key===' ')activateSpecial();if(e.key==='z'||e.key==='x')slash();}});
+function loop(){{
+  if(!running)return; requestAnimationFrame(loop); frame++;kbJoy();
+  player.x=Math.max(player.r,Math.min(W-player.r,player.x+JOY.x*player.speed));
+  player.y=Math.max(player.r,Math.min(H-player.r,player.y+JOY.y*player.speed));
+  if(JOY.x!==0||JOY.y!==0) player.facingAngle=Math.atan2(JOY.y,JOY.x);
+  if(player.invincible>0)player.invincible--;
+  if(!waveActive){{waveTimer--;if(waveTimer<=0){{spawnWave();waveTimer=0;}}}}
+  if(waveActive && enemies.length===0){{wave++;waveTimer=90;waveActive=false;score+=wave*20;updateHUD();}}
+  enemies.forEach(e=>{{if(e.invincible>0)e.invincible--;const ang=Math.atan2(player.y-e.y,player.x-e.x);e.x+=Math.cos(ang)*e.speed;e.y+=Math.sin(ang)*e.speed;}});
+  if(player.invincible===0) enemies.forEach((e,i)=>{{if(dist(player,e)<player.r+e.r-4){{lives--;player.invincible=80;mkP(player.x,player.y,'#ff3344',12);enemies.splice(i,1);updateHUD();if(lives<=0){{running=false;gameOver();}}}}}});
+  ctx.fillStyle='#000d07';ctx.fillRect(0,0,W,H);
+  const grd=ctx.createRadialGradient(W/2,H/2,30,W/2,H/2,H*0.7);grd.addColorStop(0,'#44ffbb11');grd.addColorStop(1,'transparent');ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+  particles=particles.filter(p=>{{p.x+=p.vx;p.y+=p.vy;p.vx*=0.9;p.vy*=0.9;p.life--;ctx.globalAlpha=p.life/45;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();return p.life>0;}});
+  ctx.globalAlpha=1;
+  slashes.forEach(s=>{{s.life--;ctx.save();ctx.globalAlpha=s.life/14;ctx.strokeStyle='#44ffbb';ctx.lineWidth=4;ctx.shadowColor='#44ffbb';ctx.shadowBlur=20;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x+Math.cos(s.angle)*s.range,s.y+Math.sin(s.angle)*s.range);ctx.stroke();ctx.restore();}});
+  slashes=slashes.filter(s=>s.life>0);
+  enemies.forEach(e=>{{ctx.save();ctx.shadowColor=e.color;ctx.shadowBlur=8;ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();if(e.maxHp>1){{ctx.fillStyle='#111';ctx.fillRect(e.x-e.r,e.y-e.r-8,e.r*2,4);ctx.fillStyle=e.color;ctx.fillRect(e.x-e.r,e.y-e.r-8,e.r*2*(e.hp/e.maxHp),4);}}ctx.restore();}});
+  ctx.save();if(player.invincible>0&&Math.floor(frame/5)%2===0){{ctx.restore();}}else{{ctx.shadowColor='#44ffbb';ctx.shadowBlur=14;ctx.fillStyle='#44ffbb';ctx.translate(player.x,player.y);ctx.rotate(player.facingAngle+Math.PI/2);ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(12,10);ctx.lineTo(-12,10);ctx.closePath();ctx.fill();ctx.restore();}}
+  if(!waveActive&&waveTimer>0){{ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(W/2-100,H/2-20,200,40);ctx.fillStyle='#44ffbb';ctx.font='bold 14px Courier New';ctx.textAlign='center';ctx.fillText(`WAVE ${wave} IN ${Math.ceil(waveTimer/30)}s`,W/2,H/2+5);ctx.textAlign='left';}}
+}}
+function gameOver(){{document.getElementById('final-score').textContent='SCORE: '+score;document.getElementById('over-screen').classList.remove('hidden');}}
+</script>
+</body></html>

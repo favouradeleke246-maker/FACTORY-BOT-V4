@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 29,
-    "art_ok": 4,
+    "total_runs": 30,
+    "art_ok": 5,
     "art_fail": 0,
     "games": [
       {
@@ -206,6 +206,13 @@
         "mechanic": "Fracture Line",
         "art": true,
         "ts": "2026-06-09T15:37:19.808671"
+      },
+      {
+        "name": "Warp Mire",
+        "genre": "tower defense",
+        "mechanic": "Chrono Fracture",
+        "art": true,
+        "ts": "2026-06-09T15:43:25.665051"
       }
     ],
     "successful_art": 25,
@@ -213,7 +220,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.138,
+    "rate": 0.167,
     "best_mechanic": null,
     "success_rate": 0
   }

@@ -82,5 +82,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0005",
+    "date": "2026-06-09T15:43:24.431552",
+    "game": "Warp Mire",
+    "genre": "tower defense",
+    "mechanic": "Chrono Fracture",
+    "mech_desc": "Hold to freeze all enemies in a 3-second time bubble",
+    "description": "Master Chrono Fracture in this tower defense \u2014 no two sessions are the same.",
+    "hook": "Run. Or die trying",
+    "hashtags": "#gamedev #indiegame #mobilegame #towerdefense #ChronoFracture #DeathRollStudio #solanagaming",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Warp_Mire/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Warp_Mire/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-AC784A9522386D97",
+    "color": "#44ffbb",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
