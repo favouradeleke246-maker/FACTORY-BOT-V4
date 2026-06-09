@@ -1,33 +1,8 @@
-# ╔══════════════════════════════════════════════════════════════╗
-# ║         DEATHROLL STUDIO v30.0  —  GITHUB ACTIONS           ║
-# ║  Runs every day at 6AM UTC  |  Also triggerable manually    ║
-# ╚══════════════════════════════════════════════════════════════╝
-#
-# SETUP CHECKLIST (do this once in your repo):
-#
-#   GitHub → Settings → Secrets → Actions → New repository secret
-#
-#   Required:
-#     TELEGRAM_BOT_TOKEN   your bot token from @BotFather
-#     TELEGRAM_CHAT_ID     your personal admin chat ID (from @userinfobot)
-#     GH_TOKEN             GitHub PAT with repo + workflow scope
-#
-#   Optional but recommended:
-#     OPENAI_API_KEY       gpt-4o-mini for AI mechanics/descriptions
-#                          get it at: platform.openai.com
-#     GAME_PRICE           price in SOL (default: 7)
-#
-#   GitHub Pages (do this once):
-#     Settings → Pages → Source: Deploy from branch → main → / (root)
-
 name: DeathRoll Studio — Daily Game Factory
 
 on:
-  # ── Runs every day at 6:00 AM UTC ─────────────────────────
   schedule:
     - cron: '0 6 * * *'
-
-  # ── Also allows manual trigger from Actions tab ────────────
   workflow_dispatch:
     inputs:
       game_price:
@@ -40,41 +15,29 @@ on:
         default: ''
 
 permissions:
-  contents: write       # needed to commit portfolio.json, index.html, etc.
-  pages: write          # needed for GitHub Pages deploy
+  contents: write
+  pages: write
   id-token: write
 
 jobs:
-  # ════════════════════════════════════════════════════════════
-  #  JOB 1 — BUILD & DEPLOY GAME
-  # ════════════════════════════════════════════════════════════
   create-game:
     name: Build Daily Game
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
     steps:
-      # ── 1. Checkout full history (needed for git push) ─────
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GH_TOKEN }}
 
-      # ── 2. Python 3.11 ────────────────────────────────────
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
-      # ── 3. Install dependencies ───────────────────────────
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install pillow requests
+      - run: pip install --upgrade pip && pip install pillow requests
 
-      # ── 4. Run the game factory ───────────────────────────
       - name: Run Game Factory
         env:
           TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -84,20 +47,17 @@ jobs:
           GAME_PRICE:          ${{ github.event.inputs.game_price || secrets.GAME_PRICE || '7' }}
         run: python levelforge_github.py
 
-      # ── 5. Commit & push all generated files ──────────────
-      - name: Commit and push results
+      - name: Commit and push
         run: |
-          git config --global user.name  "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --staged --quiet || git commit -m "🎮 Auto update: $(date -u +'%Y-%m-%d %H:%M') UTC"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      # ── 6. Upload build artifacts (kept 30 days) ──────────
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: game-output-${{ github.run_number }}
@@ -111,53 +71,32 @@ jobs:
             sprite.png
             workspace/
 
-  # ════════════════════════════════════════════════════════════
-  #  JOB 2 — DEPLOY TO GITHUB PAGES
-  #  Runs after job 1 completes successfully
-  # ════════════════════════════════════════════════════════════
   deploy-pages:
     name: Deploy Storefront to GitHub Pages
     needs: create-game
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      - name: Checkout updated repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
           token: ${{ secrets.GH_TOKEN }}
           ref: main
-
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
 
-  # ════════════════════════════════════════════════════════════
-  #  JOB 3 — NOTIFY ON FAILURE
-  #  Sends Telegram alert if something breaks
-  # ════════════════════════════════════════════════════════════
   notify-failure:
-    name: Failure Alert
     needs: [create-game, deploy-pages]
     runs-on: ubuntu-latest
     if: failure()
-
     steps:
-      - name: Send failure alert to Telegram
-        run: |
+      - run: |
           MESSAGE="⚠️ *DeathRoll Studio* — Build failed%0A%0ARun: \`${{ github.run_number }}\`%0ATime: $(date -u +'%Y-%m-%d %H:%M UTC')%0A%0ACheck: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
