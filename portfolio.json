@@ -145,5 +145,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0008",
+    "date": "2026-06-09T16:58:32.117043",
+    "game": "Ironskin Ops",
+    "genre": "fighting game",
+    "mechanic": "Death Bloom",
+    "mech_desc": "Near-death triggers a massive radial shockwave instantly",
+    "description": "Master Death Bloom in this fighting game \u2014 no two sessions are the same.",
+    "hook": "This game will haunt you \ud83d\udd25",
+    "hashtags": "#gamedev #indiegame #mobilegame #fightinggame #DeathBloom #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Ironskin_Ops/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Ironskin_Ops/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-0528BE824EC5A5BF",
+    "color": "#ff6600",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
