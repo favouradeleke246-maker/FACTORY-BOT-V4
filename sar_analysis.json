@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 33,
-    "art_ok": 8,
+    "total_runs": 34,
+    "art_ok": 9,
     "art_fail": 0,
     "games": [
       {
@@ -234,6 +234,13 @@
         "mechanic": "Death Bloom",
         "art": true,
         "ts": "2026-06-09T16:58:34.078755"
+      },
+      {
+        "name": "Null Xenith",
+        "genre": "action RPG",
+        "mechanic": "Chrono Fracture",
+        "art": true,
+        "ts": "2026-06-09T17:14:43.888793"
       }
     ],
     "successful_art": 25,
@@ -241,7 +248,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.242,
+    "rate": 0.265,
     "best_mechanic": null,
     "success_rate": 0
   }
