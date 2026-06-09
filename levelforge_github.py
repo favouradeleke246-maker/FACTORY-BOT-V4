@@ -332,24 +332,29 @@ const KB={};document.addEventListener('keydown',e=>{KB[e.key]=true;e.preventDefa
 function kbJoy(){JOY.x=((KB['ArrowRight']||KB['d'])?1:0)-((KB['ArrowLeft']||KB['a'])?1:0);JOY.y=((KB['ArrowDown']||KB['s'])?1:0)-((KB['ArrowUp']||KB['w'])?1:0);}
 """
 
-# ---------- GAME BUILDERS (FULL) ----------
+# ---------- GAME BUILDERS (FULL, NO F-STRING SYNTAX ERRORS) ----------
 
 def build_shooter_game():
-    return f"""{SHARED_HEAD}
+    return SHARED_HEAD + """
 <body>
 <div id="wrap">
-  <div id="hud"><div id="score-ring"><div class="num" id="sc">0</div><div class="lbl">SCORE</div></div>
-  <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;"><div id="lives-row"><div class="life-pip" id="lp0"></div><div class="life-pip" id="lp1"></div><div class="life-pip" id="lp2"></div></div>
-  <div id="special-bar"><div id="special-fill"></div></div><div style="font-size:9px;color:#555;">⚡ {MECHANIC.upper()}</div></div>
-  <div style="font-size:11px;color:#666;text-align:right;">{GAME_NAME}<br><span style="color:var(--acc);font-size:9px;">WAVE <span id="wv">1</span></span></div></div>
+  <div id="hud">
+    <div id="score-ring"><div class="num" id="sc">0</div><div class="lbl">SCORE</div></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;">
+      <div id="lives-row"><div class="life-pip" id="lp0"></div><div class="life-pip" id="lp1"></div><div class="life-pip" id="lp2"></div></div>
+      <div id="special-bar"><div id="special-fill"></div></div>
+      <div style="font-size:9px;color:#555;">⚡ """ + MECHANIC.upper() + """</div>
+    </div>
+    <div style="font-size:11px;color:#666;text-align:right;">""" + GAME_NAME + """<br><span style="color:var(--acc);font-size:9px;">WAVE <span id="wv">1</span></span></div>
+  </div>
   <canvas id="c"></canvas>
-  {start_screen()}
+  """ + start_screen() + """
   <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
   <div id="btn-zone"><div class="abtn" id="btn-special" ontouchstart="activateSpecial()">⚡</div><div class="abtn" id="btn-fire" ontouchstart="rapidFire=true" ontouchend="rapidFire=false">🔥</div></div>
   <div id="brand-strip">DeathRoll</div>
 </div>
 <script>
-{JOYSTICK_JS}
+""" + JOYSTICK_JS + """
 const C=document.getElementById('c'),ctx=C.getContext('2d'); let W,H;
 function resize(){{const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');C.width=W=wrap.offsetWidth;C.height=H=wrap.offsetHeight-hud.offsetHeight;}}
 window.addEventListener('resize',resize); resize();
@@ -373,12 +378,12 @@ function spawnEnemy(){{
   const side=Math.floor(R(0,4)); let x,y;
   if(side===0){{x=R(0,W);y=-25;}}else if(side===1){{x=W+25;y=R(0,H);}}else if(side===2){{x=R(0,W);y=H+25;}}else{{x=-25;y=R(0,H);}}
   const hp=1+Math.floor(score/300),spd=R(0.9,1.8+wave*0.15);
-  enemies.push({{x,y,r:14+hp*2,hp,maxHp:hp,speed:spd,color:`hsl(${{R(0,360)}},70%,55%)`}});
+  enemies.push({{x,y,r:14+hp*2,hp,maxHp:hp,speed:spd,color:`hsl(${R(0,360)},70%,55%)`}});
 }}
 function activateSpecial(){{
   if(specialCharge<300)return;
   player.invincible=180; specialCharge=0;
-  mkParticles(player.x,player.y,'{G_COLOR}',20);
+  mkParticles(player.x,player.y,'""" + G_COLOR + """',20);
   enemies.forEach(e=>{{if(dist(player,e)<160){{e.hp-=3; mkParticles(e.x,e.y,e.color,6);}}}});
   enemies=enemies.filter(e=>e.hp>0);
 }}
@@ -406,34 +411,34 @@ function loop(){{
     lives--; player.invincible=90; mkParticles(player.x,player.y,'#ff3344',16); enemies.splice(ei,1); updateHUD();
     if(lives<=0){{running=false; document.getElementById('final-score').textContent='SCORE: '+score; document.getElementById('over-screen').classList.remove('hidden'); return;}}
   }}
-  ctx.fillStyle='{G_BG}'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='""" + G_BG + """'; ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='rgba(255,255,255,0.04)'; for(let x=0;x<W;x+=40){{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}} for(let y=0;y<H;y+=40){{ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}}
   particles=particles.filter(p=>{{p.x+=p.vx;p.y+=p.vy;p.vx*=0.92;p.vy*=0.92;p.life--; ctx.globalAlpha=p.life/40; ctx.fillStyle=p.color; ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill(); return p.life>0;}});
   ctx.globalAlpha=1;
   enemies.forEach(e=>{{ctx.save();ctx.shadowColor=e.color;ctx.shadowBlur=10;ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();if(e.maxHp>1){{ctx.fillStyle='#111';ctx.fillRect(e.x-e.r,e.y-e.r-8,e.r*2,4);ctx.fillStyle=e.color;ctx.fillRect(e.x-e.r,e.y-e.r-8,e.r*2*(e.hp/e.maxHp),4);}}ctx.restore();}});
-  bullets.forEach(b=>{{b.x+=b.vx;b.y+=b.vy;ctx.save();ctx.shadowColor='{G_COLOR}';ctx.shadowBlur=12;ctx.fillStyle='{G_COLOR}';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.restore();}});
+  bullets.forEach(b=>{{b.x+=b.vx;b.y+=b.vy;ctx.save();ctx.shadowColor='""" + G_COLOR + """';ctx.shadowBlur=12;ctx.fillStyle='""" + G_COLOR + """';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.restore();}});
   ctx.save(); if(player.invincible>0&&Math.floor(frame/4)%2===0){{ctx.restore();return;}} ctx.shadowColor='#fff';ctx.shadowBlur=8;ctx.fillStyle='#ffffff';ctx.translate(player.x,player.y);ctx.beginPath();ctx.moveTo(0,-player.r);ctx.lineTo(player.r*0.7,player.r*0.8);ctx.lineTo(-player.r*0.7,player.r*0.8);ctx.closePath();ctx.fill();ctx.restore();
 }}
 </script>
 </body></html>"""
 
 def build_wave_game():
-    return f"""{SHARED_HEAD}
+    return SHARED_HEAD + """
 <body>
 <div id="wrap">
   <div id="hud">
     <div id="score-ring"><div class="num" id="sc">0</div><div class="lbl">SCORE</div></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;"><div id="lives-row"><div class="life-pip" id="lp0"></div><div class="life-pip" id="lp1"></div><div class="life-pip" id="lp2"></div><div class="life-pip" id="lp3"></div><div class="life-pip" id="lp4"></div></div><div id="special-bar"><div id="special-fill"></div></div></div>
-    <div style="font-size:11px;color:#666;text-align:right;">{GAME_NAME}<br><span style="color:var(--acc);font-size:9px;">WAVE <span id="wv">1</span></span></div>
+    <div style="font-size:11px;color:#666;text-align:right;">""" + GAME_NAME + """<br><span style="color:var(--acc);font-size:9px;">WAVE <span id="wv">1</span></span></div>
   </div>
   <canvas id="c"></canvas>
-  {start_screen()}
+  """ + start_screen() + """
   <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
   <div id="btn-zone"><div class="abtn" ontouchstart="activateSpecial()">⚡</div><div class="abtn" ontouchstart="slash()">⚔️</div></div>
   <div id="brand-strip">DeathRoll</div>
 </div>
 <script>
-{JOYSTICK_JS}
+""" + JOYSTICK_JS + """
 const C=document.getElementById('c'),ctx=C.getContext('2d'); let W,H;
 function resize(){{const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');C.width=W=wrap.offsetWidth;C.height=H=wrap.offsetHeight-hud.offsetHeight;}}
 window.addEventListener('resize',resize);resize();
@@ -459,7 +464,7 @@ function spawnWave(){{
   for(let i=0;i<count;i++){{
     const ang=R(0,Math.PI*2),d=Math.max(W,H)*0.6;
     const hp=1+Math.floor(wave/2);
-    enemies.push({{x:W/2+Math.cos(ang)*d,y:H/2+Math.sin(ang)*d,r:12+hp*3,hp,maxHp:hp,speed:R(1,1.8+wave*0.1),color:`hsl(${{R(0,360)}},70%,55%)`,invincible:0}});
+    enemies.push({{x:W/2+Math.cos(ang)*d,y:H/2+Math.sin(ang)*d,r:12+hp*3,hp,maxHp:hp,speed:R(1,1.8+wave*0.1),color:`hsl(${R(0,360)},70%,55%)`,invincible:0}});
   }}
   waveActive=true;
 }}
@@ -481,7 +486,7 @@ function activateSpecial(){{
   if(charge<300)return;
   charge=0;
   enemies.forEach((e,i)=>{{if(dist(player,e)<200){{mkP(e.x,e.y,e.color,12);score+=10;enemies.splice(i,1);}}}});
-  mkP(player.x,player.y,'{G_COLOR}',30);
+  mkP(player.x,player.y,'""" + G_COLOR + """',30);
   player.invincible=120;
   updateHUD();
 }}
@@ -498,37 +503,37 @@ function loop(){{
   if(waveActive && enemies.length===0){{wave++;waveTimer=90;waveActive=false;score+=wave*20;updateHUD();}}
   enemies.forEach(e=>{{if(e.invincible>0)e.invincible--;const ang=Math.atan2(player.y-e.y,player.x-e.x);e.x+=Math.cos(ang)*e.speed;e.y+=Math.sin(ang)*e.speed;}});
   if(player.invincible===0) enemies.forEach((e,i)=>{{if(dist(player,e)<player.r+e.r-4){{lives--;player.invincible=80;mkP(player.x,player.y,'#ff3344',12);enemies.splice(i,1);updateHUD();if(lives<=0){{running=false;gameOver();}}}}}});
-  ctx.fillStyle='{G_BG}';ctx.fillRect(0,0,W,H);
-  const grd=ctx.createRadialGradient(W/2,H/2,30,W/2,H/2,H*0.7);grd.addColorStop(0,'{G_COLOR}11');grd.addColorStop(1,'transparent');ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);
+  const grd=ctx.createRadialGradient(W/2,H/2,30,W/2,H/2,H*0.7);grd.addColorStop(0,'""" + G_COLOR + """11');grd.addColorStop(1,'transparent');ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
   particles=particles.filter(p=>{{p.x+=p.vx;p.y+=p.vy;p.vx*=0.9;p.vy*=0.9;p.life--;ctx.globalAlpha=p.life/45;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();return p.life>0;}});
   ctx.globalAlpha=1;
-  slashes.forEach(s=>{{s.life--;ctx.save();ctx.globalAlpha=s.life/14;ctx.strokeStyle='{G_COLOR}';ctx.lineWidth=4;ctx.shadowColor='{G_COLOR}';ctx.shadowBlur=20;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x+Math.cos(s.angle)*s.range,s.y+Math.sin(s.angle)*s.range);ctx.stroke();ctx.restore();}});
+  slashes.forEach(s=>{{s.life--;ctx.save();ctx.globalAlpha=s.life/14;ctx.strokeStyle='""" + G_COLOR + """';ctx.lineWidth=4;ctx.shadowColor='""" + G_COLOR + """';ctx.shadowBlur=20;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x+Math.cos(s.angle)*s.range,s.y+Math.sin(s.angle)*s.range);ctx.stroke();ctx.restore();}});
   slashes=slashes.filter(s=>s.life>0);
   enemies.forEach(e=>{{ctx.save();ctx.shadowColor=e.color;ctx.shadowBlur=8;ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();if(e.maxHp>1){{ctx.fillStyle='#111';ctx.fillRect(e.x-e.r,e.y-e.r-8,e.r*2,4);ctx.fillStyle=e.color;ctx.fillRect(e.x-e.r,e.y-e.r-8,e.r*2*(e.hp/e.maxHp),4);}}ctx.restore();}});
-  ctx.save();if(player.invincible>0&&Math.floor(frame/5)%2===0){{ctx.restore();}}else{{ctx.shadowColor='{G_COLOR}';ctx.shadowBlur=14;ctx.fillStyle='{G_COLOR}';ctx.translate(player.x,player.y);ctx.rotate(player.facingAngle+Math.PI/2);ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(12,10);ctx.lineTo(-12,10);ctx.closePath();ctx.fill();ctx.restore();}}
-  if(!waveActive&&waveTimer>0){{ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(W/2-100,H/2-20,200,40);ctx.fillStyle='{G_COLOR}';ctx.font='bold 14px Courier New';ctx.textAlign='center';ctx.fillText(`WAVE ${{wave}} IN ${{Math.ceil(waveTimer/30)}}s`,W/2,H/2+5);ctx.textAlign='left';}}
+  ctx.save();if(player.invincible>0&&Math.floor(frame/5)%2===0){{ctx.restore();}}else{{ctx.shadowColor='""" + G_COLOR + """';ctx.shadowBlur=14;ctx.fillStyle='""" + G_COLOR + """';ctx.translate(player.x,player.y);ctx.rotate(player.facingAngle+Math.PI/2);ctx.beginPath();ctx.moveTo(0,-16);ctx.lineTo(12,10);ctx.lineTo(-12,10);ctx.closePath();ctx.fill();ctx.restore();}}
+  if(!waveActive&&waveTimer>0){{ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(W/2-100,H/2-20,200,40);ctx.fillStyle='""" + G_COLOR + """';ctx.font='bold 14px Courier New';ctx.textAlign='center';ctx.fillText(`WAVE ${wave} IN ${Math.ceil(waveTimer/30)}s`,W/2,H/2+5);ctx.textAlign='left';}}
 }}
 function gameOver(){{document.getElementById('final-score').textContent='SCORE: '+score;document.getElementById('over-screen').classList.remove('hidden');}}
 </script>
 </body></html>"""
 
 def build_platformer_game():
-    return f"""{SHARED_HEAD}
+    return SHARED_HEAD + """
 <body>
 <div id="wrap">
   <div id="hud">
     <div id="score-ring"><div class="num" id="sc">0</div><div class="lbl">SCORE</div></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;"><div id="lives-row"><div class="life-pip" id="lp0"></div><div class="life-pip" id="lp1"></div><div class="life-pip" id="lp2"></div></div><div id="special-bar"><div id="special-fill"></div></div></div>
-    <div style="font-size:11px;color:#666;">{GAME_NAME}</div>
+    <div style="font-size:11px;color:#666;">""" + GAME_NAME + """</div>
   </div>
   <canvas id="c"></canvas>
-  {start_screen()}
+  """ + start_screen() + """
   <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
   <div id="btn-zone"><div class="abtn" ontouchstart="doJump()">↑</div><div class="abtn" ontouchstart="activateSpecial()">⚡</div></div>
   <div id="brand-strip">DeathRoll</div>
 </div>
 <script>
-{JOYSTICK_JS}
+""" + JOYSTICK_JS + """
 const C=document.getElementById('c'),ctx=C.getContext('2d'); let W,H;
 function resize(){{const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');C.width=W=wrap.offsetWidth;C.height=H=wrap.offsetHeight-hud.offsetHeight;}}
 window.addEventListener('resize',resize);resize();
@@ -538,22 +543,22 @@ function R(a,b){{return Math.random()*(b-a)+a;}}
 function mkP(x,y,c,n=6){{for(let i=0;i<n;i++){{const a=R(0,Math.PI*2),s=R(1,4);particles.push({{x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:R(20,35),color:c,r:R(1,4)}});}}}}
 function startGame(){{document.getElementById('start-screen').classList.add('hidden');init();}}
 function restartGame(){{document.getElementById('over-screen').classList.add('hidden');init();}}
-function doJump(){{if(player&&player.onGround){{player.vy=JUMP;player.onGround=false;mkP(player.x,player.y+player.h,'{G_COLOR}',6);}}}}
+function doJump(){{if(player&&player.onGround){{player.vy=JUMP;player.onGround=false;mkP(player.x,player.y+player.h,'""" + G_COLOR + """',6);}}}}
 function activateSpecial(){{
   if(charge<300)return;charge=0;
   player.vy=JUMP*1.6;player.invincible=120;
-  mkP(player.x,player.y,'{G_COLOR}',20);
+  mkP(player.x,player.y,'""" + G_COLOR + """',20);
   enemies.forEach((e,i)=>{{if(Math.hypot(e.x-player.x,e.y-player.y)<120){{mkP(e.x,e.y,e.color,8);enemies.splice(i,1);score+=20;}}}});
   updateHUD();
 }}
 document.addEventListener('keydown',e=>{{if(e.key===' '||e.key==='ArrowUp'||e.key==='w')doJump();if(e.key==='z')activateSpecial();}});
 function buildLevel(startY){{
   const plats=[];plats.push({{x:0,y:startY+H-20,w:W,h:20,color:'#333'}});
-  for(let i=1;i<30;i++){{const y=startY+H-20-i*85+R(-20,20);const w=R(60,140);const x=R(10,W-w-10);plats.push({{x,y,w,h:14,color:`hsl(${{R(180,280)}},60%,35%)`}});}}
+  for(let i=1;i<30;i++){{const y=startY+H-20-i*85+R(-20,20);const w=R(60,140);const x=R(10,W-w-10);plats.push({{x,y,w,h:14,color:`hsl(${R(180,280)},60%,35%)`}});}}
   return plats;
 }}
 function buildCoins(plats){{return plats.slice(1).map(p=>Math.random()<0.6?{{x:p.x+p.w/2,y:p.y-18,r:7,collected:false}}:null).filter(Boolean);}}
-function buildEnemies(plats){{return plats.slice(5).filter(()=>Math.random()<0.35).map(p=>{{return{{x:p.x+p.w/2,y:p.y-20,r:12,dx:1.2,plat:p,color:`hsl(${{R(0,60)}},80%,55%)`,invincible:0}};}});}}
+function buildEnemies(plats){{return plats.slice(5).filter(()=>Math.random()<0.35).map(p=>{{return{{x:p.x+p.w/2,y:p.y-20,r:12,dx:1.2,plat:p,color:`hsl(${R(0,60)},80%,55%)`,invincible:0}};}});}}
 function init(){{
   camY=0;player={{x:W/2-12,y:H-100,w:24,h:28,vx:0,vy:0,onGround:false,invincible:0}};
   platforms=buildLevel(0);coins=buildCoins(platforms);enemies=buildEnemies(platforms);
@@ -571,16 +576,16 @@ function loop(){{
   if(player.invincible>0)player.invincible--;
   platforms.forEach(p=>{{if(player.x<p.x+p.w&&player.x+player.w>p.x&&player.y+player.h>p.y&&player.y+player.h<p.y+p.h+Math.abs(player.vy)+2&&player.vy>=0){{player.y=p.y-player.h;player.vy=0;player.onGround=true;}}}});
   const targetY=player.y-H*0.5;if(targetY<camY)camY+=(targetY-camY)*0.08;
-  coins.forEach(coin=>{{if(!coin.collected&&Math.hypot(player.x+12-coin.x,player.y+14-coin.y)<coin.r+14){{coin.collected=true;score+=5;charge=Math.min(300,charge+25);mkP(coin.x,coin.y,'{G_COLOR}',8);updateHUD();}}}});
+  coins.forEach(coin=>{{if(!coin.collected&&Math.hypot(player.x+12-coin.x,player.y+14-coin.y)<coin.r+14){{coin.collected=true;score+=5;charge=Math.min(300,charge+25);mkP(coin.x,coin.y,'""" + G_COLOR + """',8);updateHUD();}}}});
   enemies.forEach(e=>{{e.x+=e.dx;if(e.x<e.plat.x||e.x>e.plat.x+e.plat.w)e.dx*=-1;if(player.invincible===0&&Math.hypot(player.x+12-e.x,player.y+14-e.y)<e.r+14){{if(player.vy>0&&player.y+player.h<e.y+4){{score+=15;charge=Math.min(300,charge+50);mkP(e.x,e.y,e.color,12);enemies=enemies.filter(en=>en!==e);player.vy=JUMP*0.6;updateHUD();}}else{{lives--;player.invincible=90;player.vy=JUMP*0.7;mkP(player.x,player.y,'#ff3344',12);updateHUD();if(lives<=0){{running=false;gameOver();}}}}}}}});
   if(player.y-camY>H+100||player.y>10000){{running=false;gameOver();}}
-  ctx.fillStyle='{G_BG}';ctx.fillRect(0,0,W,H);ctx.save();ctx.translate(0,-camY);
+  ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);ctx.save();ctx.translate(0,-camY);
   platforms.forEach(p=>{{ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='rgba(255,255,255,0.06)';ctx.fillRect(p.x,p.y,p.w,4);}});
-  coins.forEach(c=>{{if(c.collected)return;ctx.save();ctx.shadowColor='{G_COLOR}';ctx.shadowBlur=10;ctx.fillStyle='{G_COLOR}';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();ctx.restore();}});
+  coins.forEach(c=>{{if(c.collected)return;ctx.save();ctx.shadowColor='""" + G_COLOR + """';ctx.shadowBlur=10;ctx.fillStyle='""" + G_COLOR + """';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();ctx.restore();}});
   enemies.forEach(e=>{{ctx.save();ctx.shadowColor=e.color;ctx.shadowBlur=8;ctx.fillStyle=e.color;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,Math.PI*2);ctx.fill();ctx.restore();}});
   particles=particles.filter(p=>{{p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;p.life--;ctx.globalAlpha=p.life/35;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();return p.life>0;}});
   ctx.globalAlpha=1;
-  if(!(player.invincible>0&&Math.floor(frame/5)%2===0)){{ctx.fillStyle='{G_COLOR}';ctx.shadowColor='{G_COLOR}';ctx.shadowBlur=10;ctx.fillRect(player.x,player.y,player.w,player.h);ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(player.x+6,player.y+6,6,6);}}
+  if(!(player.invincible>0&&Math.floor(frame/5)%2===0)){{ctx.fillStyle='""" + G_COLOR + """';ctx.shadowColor='""" + G_COLOR + """';ctx.shadowBlur=10;ctx.fillRect(player.x,player.y,player.w,player.h);ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(player.x+6,player.y+6,6,6);}}
   ctx.restore();
 }}
 function gameOver(){{document.getElementById('final-score').textContent='SCORE: '+score;document.getElementById('over-screen').classList.remove('hidden');}}
@@ -588,16 +593,16 @@ function gameOver(){{document.getElementById('final-score').textContent='SCORE: 
 </body></html>"""
 
 def build_puzzle_game():
-    return f"""{SHARED_HEAD}
+    return SHARED_HEAD + """
 <body>
 <div id="wrap">
   <div id="hud">
     <div id="score-ring"><div class="num" id="sc">0</div><div class="lbl">MOVES</div></div>
-    <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;"><div style="font-size:11px;color:var(--acc);">Best: <span id="best">—</span></div><div id="special-bar"><div id="special-fill"></div></div><div style="font-size:9px;color:#555;">⚡ {MECHANIC.upper()}</div></div>
-    <div style="font-size:11px;color:#666;">{GAME_NAME}</div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;"><div style="font-size:11px;color:var(--acc);">Best: <span id="best">—</span></div><div id="special-bar"><div id="special-fill"></div></div><div style="font-size:9px;color:#555;">⚡ """ + MECHANIC.upper() + """</div></div>
+    <div style="font-size:11px;color:#666;">""" + GAME_NAME + """</div>
   </div>
   <canvas id="c"></canvas>
-  {start_screen()}
+  """ + start_screen() + """
   <div id="brand-strip">DeathRoll</div>
 </div>
 <script>
@@ -620,8 +625,8 @@ function random_move(){{const dirs=[[-1,0],[1,0],[0,-1],[0,1]];const valid=dirs.
 function doMove([dr,dc]){{const nr=blank.r+dr,nc=blank.c+dc;if(nr<0||nr>=N||nc<0||nc>=N)return false;board[idx(blank.r,blank.c)]=board[idx(nr,nc)];board[idx(nr,nc)]=0;blank={{r:nr,c:nc}};return true;}}
 function isSolved(){{for(let i=0;i<N*N-1;i++)if(board[i]!==i+1)return false;return board[N*N-1]===0;}}
 C.addEventListener('click',handleClick);C.addEventListener('touchend',e=>{{e.preventDefault();const t=e.changedTouches[0];handleClick({{clientX:t.clientX,clientY:t.clientY}});}},{{passive:false}});
-function handleClick(e){{if(!running)return;const rect=C.getBoundingClientRect();const mx=e.clientX-rect.left,my=e.clientY-rect.top;const tw=W/N,th=H/N;const cc=Math.floor(mx/tw),cr=Math.floor(my/th);if(cr<0||cr>=N||cc<0||cc>=N)return;const dr=cr-blank.r,dc=cc-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){{doMove([dr,dc]);moves++;charge=Math.min(300,charge+10);updateHUD();if(isSolved()){{running=false;const b=getBest();if(!b||moves<parseInt(b))setBest(moves);setTimeout(()=>{{document.getElementById('final-score').textContent=`Solved in ${{moves}} moves!`;document.getElementById('over-screen').classList.remove('hidden');}},500);}}}}}}
-function loop(){{requestAnimationFrame(loop);frame++;ctx.fillStyle='{G_BG}';ctx.fillRect(0,0,W,H);const tw=W/N,th=H/N,gap=4;for(let r=0;r<N;r++){{for(let c=0;c<N;c++){{const v=board[idx(r,c)];if(v===0)continue;const x=c*tw+gap/2,y=r*th+gap/2,bw=tw-gap,bh=th-gap;const hue=((v-1)/(N*N-1))*280+20;ctx.fillStyle=`hsl(${{hue}},60%,18%)`;ctx.fillRect(x,y,bw,bh);ctx.strokeStyle=`hsl(${{hue}},70%,45%)`;ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,bw-2,bh-2);ctx.fillStyle=`hsl(${{hue}},80%,70%)`;ctx.font=`bold ${{Math.floor(tw*0.38)}}px Courier New`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor=`hsl(${{hue}},80%,60%)`;ctx.shadowBlur=8;ctx.fillText(v,x+bw/2,y+bh/2);ctx.shadowBlur=0;}}}
+function handleClick(e){{if(!running)return;const rect=C.getBoundingClientRect();const mx=e.clientX-rect.left,my=e.clientY-rect.top;const tw=W/N,th=H/N;const cc=Math.floor(mx/tw),cr=Math.floor(my/th);if(cr<0||cr>=N||cc<0||cc>=N)return;const dr=cr-blank.r,dc=cc-blank.c;if((Math.abs(dr)+Math.abs(dc))===1){{doMove([dr,dc]);moves++;charge=Math.min(300,charge+10);updateHUD();if(isSolved()){{running=false;const b=getBest();if(!b||moves<parseInt(b))setBest(moves);setTimeout(()=>{{document.getElementById('final-score').textContent=`Solved in ${moves} moves!`;document.getElementById('over-screen').classList.remove('hidden');}},500);}}}}}}
+function loop(){{requestAnimationFrame(loop);frame++;ctx.fillStyle='""" + G_BG + """';ctx.fillRect(0,0,W,H);const tw=W/N,th=H/N,gap=4;for(let r=0;r<N;r++){{for(let c=0;c<N;c++){{const v=board[idx(r,c)];if(v===0)continue;const x=c*tw+gap/2,y=r*th+gap/2,bw=tw-gap,bh=th-gap;const hue=((v-1)/(N*N-1))*280+20;ctx.fillStyle=`hsl(${hue},60%,18%)`;ctx.fillRect(x,y,bw,bh);ctx.strokeStyle=`hsl(${hue},70%,45%)`;ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,bw-2,bh-2);ctx.fillStyle=`hsl(${hue},80%,70%)`;ctx.font=`bold ${Math.floor(tw*0.38)}px Courier New`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor=`hsl(${hue},80%,60%)`;ctx.shadowBlur=8;ctx.fillText(v,x+bw/2,y+bh/2);ctx.shadowBlur=0;}}}
   ctx.textAlign='left';ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;for(let i=1;i<N;i++){{ctx.beginPath();ctx.moveTo(i*tw,0);ctx.lineTo(i*tw,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*th);ctx.lineTo(W,i*th);ctx.stroke();}}
 }}
 function gameOver(){{}}
@@ -629,22 +634,22 @@ function gameOver(){{}}
 </body></html>"""
 
 def build_racer_game():
-    return f"""{SHARED_HEAD}
+    return SHARED_HEAD + """
 <body>
 <div id="wrap">
   <div id="hud">
     <div id="score-ring"><div class="num" id="sc">0</div><div class="lbl">DIST</div></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:0 8px;"><div style="font-size:11px;color:var(--acc);">SPEED: <span id="spd">0</span></div><div id="special-bar"><div id="special-fill"></div></div></div>
-    <div style="font-size:11px;color:#666;">{GAME_NAME}</div>
+    <div style="font-size:11px;color:#666;">""" + GAME_NAME + """</div>
   </div>
   <canvas id="c"></canvas>
-  {start_screen()}
+  """ + start_screen() + """
   <div id="joy-zone"><div id="joy-outer"><div id="joy-inner"></div></div></div>
   <div id="btn-zone"><div class="abtn" ontouchstart="activateBoost()">🚀</div></div>
   <div id="brand-strip">DeathRoll</div>
 </div>
 <script>
-{JOYSTICK_JS}
+""" + JOYSTICK_JS + """
 const C=document.getElementById('c'),ctx=C.getContext('2d'); let W,H;
 function resize(){{const wrap=document.getElementById('wrap'),hud=document.getElementById('hud');C.width=W=wrap.offsetWidth;C.height=H=wrap.offsetHeight-hud.offsetHeight;}}
 window.addEventListener('resize',resize);resize();
@@ -653,7 +658,7 @@ function R(a,b){{return Math.random()*(b-a)+a;}}
 function mkP(x,y,c,n=8){{for(let i=0;i<n;i++){{const a=R(0,Math.PI*2),s=R(2,6);particles.push({{x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:R(20,35),color:c,r:R(2,4)}});}}}}
 function startGame(){{document.getElementById('start-screen').classList.add('hidden');init();}}
 function restartGame(){{document.getElementById('over-screen').classList.add('hidden');init();}}
-function activateBoost(){{if(charge<300)return;charge=0;boost=180;mkP(car.x,car.y+30,'{G_COLOR}',20);updateHUD();}}
+function activateBoost(){{if(charge<300)return;charge=0;boost=180;mkP(car.x,car.y+30,'""" + G_COLOR + """',20);updateHUD();}}
 document.addEventListener('keydown',e=>{{if(e.key===' ')activateBoost();}});
 function init(){{
   car={{x:W/2,y:H*0.75,w:28,h:44,invincible:0}};
@@ -676,13 +681,13 @@ function loop(){{
   if(car.invincible>0)car.invincible--;
   score+=effectiveSpeed*0.1;
   lines.forEach(l=>{{l.y+=effectiveSpeed*2;if(l.y>H){{l.y-=H;l.x=W/2+R(-20,20);}}}});
-  if(frame%Math.max(30,60-Math.floor(speed*4))===0){{const cols=[W*0.2,W*0.4,W*0.6,W*0.8];const col=cols[Math.floor(R(0,cols.length))];obstacles.push({{x:col,y:-30,w:R(30,50),h:R(30,50),color:`hsl(${{R(0,360)}},70%,50%)`}});}}
+  if(frame%Math.max(30,60-Math.floor(speed*4))===0){{const cols=[W*0.2,W*0.4,W*0.6,W*0.8];const col=cols[Math.floor(R(0,cols.length))];obstacles.push({{x:col,y:-30,w:R(30,50),h:R(30,50),color:`hsl(${R(0,360)},70%,50%)`}});}}
   if(frame%45===0) coins.push({{x:R(40,W-40),y:-20,r:10,collected:false}});
   obstacles.forEach(o=>o.y+=effectiveSpeed*1.8);
   coins.forEach(c=>c.y+=effectiveSpeed*1.8);
   obstacles=obstacles.filter(o=>o.y<H+60);
   coins=coins.filter(c=>c.y<H+30&&!c.collected);
-  coins.forEach(c=>{{if(!c.collected&&Math.hypot(car.x-c.x,car.y-c.y)<c.r+18){{c.collected=true;score+=20;charge=Math.min(300,charge+40);mkP(c.x,c.y,'{G_COLOR}',8);updateHUD();}}}});
+  coins.forEach(c=>{{if(!c.collected&&Math.hypot(car.x-c.x,car.y-c.y)<c.r+18){{c.collected=true;score+=20;charge=Math.min(300,charge+40);mkP(c.x,c.y,'""" + G_COLOR + """',8);updateHUD();}}}});
   if(car.invincible===0) obstacles.forEach((o,i)=>{{if(car.x-car.w/2<o.x+o.w/2&&car.x+car.w/2>o.x-o.w/2&&car.y-car.h/2<o.y+o.h/2&&car.y+car.h/2>o.y-o.h/2){{mkP(car.x,car.y,'#ff4444',20);running=false;gameOver();}}}});
   ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
   ctx.fillStyle='#1a1a1a';ctx.fillRect(W*0.1,0,W*0.8,H);
@@ -691,8 +696,8 @@ function loop(){{
   particles=particles.filter(p=>{{p.x+=p.vx;p.y+=p.vy;p.vx*=0.9;p.vy*=0.9;p.life--;ctx.globalAlpha=p.life/35;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();return p.life>0;}});
   ctx.globalAlpha=1;
   obstacles.forEach(o=>{{ctx.fillStyle=o.color;ctx.shadowColor=o.color;ctx.shadowBlur=8;ctx.fillRect(o.x-o.w/2,o.y-o.h/2,o.w,o.h);ctx.shadowBlur=0;}});
-  coins.forEach(c=>{{if(c.collected)return;ctx.save();ctx.shadowColor='{G_COLOR}';ctx.shadowBlur=10;ctx.fillStyle='{G_COLOR}';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();ctx.restore();}});
-  ctx.save();if(boost>0){{ctx.shadowColor='{G_COLOR}';ctx.shadowBlur=20;}}ctx.fillStyle=boost>0?'{G_COLOR}':'#ffffff';ctx.fillRect(car.x-car.w/2,car.y-car.h/2,car.w,car.h);ctx.fillStyle='rgba(0,200,255,.4)';ctx.fillRect(car.x-car.w/2+4,car.y-car.h/2+6,car.w-8,14);if(boost>0){{for(let i=0;i<3;i++) mkP(car.x+R(-8,8),car.y+car.h/2+5,'{G_COLOR}',1);}}ctx.restore();
+  coins.forEach(c=>{{if(c.collected)return;ctx.save();ctx.shadowColor='""" + G_COLOR + """';ctx.shadowBlur=10;ctx.fillStyle='""" + G_COLOR + """';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();ctx.restore();}});
+  ctx.save();if(boost>0){{ctx.shadowColor='""" + G_COLOR + """';ctx.shadowBlur=20;}}ctx.fillStyle=boost>0?'""" + G_COLOR + """':'#ffffff';ctx.fillRect(car.x-car.w/2,car.y-car.h/2,car.w,car.h);ctx.fillStyle='rgba(0,200,255,.4)';ctx.fillRect(car.x-car.w/2+4,car.y-car.h/2+6,car.w-8,14);if(boost>0){{for(let i=0;i<3;i++) mkP(car.x+R(-8,8),car.y+car.h/2+5,'""" + G_COLOR + """',1);}}ctx.restore();
   updateHUD();
 }}
 function gameOver(){{document.getElementById('final-score').textContent='DISTANCE: '+Math.floor(score);document.getElementById('over-screen').classList.remove('hidden');}}
