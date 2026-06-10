@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v30.0 — COMPLETE GAME FACTORY (ALL 5 GENRES)
-Generates a new mobile game every day with AI mechanics, modern UI, and beautiful art.
+DEATHROLL STUDIO v30.0 — COMPLETE FACTORY (FREE ART + ALL GAMES)
+Generates a new mobile game daily using free AI art (Pollinations + Hugging Face).
+All 5 game genres fully implemented, modern UI, no repeated mechanics.
 """
-import os, json, random, requests, shutil, zipfile, hashlib, math, html
+import os, json, random, requests, shutil, zipfile, hashlib, math, time
 from datetime import datetime
 from pathlib import Path
 
@@ -23,57 +24,32 @@ SOLANA_PHANTOM = "Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb"
 GAME_PRICE = os.getenv("GAME_PRICE", "7")
 TG_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TG_ADMIN = os.getenv("TELEGRAM_CHAT_ID")
-OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GH_TOKEN = os.getenv("GH_TOKEN")
 WHATSAPP_WEBHOOK_URL = os.getenv("WHATSAPP_WEBHOOK_URL", "")
 
 BASE_URL = f"https://{BRAND_GITHUB}.github.io/{BRAND_REPO}"
 RAW_URL = f"https://raw.githubusercontent.com/{BRAND_GITHUB}/{BRAND_REPO}/main"
 
-# ---------- TELEGRAM HELPERS (safe HTML) ----------
+# ---------- TELEGRAM HELPERS ----------
 def tg_send_photo(chat_id, photo_path, caption):
     if not TG_TOKEN: return False
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendPhoto"
     try:
         with open(photo_path, "rb") as f:
-            files = {"photo": f}
-            # Escape caption to avoid HTML injection but keep our tags
-            safe_caption = caption.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            # But we need to allow <b>, <i>, <code> etc. We'll just send as is – we trust our own formatting.
-            data = {
-                "chat_id": chat_id,
-                "caption": caption,
-                "parse_mode": "HTML",
-                "disable_web_page_preview": True
-            }
-            r = requests.post(url, files=files, data=data, timeout=40)
-        if r.status_code == 200:
-            print(f"  ✅ Telegram photo sent to {chat_id}")
-            return True
-        else:
-            print(f"  ❌ Telegram error {r.status_code}: {r.text[:200]}")
-            return False
-    except Exception as e:
-        print(f"  ❌ Telegram exception: {e}")
-        return False
+            r = requests.post(url, files={"photo": f},
+                              data={"chat_id": chat_id, "caption": caption, "parse_mode": "HTML"}, timeout=40)
+        return r.status_code == 200
+    except: return False
 
 def tg_send_doc(chat_id, doc_path, caption):
     if not TG_TOKEN: return False
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendDocument"
     try:
         with open(doc_path, "rb") as f:
-            files = {"document": f}
-            data = {"chat_id": chat_id, "caption": caption, "parse_mode": "HTML"}
-            r = requests.post(url, files=files, data=data, timeout=90)
-        if r.status_code == 200:
-            print(f"  ✅ Document sent to {chat_id}")
-            return True
-        else:
-            print(f"  ❌ Document error: {r.text[:200]}")
-            return False
-    except Exception as e:
-        print(f"  ❌ Document exception: {e}")
-        return False
+            r = requests.post(url, files={"document": f},
+                              data={"chat_id": chat_id, "caption": caption, "parse_mode": "HTML"}, timeout=90)
+        return r.status_code == 200
+    except: return False
 
 def send_to_whatsapp(text, image_url=None):
     if not WHATSAPP_WEBHOOK_URL: return False
@@ -82,20 +58,92 @@ def send_to_whatsapp(text, image_url=None):
         return r.status_code == 200
     except: return False
 
-# ---------- OPENAI ----------
-def call_openai(prompt, max_tokens=300, system=""):
-    if not OPENAI_KEY: return None
-    try:
-        r = requests.post("https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENAI_KEY}", "content-type": "application/json"},
-            json={"model": "gpt-4o-mini", "max_tokens": max_tokens,
-                  "messages": ([{"role":"system","content":system}] if system else []) + [{"role":"user","content":prompt}]},
-            timeout=50)
-        if r.status_code == 200:
-            return r.json()["choices"][0]["message"]["content"].strip().strip('"')
-    except Exception as e:
-        print(f"  ⚠️  OpenAI error: {e}")
+# ---------- FREE ART GENERATION (no API key needed) ----------
+def generate_image_pollinations(prompt, max_retries=2):
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "image/webp,image/apng,image/*"
+    }
+    for attempt in range(max_retries):
+        try:
+            enc = prompt.replace(" ", "+").replace(",", "%2C").replace("'", "%27").replace("\n", " ")[:500]
+            url = f"https://image.pollinations.ai/prompt/{enc}?width=512&height=512&seed={random.randint(1,999999)}&nologo=true"
+            r = requests.get(url, headers=headers, timeout=45)
+            if r.status_code == 200 and len(r.content) > 5000:
+                return r.content
+            time.sleep(2)
+        except:
+            time.sleep(3)
     return None
+
+def generate_image_huggingface(prompt):
+    api_url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
+    headers = {"User-Agent": "DeathRollStudio/3.0"}
+    payload = {"inputs": prompt, "parameters": {"negative_prompt": "text, watermark, lowres, ugly"}}
+    try:
+        r = requests.post(api_url, headers=headers, json=payload, timeout=60)
+        if r.status_code == 200 and r.headers.get('content-type', '').startswith('image'):
+            return r.content
+    except:
+        pass
+    return None
+
+def generate_pil_cover(game_name, genre, mechanic, color, bg_color):
+    """Enhanced PIL fallback – looks like a premium game cover"""
+    img = Image.new("RGB", (512, 512), bg_color)
+    draw = ImageDraw.Draw(img)
+    # Gradient background
+    for y in range(512):
+        factor = y / 512
+        r_val = int(20 + factor * 40)
+        g_val = int(10 + factor * 30)
+        b_val = int(30 + factor * 50)
+        draw.line([(0, y), (512, y)], fill=(r_val, g_val, b_val))
+    cx, cy = 256, 256
+    # Glowing rings
+    for rad in range(200, 30, -15):
+        alpha = max(15, 80 - rad//2)
+        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(color[1:]), alpha), width=3)
+    # Diagonal scanlines
+    for i in range(-512, 512, 24):
+        draw.line([(i, 0), (i+512, 512)], fill=(*bytes.fromhex(color[1:]), 20), width=2)
+        draw.line([(0, i), (512, i+512)], fill=(*bytes.fromhex(color[1:]), 20), width=2)
+    # Hex grid
+    hex_size = 50
+    for x in range(-hex_size, 512+hex_size, hex_size):
+        for y in range(-hex_size, 512+hex_size, int(hex_size*0.86)):
+            xc = x + (y % (hex_size*2)) * 0.5
+            pts = []
+            for i in range(6):
+                ang = math.radians(60*i - 30)
+                px = xc + hex_size * 0.5 * math.cos(ang)
+                py = y + hex_size * 0.5 * math.sin(ang)
+                pts.append((px, py))
+            draw.polygon(pts, outline=(*bytes.fromhex(color[1:]), 45), width=1)
+    # Game title with shadow
+    try:
+        font = ImageFont.load_default()
+        title = game_name[:18]
+        for offset in range(-3, 4, 2):
+            for oy in range(-3, 4, 2):
+                draw.text((cx-150+offset, cy-70+oy), title, fill=(0,0,0), anchor="mm", font=font)
+        draw.text((cx-150, cy-70), title, fill=color, anchor="mm", font=font)
+    except:
+        draw.text((cx-150, cy-70), game_name[:18], fill=color, anchor="mm")
+    # Genre badge
+    genre_text = genre.upper()
+    bbox = draw.textbbox((0,0), genre_text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    badge_x = cx - tw//2 - 12
+    badge_y = cy + 10
+    draw.rectangle([badge_x, badge_y, badge_x+tw+24, badge_y+th+10], fill=(*bytes.fromhex(color[1:]), 70), outline=color, width=2)
+    draw.text((cx, cy+16), genre_text, fill=color, anchor="mm", font=font)
+    # Mechanic text
+    mech_text = f"⚡ {mechanic}"
+    draw.text((cx, cy+55), mech_text, fill=(220,220,240), anchor="mm", font=font)
+    draw.text((15, 480), "DEATHROLL STUDIO", fill=(100,100,120), font=font)
+    return img
 
 # ---------- GENRES & LISTS ----------
 GENRES = {
@@ -165,7 +213,7 @@ def fetch_trends():
 
 # ---------- MAIN ----------
 print("╔══════════════════════════════════════════════════════╗")
-print(f"║  DEATHROLL STUDIO v{BOT_VERSION}  —  UPGRADED UI     ║")
+print(f"║  DEATHROLL STUDIO v{BOT_VERSION}  —  COMPLETE        ║")
 print("╚══════════════════════════════════════════════════════╝")
 
 trends = fetch_trends()
@@ -185,20 +233,8 @@ G_EMOJIS = GENRES[GENRE]["emojis"]
 EMOJI_STR = " ".join(random.sample(G_EMOJIS, len(G_EMOJIS)))
 print(f"  🎮 Genre: {GENRE}  ({EMOJI_STR})")
 
-# AI Mechanic & Description
-print("  ⚙️  Generating mechanic...")
-def gen_mechanic():
-    if OPENAI_KEY:
-        res = call_openai(f"Invent one UNIQUE, surprising game mechanic for a mobile {GENRE} game.\nIt must work well with TOUCH controls.\nReply EXACTLY:\nMECHANIC: <short name 2-4 words>\nDESCRIPTION: <one punchy sentence max 18 words>", max_tokens=100, system="You are a genius indie game designer.")
-        if res:
-            name = desc = None
-            for line in res.splitlines():
-                if line.startswith("MECHANIC:"): name = line.split(":",1)[1].strip()
-                elif line.startswith("DESCRIPTION:"): desc = line.split(":",1)[1].strip()
-            if name and desc: return name, desc
-    return random.choice(MECHANICS_FALLBACK)
-
-MECHANIC, MECH_DESC = gen_mechanic()
+# Mechanic & Description (from fallback list – no OpenAI needed)
+MECHANIC, MECH_DESC = random.choice(MECHANICS_FALLBACK)
 print(f"  ✨ {MECHANIC} — {MECH_DESC}")
 
 # Game name
@@ -223,24 +259,13 @@ ZIP_URL = f"{RAW_URL}/workspace/latest_game.zip"
 print(f"  🎯 Name: {GAME_NAME}")
 
 # Short description
-def gen_short_desc():
-    if OPENAI_KEY:
-        res = call_openai(f"Write ONE thrilling sentence (max 110 chars) for a mobile {GENRE} game called '{GAME_NAME}' featuring '{MECHANIC}'. No quotes.", max_tokens=60, system="You write killer indie game marketing copy.")
-        if res and len(res) > 15: return res[:120]
-    return f"Master {MECHANIC} in this {GENRE} — no two sessions are the same."
-DESCRIPTION = gen_short_desc()
+DESCRIPTION = f"Master {MECHANIC} in this {GENRE} — no two sessions are the same."
 HOOK = random.choice(HOOKS)
 TAGS = f"#gamedev #indiegame #mobilegame #{GENRE.replace(' ','').replace('-','')} #{MECHANIC.replace(' ','')} #DeathRollStudio"
 print(f"  📝 {DESCRIPTION}")
 
-# AI art prompt
-def gen_art_prompt():
-    if OPENAI_KEY:
-        prompt = f"Write a detailed, vivid image generation prompt for a {GENRE} mobile game called '{GAME_NAME}' whose main mechanic is '{MECHANIC}'. The art should be stunning, game‑ready, suitable for a 512x512 icon. Include style, lighting, mood. Max 150 words."
-        res = call_openai(prompt, max_tokens=200, system="You are a concept artist. Output only the prompt.")
-        if res and len(res) > 20: return res
-    return f"isometric 3D render, {GENRE} game character for '{GAME_NAME}', mechanic: {MECHANIC}, professional game art, dark background, dramatic lighting, high detail"
-ART_PROMPT = gen_art_prompt()
+# Art prompt
+ART_PROMPT = f"isometric 3D render, {GENRE} game character for '{GAME_NAME}', mechanic: {MECHANIC}, professional game art, dark background, dramatic lighting, high detail, 512x512 game icon"
 print(f"  🖌️  Art prompt: {ART_PROMPT[:80]}...")
 
 LICENSE_KEY = "DR-" + hashlib.md5(f"{GAME_NAME}{datetime.now().date()}{SOLANA_TRUST}".encode()).hexdigest()[:16].upper()
@@ -257,108 +282,33 @@ entries = entries[-300:]
 port_path.write_text(json.dumps(entries, indent=2))
 print(f"  💾 Portfolio: {len(entries)} games")
 
-# ---------- ART GENERATION (with modern fallback) ----------
+# ---------- ART GENERATION (free APIs) ----------
 print("  🎨 Generating game art...")
 sprite = Path("sprite.png")
 art_ok = False
 
-if ART_PROMPT:
-    try:
-        enc = ART_PROMPT.replace(" ", "+").replace(",", "%2C").replace("'", "%27").replace("\n", " ")[:500]
-        url = f"https://image.pollinations.ai/prompt/{enc}?width=512&height=512&seed={random.randint(1,999999)}&nologo=true"
-        print(f"  🖼️  Trying Pollinations...")
-        r = requests.get(url, timeout=60)
-        if r.status_code == 200 and r.headers.get('content-type', '').startswith('image'):
-            sprite.write_bytes(r.content)
-            art_ok = True
-            print("  ✅ AI‑generated art from custom prompt")
-        else:
-            print(f"  ⚠️  Pollinations returned {r.status_code}")
-    except Exception as e:
-        print(f"  ⚠️  Pollinations error: {e}")
+# Try Pollinations
+print("  🖼️  Pollinations.ai...")
+img_data = generate_image_pollinations(ART_PROMPT)
+if img_data:
+    sprite.write_bytes(img_data)
+    art_ok = True
+    print("  ✅ Pollinations art generated")
+else:
+    print("  ⚠️  Pollinations failed, trying Hugging Face...")
+    img_data = generate_image_huggingface(ART_PROMPT)
+    if img_data:
+        sprite.write_bytes(img_data)
+        art_ok = True
+        print("  ✅ Hugging Face art generated")
 
-    if not art_ok:
-        simple_prompt = f"{GENRE} game {GAME_NAME} {MECHANIC} character art, dark cyberpunk style, 512x512 game icon"
-        try:
-            enc = simple_prompt.replace(" ", "+")
-            url = f"https://image.pollinations.ai/prompt/{enc}?width=512&height=512&seed={random.randint(1,999999)}&nologo=true"
-            r = requests.get(url, timeout=60)
-            if r.status_code == 200 and r.headers.get('content-type', '').startswith('image'):
-                sprite.write_bytes(r.content)
-                art_ok = True
-                print("  ✅ AI‑generated art (simple prompt)")
-        except Exception as e:
-            print(f"  ⚠️  Simple Pollinations error: {e}")
-
-# Beautiful game cover fallback
+# Fallback to PIL
 if not art_ok and PIL_OK:
-    print("  🎨 Generating modern game cover art...")
-    img = Image.new("RGB", (512, 512), G_BG)
-    draw = ImageDraw.Draw(img)
-
-    # Gradient background
-    for y in range(512):
-        factor = y / 512
-        r_val = int(10 + factor * 30)
-        g_val = int(5 + factor * 20)
-        b_val = int(20 + factor * 40)
-        draw.line([(0, y), (512, y)], fill=(r_val, g_val, b_val))
-
-    # Glowing concentric rings
-    cx, cy = 256, 256
-    for rad in range(200, 40, -20):
-        alpha = max(20, 80 - rad//3)
-        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(G_COLOR[1:]), alpha), width=3)
-
-    # Diagonal scanlines
-    for i in range(-512, 512, 20):
-        draw.line([(i, 0), (i+512, 512)], fill=(*bytes.fromhex(G_COLOR[1:]), 15), width=1)
-        draw.line([(0, i), (512, i+512)], fill=(*bytes.fromhex(G_COLOR[1:]), 15), width=1)
-
-    # Hex grid overlay
-    hex_size = 45
-    for x in range(-hex_size, 512+hex_size, hex_size):
-        for y in range(-hex_size, 512+hex_size, int(hex_size*0.86)):
-            xc = x + (y % (hex_size*2)) * 0.5
-            pts = []
-            for i in range(6):
-                ang = math.radians(60*i - 30)
-                px = xc + hex_size * 0.6 * math.cos(ang)
-                py = y + hex_size * 0.6 * math.sin(ang)
-                pts.append((px, py))
-            draw.polygon(pts, outline=(*bytes.fromhex(G_COLOR[1:]), 35), width=1)
-
-    # Game title with outline
-    try:
-        font = ImageFont.load_default()
-        title = GAME_NAME[:18]
-        for offset in range(-2, 3):
-            for oy in range(-2, 3):
-                draw.text((cx-150+offset, cy-60+oy), title, fill=(0,0,0), anchor="mm", font=font)
-        draw.text((cx-150, cy-60), title, fill=G_COLOR, anchor="mm", font=font)
-    except:
-        draw.text((cx-150, cy-60), GAME_NAME[:18], fill=G_COLOR, anchor="mm")
-
-    # Genre badge
-    genre_text = GENRE.upper()
-    bbox = draw.textbbox((0,0), genre_text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    badge_x = cx - tw//2 - 10
-    badge_y = cy + 10
-    draw.rectangle([badge_x, badge_y, badge_x+tw+20, badge_y+th+8], fill=(*bytes.fromhex(G_COLOR[1:]), 60), outline=G_COLOR, width=1)
-    draw.text((cx, cy+15), genre_text, fill=G_COLOR, anchor="mm", font=font)
-
-    # Mechanic text
-    mech_text = f"⚡ {MECHANIC}"
-    draw.text((cx, cy+50), mech_text, fill=(200,200,200), anchor="mm", font=font)
-
-    # Watermark
-    draw.text((10, 480), "DeathRoll Studio", fill=(80,80,100))
-
+    print("  🎨 Using enhanced PIL cover...")
+    img = generate_pil_cover(GAME_NAME, GENRE, MECHANIC, G_COLOR, G_BG)
     img.save(sprite)
     art_ok = True
-    print("  ✅ Modern game cover art generated")
+    print("  ✅ PIL cover generated")
 
 if not art_ok:
     img = Image.new("RGB", (512,512), G_BG)
@@ -368,7 +318,8 @@ if not art_ok:
     art_ok = True
     print("  ✅ Basic fallback art generated")
 
-# ---------- MODERN UI FOR HTML5 GAMES (shared components) ----------
+# ---------- HTML5 GAME BUILDERS (all 5, unique mechanics) ----------
+# Shared components
 SHARED_HEAD = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -380,7 +331,7 @@ SHARED_HEAD = f"""<!DOCTYPE html>
   body{{
     background: radial-gradient(circle at 20% 30%, #0a0a1a, #03030a);
     display:flex; align-items:center; justify-content:center;
-    font-family:'Segoe UI','Poppins',system-ui,sans-serif;
+    font-family:'Segoe UI','Poppins',sans-serif;
     min-height:100vh;
   }}
   #game-container{{
@@ -402,13 +353,25 @@ SHARED_HEAD = f"""<!DOCTYPE html>
     font-weight: bold;
     color: #0ff;
     text-shadow: 0 0 5px #0ff;
-    letter-spacing: 1px;
   }}
   .hud div{{
     background: rgba(0,0,0,0.6);
     padding: 6px 12px;
     border-radius: 40px;
     font-size: 14px;
+  }}
+  .special-bar{{
+    margin: 5px 20px;
+    height: 8px;
+    background: #2a2a3a;
+    border-radius: 10px;
+    overflow: hidden;
+  }}
+  .special-fill{{
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #0ff, #f0f);
+    transition: width 0.1s;
   }}
   canvas{{
     flex: 1;
@@ -562,12 +525,17 @@ function getJoyFromKeys() {
 }
 """
 
-# ---------- FULL UPGRADED GAME BUILDERS (modern UI) ----------
+# ---------- GAME 1: SHOOTER (twin-stick with special attack) ----------
 def build_shooter_game():
     return SHARED_HEAD + """
 <body>
 <div id="game-container">
-  <div class="hud"><div>💥 SCORE <span id="score">0</span></div><div>❤️ LIVES <span id="lives">3</span></div><div>🌊 WAVE <span id="wave">1</span></div></div>
+  <div class="hud">
+    <div>💥 SCORE <span id="score">0</span></div>
+    <div>❤️ <span id="lives">3</span> LIVES</div>
+    <div>🌊 WAVE <span id="wave">1</span></div>
+  </div>
+  <div class="special-bar"><div class="special-fill" id="specialFill"></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
   <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
@@ -581,8 +549,9 @@ let W, H, player, enemies, bullets, score, lives, wave, frame, specialCharge, ga
 function resize() {
   const container = document.getElementById('game-container');
   const hud = document.querySelector('.hud');
+  const specialBar = document.querySelector('.special-bar');
   canvas.width = W = container.clientWidth;
-  canvas.height = H = container.clientHeight - hud.clientHeight;
+  canvas.height = H = container.clientHeight - hud.clientHeight - specialBar.clientHeight;
 }
 window.addEventListener('resize', resize);
 resize();
@@ -599,6 +568,7 @@ function updateUI() {
   document.getElementById('score').innerText = score;
   document.getElementById('lives').innerText = lives;
   document.getElementById('wave').innerText = wave;
+  document.getElementById('specialFill').style.width = (specialCharge/100)*100 + '%';
 }
 function spawnEnemy() {
   let side = Math.floor(Math.random()*4);
@@ -607,13 +577,13 @@ function spawnEnemy() {
   else if(side===1){ x=W+20; y=Math.random()*H; }
   else if(side===2){ x=Math.random()*W; y=H+20; }
   else{ x=-20; y=Math.random()*H; }
-  enemies.push({ x:x, y:y, r:15, hp: 1+Math.floor(wave/3) });
+  enemies.push({ x:x, y:y, r:15, hp: 1+Math.floor(wave/3), maxHp: 1+Math.floor(wave/3) });
 }
 function shoot() {
   let ang = Math.atan2(player.y+10 - player.y, player.x+10 - player.x);
   bullets.push({ x:player.x, y:player.y-10, dx:Math.cos(ang)*8, dy:Math.sin(ang)*8, r:4 });
 }
-function special() { if(specialCharge>=100){ specialCharge=0; enemies.forEach(e=>e.hp-=2); } }
+function special() { if(specialCharge>=100){ specialCharge=0; enemies.forEach(e=>e.hp-=2); updateUI(); } }
 document.getElementById('shootBtn').onclick = () => { if(gameRunning) shoot(); };
 document.getElementById('specialBtn').onclick = () => { if(gameRunning) special(); };
 function gameLoop() {
@@ -644,7 +614,7 @@ function gameLoop() {
       if(Math.hypot(bullets[i].x-enemies[j].x, bullets[i].y-enemies[j].y) < enemies[j].r+bullets[i].r) {
         enemies[j].hp--;
         bullets.splice(i,1); i--;
-        if(enemies[j].hp<=0) { score+=10; enemies.splice(j,1); j--; }
+        if(enemies[j].hp<=0) { score+=10; enemies.splice(j,1); j--; updateUI(); }
         break;
       }
     }
@@ -661,18 +631,30 @@ function gameLoop() {
   if(score>0 && score%500<20) wave = Math.min(10, 1+Math.floor(score/500));
   ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,W,H);
   ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
-  for(let e of enemies) { ctx.fillStyle = '#f44'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill(); }
+  for(let e of enemies) {
+    ctx.fillStyle = '#f44'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill();
+    if(e.hp < e.maxHp) {
+      ctx.fillStyle = '#fff'; ctx.fillRect(e.x-e.r, e.y-e.r-8, e.r*2, 4);
+      ctx.fillStyle = '#0f0'; ctx.fillRect(e.x-e.r, e.y-e.r-8, e.r*2 * (e.hp/e.maxHp), 4);
+    }
+  }
   for(let b of bullets) { ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill(); }
   updateUI();
 }
 </script>
 </body></html>"""
 
+# ---------- GAME 2: WAVE DEFENSE (melee + special) ----------
 def build_wave_game():
     return SHARED_HEAD + """
 <body>
 <div id="game-container">
-  <div class="hud"><div>💥 SCORE <span id="score">0</span></div><div>❤️ LIVES <span id="lives">5</span></div><div>🌊 WAVE <span id="wave">1</span></div></div>
+  <div class="hud">
+    <div>💥 SCORE <span id="score">0</span></div>
+    <div>❤️ <span id="lives">5</span> LIVES</div>
+    <div>🌊 WAVE <span id="wave">1</span></div>
+  </div>
+  <div class="special-bar"><div class="special-fill" id="specialFill"></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
   <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
@@ -682,20 +664,22 @@ def build_wave_game():
 """ + JOYSTICK_JS + """
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-let W, H, player, enemies, score, lives, wave, frame, specialCharge, gameRunning;
+let W, H, player, enemies, score, lives, wave, frame, specialCharge, gameRunning, attackTimer=0;
 function resize() {
   const container = document.getElementById('game-container');
   const hud = document.querySelector('.hud');
+  const specialBar = document.querySelector('.special-bar');
   canvas.width = W = container.clientWidth;
-  canvas.height = H = container.clientHeight - hud.clientHeight;
+  canvas.height = H = container.clientHeight - hud.clientHeight - specialBar.clientHeight;
 }
 window.addEventListener('resize', resize);
 resize();
 function init() {
-  player = { x: W/2, y: H/2, r: 18, speed: 4, invincible: 0, attackTimer: 0 };
-  enemies = []; score = 0; lives = 5; wave = 1; frame = 0; specialCharge = 0;
+  player = { x: W/2, y: H/2, r: 18, speed: 4, invincible: 0 };
+  enemies = []; score = 0; lives = 5; wave = 1; frame = 0; specialCharge = 0; attackTimer=0;
   gameRunning = true;
   updateUI();
+  spawnWave();
   requestAnimationFrame(gameLoop);
 }
 function startGame() { document.getElementById('startScreen').classList.add('hidden'); init(); }
@@ -704,37 +688,37 @@ function updateUI() {
   document.getElementById('score').innerText = score;
   document.getElementById('lives').innerText = lives;
   document.getElementById('wave').innerText = wave;
+  document.getElementById('specialFill').style.width = (specialCharge/100)*100 + '%';
 }
 function spawnWave() {
   let count = 3 + wave;
   for(let i=0;i<count;i++) {
     let ang = Math.random() * Math.PI * 2;
     let dist = Math.max(W,H) * 0.6;
-    enemies.push({ x: W/2 + Math.cos(ang)*dist, y: H/2 + Math.sin(ang)*dist, r: 15+wave, hp: 1+Math.floor(wave/2), speed: 1+wave*0.1 });
+    enemies.push({ x: W/2 + Math.cos(ang)*dist, y: H/2 + Math.sin(ang)*dist, r: 15+wave, hp: 1+Math.floor(wave/2), maxHp: 1+Math.floor(wave/2), speed: 1+wave*0.1 });
   }
 }
 function attack() {
-  if(player.attackTimer<=0) {
-    player.attackTimer = 10;
+  if(attackTimer<=0) {
+    attackTimer = 10;
     let range = 70;
     for(let i=0;i<enemies.length;i++) {
       if(Math.hypot(enemies[i].x-player.x, enemies[i].y-player.y) < range) {
         enemies[i].hp--;
         specialCharge = Math.min(100, specialCharge+10);
-        if(enemies[i].hp<=0) { score+=10; enemies.splice(i,1); i--; }
+        if(enemies[i].hp<=0) { score+=10; enemies.splice(i,1); i--; updateUI(); }
       }
     }
-    updateUI();
   }
 }
-function special() { if(specialCharge>=100){ specialCharge=0; enemies.forEach(e=>e.hp-=3); } }
+function special() { if(specialCharge>=100){ specialCharge=0; enemies.forEach(e=>e.hp-=3); updateUI(); } }
 document.getElementById('attackBtn').onclick = () => { if(gameRunning) attack(); };
 document.getElementById('specialBtn').onclick = () => { if(gameRunning) special(); };
 function gameLoop() {
   if(!gameRunning) return;
   requestAnimationFrame(gameLoop);
   frame++;
-  if(player.attackTimer>0) player.attackTimer--;
+  if(attackTimer>0) attackTimer--;
   if(player.invincible>0) player.invincible--;
   let joy = joyActive ? {x:joyX, y:joyY} : getJoyFromKeys();
   player.x += joy.x * player.speed;
@@ -759,18 +743,30 @@ function gameLoop() {
   }
   ctx.fillStyle = '#05050a'; ctx.fillRect(0,0,W,H);
   ctx.fillStyle = '#0ff'; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
-  for(let e of enemies) { ctx.fillStyle = '#f44'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill(); }
-  if(player.attackTimer>0) { ctx.strokeStyle = '#ff0'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(player.x,player.y,50,0,Math.PI*2); ctx.stroke(); }
+  for(let e of enemies) {
+    ctx.fillStyle = '#f44'; ctx.beginPath(); ctx.arc(e.x,e.y,e.r,0,Math.PI*2); ctx.fill();
+    if(e.hp < e.maxHp) {
+      ctx.fillStyle = '#fff'; ctx.fillRect(e.x-e.r, e.y-e.r-8, e.r*2, 4);
+      ctx.fillStyle = '#0f0'; ctx.fillRect(e.x-e.r, e.y-e.r-8, e.r*2 * (e.hp/e.maxHp), 4);
+    }
+  }
+  if(attackTimer>0) { ctx.strokeStyle = '#ff0'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(player.x,player.y,50,0,Math.PI*2); ctx.stroke(); }
   updateUI();
 }
 </script>
 </body></html>"""
 
+# ---------- GAME 3: PLATFORMER (jump & run, collect coins) ----------
 def build_platformer_game():
     return SHARED_HEAD + """
 <body>
 <div id="game-container">
-  <div class="hud"><div>💥 SCORE <span id="score">0</span></div><div>❤️ LIVES <span id="lives">3</span></div><div>🪙 COINS</div></div>
+  <div class="hud">
+    <div>💥 SCORE <span id="score">0</span></div>
+    <div>❤️ <span id="lives">3</span> LIVES</div>
+    <div>🪙 COINS</div>
+  </div>
+  <div class="special-bar"><div class="special-fill" id="specialFill"></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
   <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
@@ -785,8 +781,9 @@ const GRAV = 0.5, JUMP = -9;
 function resize() {
   const container = document.getElementById('game-container');
   const hud = document.querySelector('.hud');
+  const specialBar = document.querySelector('.special-bar');
   canvas.width = W = container.clientWidth;
-  canvas.height = H = container.clientHeight - hud.clientHeight;
+  canvas.height = H = container.clientHeight - hud.clientHeight - specialBar.clientHeight;
 }
 window.addEventListener('resize', resize);
 resize();
@@ -813,9 +810,10 @@ function restartGame() { document.getElementById('gameOverScreen').classList.add
 function updateUI() {
   document.getElementById('score').innerText = score;
   document.getElementById('lives').innerText = lives;
+  document.getElementById('specialFill').style.width = (specialCharge/100)*100 + '%';
 }
 function jump() { if(player.onGround){ player.vy = JUMP; player.onGround = false; } }
-function special() { if(specialCharge>=100){ specialCharge=0; player.vy = JUMP*1.5; player.invincible=60; } }
+function special() { if(specialCharge>=100){ specialCharge=0; player.vy = JUMP*1.5; player.invincible=60; updateUI(); } }
 document.getElementById('jumpBtn').onclick = () => { if(gameRunning) jump(); };
 document.getElementById('specialBtn').onclick = () => { if(gameRunning) special(); };
 function gameLoop() {
@@ -864,11 +862,15 @@ function gameLoop() {
 </script>
 </body></html>"""
 
+# ---------- GAME 4: PUZZLE (sliding tiles) ----------
 def build_puzzle_game():
     return SHARED_HEAD + """
 <body>
 <div id="game-container">
-  <div class="hud"><div>🔢 MOVES <span id="moves">0</span></div><div>🏆 BEST <span id="best">-</span></div></div>
+  <div class="hud">
+    <div>🔢 MOVES <span id="moves">0</span></div>
+    <div>🏆 BEST <span id="best">-</span></div>
+  </div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
 </div>
@@ -982,11 +984,16 @@ function restartGame() { document.getElementById('gameOverScreen').classList.add
 </script>
 </body></html>"""
 
+# ---------- GAME 5: RACER (endless runner with boost) ----------
 def build_racer_game():
     return SHARED_HEAD + """
 <body>
 <div id="game-container">
-  <div class="hud"><div>🏁 DIST <span id="distance">0</span></div><div>💨 SPEED <span id="speed">0</span></div></div>
+  <div class="hud">
+    <div>🏁 DIST <span id="distance">0</span></div>
+    <div>💨 SPEED <span id="speed">0</span></div>
+  </div>
+  <div class="special-bar"><div class="special-fill" id="specialFill"></div></div>
   <canvas id="gameCanvas"></canvas>
   """ + start_screen() + """
   <div class="joystick-area"><div class="joystick-base"><div class="joystick-thumb"></div></div></div>
@@ -1000,8 +1007,9 @@ let W, H, car, obstacles, score, speed, boost, frame, gameRunning;
 function resize() {
   const container = document.getElementById('game-container');
   const hud = document.querySelector('.hud');
+  const specialBar = document.querySelector('.special-bar');
   canvas.width = W = container.clientWidth;
-  canvas.height = H = container.clientHeight - hud.clientHeight;
+  canvas.height = H = container.clientHeight - hud.clientHeight - specialBar.clientHeight;
 }
 window.addEventListener('resize', resize);
 resize();
@@ -1018,6 +1026,7 @@ function restartGame() { document.getElementById('gameOverScreen').classList.add
 function updateUI() {
   document.getElementById('distance').innerText = Math.floor(score);
   document.getElementById('speed').innerText = Math.floor(speed*10);
+  document.getElementById('specialFill').style.width = (boost/100)*100 + '%';
 }
 function boostFunc() { if(boost<=0) boost = 60; }
 document.getElementById('boostBtn').onclick = () => { if(gameRunning) boostFunc(); };
@@ -1096,8 +1105,8 @@ for g in cur:
         g["game_type"] = GAME_TYPE
 port_path.write_text(json.dumps(cur, indent=2))
 
-# ---------- STOREFRONT (upgraded) ----------
-print("  🌐 Generating upgraded storefront...")
+# ---------- STOREFRONT (Popular + Latest) ----------
+print("  🌐 Generating storefront (Popular / Latest)...")
 storefront_html = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1112,7 +1121,7 @@ storefront_html = '''<!DOCTYPE html>
   .container{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px;}
   header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:20px 0;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:32px;}
   .logo{font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,#fff,#00ffcc);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .logo span{color:#00ffcc;background:none;}
+  .logo span{color:#00ffcc;}
   .nav a{color:#6a6a8a;text-decoration:none;margin-left:24px;font-size:0.8rem;letter-spacing:1px;transition:color 0.2s;}
   .nav a:hover{color:#00ffcc;}
   .live-badge{background:rgba(0,255,204,0.1);border:1px solid #00ffcc;color:#00ffcc;padding:4px 12px;border-radius:20px;font-size:0.7rem;}
@@ -1123,7 +1132,8 @@ storefront_html = '''<!DOCTYPE html>
   .stat-card{background:rgba(255,255,255,0.02);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:20px 32px;text-align:center;}
   .stat-number{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:900;color:#00ffcc;}
   .stat-label{font-size:0.7rem;letter-spacing:2px;color:#6a6a8a;}
-  .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin:40px 0;}
+  .section-title{font-family:'Orbitron',sans-serif;font-size:1.2rem;margin:40px 0 20px;letter-spacing:2px;color:#00ffcc;}
+  .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin:20px 0;}
   .game-card{background:#0f0f20;border:1px solid rgba(255,255,255,0.05);border-radius:16px;overflow:hidden;transition:transform 0.2s,border-color 0.2s;}
   .game-card:hover{transform:translateY(-4px);border-color:#00ffcc;}
   .game-image{height:180px;background-size:cover;background-position:center;position:relative;}
@@ -1157,23 +1167,67 @@ storefront_html = '''<!DOCTYPE html>
     <p>AI‑generated mechanics, unique art, and full source code – all playable in your browser.<br>Own the game for <span id="priceDisplay">7</span> SOL.</p>
     <div class="stats" id="stats"><div class="stat-card"><div class="stat-number" id="totalGames">-</div><div class="stat-label">GAMES</div></div><div class="stat-card"><div class="stat-number" id="totalGenres">-</div><div class="stat-label">GENRES</div></div><div class="stat-card"><div class="stat-number" id="latestDate">-</div><div class="stat-label">LATEST</div></div></div>
   </div>
-  <div class="games-grid" id="gamesGrid"><div class="stat-card">Loading games...</div></div>
+  <div class="section-title">🔥 POPULAR GAMES (TOP SALES)</div>
+  <div class="games-grid" id="popularGrid"></div>
+  <div class="section-title">🆕 LATEST RELEASES</div>
+  <div class="games-grid" id="latestGrid"></div>
   <div class="buy-section" id="buy"><h2>⚡ GET FULL SOURCE CODE</h2><p>Send <strong id="buyPrice">7</strong> SOL to either wallet below, then DM <strong>@deathroll1</strong> with your @username.<br>You'll receive the complete Godot 4 project + HTML5 build + license key instantly.</p>
   <div class="wallet-box"><div class="wallet-row">🔵 <strong>Trust Wallet (Solana)</strong><br><code>6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3</code></div><div class="wallet-row">🟣 <strong>Phantom Wallet (Solana)</strong><br><code>Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb</code></div></div>
   <a href="https://t.me/deathroll1" class="btn" target="_blank">📩 DM @deathroll1</a></div>
   <footer><p>© 2025 DeathRoll Studio — Automated Game Factory v30.0</p><p>Built with AI & Solana | <a href="https://t.me/drolltech" style="color:#00ffcc;">Join Telegram</a></p></footer>
 </div>
 <script>
-async function loadGames(){try{const res=await fetch('portfolio.json?t='+Date.now());if(!res.ok)throw new Error();let games=await res.json();if(!Array.isArray(games))games=[];games.sort((a,b)=>new Date(b.date)-new Date(a.date));document.getElementById('totalGames').innerText=games.length;document.getElementById('totalGenres').innerText=new Set(games.map(g=>g.genre)).size;document.getElementById('latestDate').innerText=games[0]?new Date(games[0].date).toLocaleDateString():'-';const price=games[0]?.price_sol||'7';document.getElementById('priceDisplay').innerText=price;document.getElementById('buyPrice').innerText=price;const grid=document.getElementById('gamesGrid');grid.innerHTML=games.slice(0,20).map(g=>`<div class="game-card"><div class="game-image" style="background-image:url('${g.image_url||''}');background-color:#111;"><div class="game-badge">${escapeHtml(g.genre||'?')}</div></div><div class="game-info"><div class="game-name">${escapeHtml(g.game)}</div><div class="game-genre">${escapeHtml(g.genre)}</div><div class="game-mechanic">⚡ ${escapeHtml(g.mechanic)}</div><div class="game-desc">${escapeHtml(g.description||g.mech_desc||'')}</div><div class="price">💰 ${g.price_sol||price} SOL</div><div class="game-date">📅 ${new Date(g.date).toLocaleDateString()}</div><a href="${g.play_url||'#'}" target="_blank" style="display:inline-block;margin-top:12px;color:#00ffcc;font-size:0.7rem;">▶ Play Free</a></div></div>`).join('');if(!games.length)grid.innerHTML='<div class="stat-card">No games yet. First game will appear at 6AM UTC tomorrow.</div>';}catch(e){document.getElementById('gamesGrid').innerHTML='<div class="stat-card">⚠️ Error loading games. Check back soon.</div>';}}
+async function loadGames() {
+  try {
+    const res = await fetch('portfolio.json?t='+Date.now());
+    if (!res.ok) throw new Error();
+    let games = await res.json();
+    if (!Array.isArray(games)) games = [];
+    const latest = [...games].sort((a,b) => new Date(b.date) - new Date(a.date));
+    const popular = [...games].sort((a,b) => (b.sales||0) - (a.sales||0));
+    const price = games[0]?.price_sol || '7';
+    document.getElementById('priceDisplay').innerText = price;
+    document.getElementById('buyPrice').innerText = price;
+    document.getElementById('totalGames').innerText = games.length;
+    document.getElementById('totalGenres').innerText = new Set(games.map(g=>g.genre)).size;
+    document.getElementById('latestDate').innerText = latest[0] ? new Date(latest[0].date).toLocaleDateString() : '-';
+    function renderGames(gridId, list) {
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = list.slice(0,20).map(g => `
+        <div class="game-card">
+          <div class="game-image" style="background-image:url('${g.image_url||''}'); background-color:#111;">
+            <div class="game-badge">${escapeHtml(g.genre||'?')}</div>
+          </div>
+          <div class="game-info">
+            <div class="game-name">${escapeHtml(g.game)}</div>
+            <div class="game-genre">${escapeHtml(g.genre)}</div>
+            <div class="game-mechanic">⚡ ${escapeHtml(g.mechanic)}</div>
+            <div class="game-desc">${escapeHtml(g.description||g.mech_desc||'')}</div>
+            <div class="price">💰 ${g.price_sol||price} SOL</div>
+            <div class="game-date">📅 ${new Date(g.date).toLocaleDateString()}</div>
+            <div>💬 Sold: ${g.sales||0}</div>
+            <a href="${g.play_url||'#'}" target="_blank" style="display:inline-block;margin-top:12px;color:#00ffcc;">▶ Play Free</a>
+          </div>
+        </div>
+      `).join('');
+      if (!list.length) grid.innerHTML = '<div class="stat-card">No games yet.</div>';
+    }
+    renderGames('popularGrid', popular);
+    renderGames('latestGrid', latest);
+  } catch(e) {
+    document.getElementById('popularGrid').innerHTML = '<div class="stat-card">Error loading games.</div>';
+    document.getElementById('latestGrid').innerHTML = '';
+  }
+}
 function escapeHtml(str){if(!str)return '';return str.replace(/[&<>]/g,m=>{if(m==='&')return '&amp;';if(m==='<')return '&lt;';if(m==='>')return '&gt;';return m;});}
-loadGames();setInterval(loadGames,60000);
+loadGames(); setInterval(loadGames,60000);
 </script>
 </body>
 </html>'''
 Path("index.html").write_text(storefront_html, encoding="utf-8")
 print("  ✅ Storefront updated")
 
-# ---------- TELEGRAM POST (safe HTML) ----------
+# ---------- TELEGRAM POST ----------
 sales_post = f"""
 <b>{EMOJI_STR} {HOOK} {EMOJI_STR}</b>
 
@@ -1195,23 +1249,19 @@ Send ${GAME_PRICE} SOL + @username → instant delivery
 if TG_TOKEN and sprite.exists():
     print(f"  📤 Sending to channel {TELEGRAM_CHANNEL}...")
     ok = tg_send_photo(TELEGRAM_CHANNEL, sprite, sales_post)
-    if ok:
-        print("  ✅ Channel post sent")
-    else:
-        print("  ❌ Channel post failed. Ensure bot is admin in channel.")
+    if ok: print("  ✅ Channel post sent")
+    else: print("  ❌ Channel post failed. Ensure bot is admin.")
 else:
     print("  ⚠️  Missing TG_TOKEN or sprite.png")
 
 if TG_TOKEN and TG_ADMIN and zip_path.exists():
     admin_caption = f"<b>🎮 {GAME_NAME}</b> — {GAME_TYPE}<br>Genre: {GENRE}<br>Mechanic: {MECHANIC}<br>Art: {'✅' if art_ok else '⚠️'}<br>Key: <code>{LICENSE_KEY}</code>"
     tg_send_doc(TG_ADMIN, zip_path, admin_caption)
-    print("  ✅ Admin bundle sent")
 
 if WHATSAPP_WEBHOOK_URL:
     send_to_whatsapp(f"🎮 NEW GAME: {GAME_NAME} ({GENRE})\n{MECHANIC}\n{DESCRIPTION}\nPlay: {PLAY_URL}\n{GAME_PRICE} SOL", IMG_URL)
-    print("  ✅ WhatsApp sent")
 
-# ---------- SAR ----------
+# ---------- SAR & LOGS ----------
 SAR["study"]["total_runs"] += 1
 if art_ok: SAR["study"]["art_ok"] += 1
 else: SAR["study"]["art_fail"] += 1
@@ -1231,7 +1281,7 @@ Path("learning_data.json").write_text(json.dumps({"ts": datetime.now().isoformat
 Path("last_run.txt").write_text(datetime.now().isoformat())
 
 print("\n╔══════════════════════════════════════════════════════╗")
-print("║  ✅  DEATHROLL STUDIO v30.0  —  COMPLETE            ║")
+print("║  ✅  DEATHROLL STUDIO v30.0  —  READY               ║")
 print(f"║  Game    : {GAME_NAME:<41}║")
 print(f"║  Genre   : {GENRE:<41}║")
 print(f"║  Mechanic: {MECHANIC:<41}║")

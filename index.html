@@ -12,7 +12,7 @@
   .container{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px;}
   header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:20px 0;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:32px;}
   .logo{font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,#fff,#00ffcc);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .logo span{color:#00ffcc;background:none;}
+  .logo span{color:#00ffcc;}
   .nav a{color:#6a6a8a;text-decoration:none;margin-left:24px;font-size:0.8rem;letter-spacing:1px;transition:color 0.2s;}
   .nav a:hover{color:#00ffcc;}
   .live-badge{background:rgba(0,255,204,0.1);border:1px solid #00ffcc;color:#00ffcc;padding:4px 12px;border-radius:20px;font-size:0.7rem;}
@@ -23,7 +23,8 @@
   .stat-card{background:rgba(255,255,255,0.02);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:20px 32px;text-align:center;}
   .stat-number{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:900;color:#00ffcc;}
   .stat-label{font-size:0.7rem;letter-spacing:2px;color:#6a6a8a;}
-  .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin:40px 0;}
+  .section-title{font-family:'Orbitron',sans-serif;font-size:1.2rem;margin:40px 0 20px;letter-spacing:2px;color:#00ffcc;}
+  .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin:20px 0;}
   .game-card{background:#0f0f20;border:1px solid rgba(255,255,255,0.05);border-radius:16px;overflow:hidden;transition:transform 0.2s,border-color 0.2s;}
   .game-card:hover{transform:translateY(-4px);border-color:#00ffcc;}
   .game-image{height:180px;background-size:cover;background-position:center;position:relative;}
@@ -57,16 +58,60 @@
     <p>AI‑generated mechanics, unique art, and full source code – all playable in your browser.<br>Own the game for <span id="priceDisplay">7</span> SOL.</p>
     <div class="stats" id="stats"><div class="stat-card"><div class="stat-number" id="totalGames">-</div><div class="stat-label">GAMES</div></div><div class="stat-card"><div class="stat-number" id="totalGenres">-</div><div class="stat-label">GENRES</div></div><div class="stat-card"><div class="stat-number" id="latestDate">-</div><div class="stat-label">LATEST</div></div></div>
   </div>
-  <div class="games-grid" id="gamesGrid"><div class="stat-card">Loading games...</div></div>
+  <div class="section-title">🔥 POPULAR GAMES (TOP SALES)</div>
+  <div class="games-grid" id="popularGrid"></div>
+  <div class="section-title">🆕 LATEST RELEASES</div>
+  <div class="games-grid" id="latestGrid"></div>
   <div class="buy-section" id="buy"><h2>⚡ GET FULL SOURCE CODE</h2><p>Send <strong id="buyPrice">7</strong> SOL to either wallet below, then DM <strong>@deathroll1</strong> with your @username.<br>You'll receive the complete Godot 4 project + HTML5 build + license key instantly.</p>
   <div class="wallet-box"><div class="wallet-row">🔵 <strong>Trust Wallet (Solana)</strong><br><code>6wsQ6nGXrUUUGCEokb4rZcfHDv2a8MomUb22TuVaH2m3</code></div><div class="wallet-row">🟣 <strong>Phantom Wallet (Solana)</strong><br><code>Csk9DKstWMdKx19gUHWB9xy2VwZZX2nx6V6oSVGDCgMb</code></div></div>
   <a href="https://t.me/deathroll1" class="btn" target="_blank">📩 DM @deathroll1</a></div>
   <footer><p>© 2025 DeathRoll Studio — Automated Game Factory v30.0</p><p>Built with AI & Solana | <a href="https://t.me/drolltech" style="color:#00ffcc;">Join Telegram</a></p></footer>
 </div>
 <script>
-async function loadGames(){try{const res=await fetch('portfolio.json?t='+Date.now());if(!res.ok)throw new Error();let games=await res.json();if(!Array.isArray(games))games=[];games.sort((a,b)=>new Date(b.date)-new Date(a.date));document.getElementById('totalGames').innerText=games.length;document.getElementById('totalGenres').innerText=new Set(games.map(g=>g.genre)).size;document.getElementById('latestDate').innerText=games[0]?new Date(games[0].date).toLocaleDateString():'-';const price=games[0]?.price_sol||'7';document.getElementById('priceDisplay').innerText=price;document.getElementById('buyPrice').innerText=price;const grid=document.getElementById('gamesGrid');grid.innerHTML=games.slice(0,20).map(g=>`<div class="game-card"><div class="game-image" style="background-image:url('${g.image_url||''}');background-color:#111;"><div class="game-badge">${escapeHtml(g.genre||'?')}</div></div><div class="game-info"><div class="game-name">${escapeHtml(g.game)}</div><div class="game-genre">${escapeHtml(g.genre)}</div><div class="game-mechanic">⚡ ${escapeHtml(g.mechanic)}</div><div class="game-desc">${escapeHtml(g.description||g.mech_desc||'')}</div><div class="price">💰 ${g.price_sol||price} SOL</div><div class="game-date">📅 ${new Date(g.date).toLocaleDateString()}</div><a href="${g.play_url||'#'}" target="_blank" style="display:inline-block;margin-top:12px;color:#00ffcc;font-size:0.7rem;">▶ Play Free</a></div></div>`).join('');if(!games.length)grid.innerHTML='<div class="stat-card">No games yet. First game will appear at 6AM UTC tomorrow.</div>';}catch(e){document.getElementById('gamesGrid').innerHTML='<div class="stat-card">⚠️ Error loading games. Check back soon.</div>';}}
+async function loadGames() {
+  try {
+    const res = await fetch('portfolio.json?t='+Date.now());
+    if (!res.ok) throw new Error();
+    let games = await res.json();
+    if (!Array.isArray(games)) games = [];
+    const latest = [...games].sort((a,b) => new Date(b.date) - new Date(a.date));
+    const popular = [...games].sort((a,b) => (b.sales||0) - (a.sales||0));
+    const price = games[0]?.price_sol || '7';
+    document.getElementById('priceDisplay').innerText = price;
+    document.getElementById('buyPrice').innerText = price;
+    document.getElementById('totalGames').innerText = games.length;
+    document.getElementById('totalGenres').innerText = new Set(games.map(g=>g.genre)).size;
+    document.getElementById('latestDate').innerText = latest[0] ? new Date(latest[0].date).toLocaleDateString() : '-';
+    function renderGames(gridId, list) {
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = list.slice(0,20).map(g => `
+        <div class="game-card">
+          <div class="game-image" style="background-image:url('${g.image_url||''}'); background-color:#111;">
+            <div class="game-badge">${escapeHtml(g.genre||'?')}</div>
+          </div>
+          <div class="game-info">
+            <div class="game-name">${escapeHtml(g.game)}</div>
+            <div class="game-genre">${escapeHtml(g.genre)}</div>
+            <div class="game-mechanic">⚡ ${escapeHtml(g.mechanic)}</div>
+            <div class="game-desc">${escapeHtml(g.description||g.mech_desc||'')}</div>
+            <div class="price">💰 ${g.price_sol||price} SOL</div>
+            <div class="game-date">📅 ${new Date(g.date).toLocaleDateString()}</div>
+            <div>💬 Sold: ${g.sales||0}</div>
+            <a href="${g.play_url||'#'}" target="_blank" style="display:inline-block;margin-top:12px;color:#00ffcc;">▶ Play Free</a>
+          </div>
+        </div>
+      `).join('');
+      if (!list.length) grid.innerHTML = '<div class="stat-card">No games yet.</div>';
+    }
+    renderGames('popularGrid', popular);
+    renderGames('latestGrid', latest);
+  } catch(e) {
+    document.getElementById('popularGrid').innerHTML = '<div class="stat-card">Error loading games.</div>';
+    document.getElementById('latestGrid').innerHTML = '';
+  }
+}
 function escapeHtml(str){if(!str)return '';return str.replace(/[&<>]/g,m=>{if(m==='&')return '&amp;';if(m==='<')return '&lt;';if(m==='>')return '&gt;';return m;});}
-loadGames();setInterval(loadGames,60000);
+loadGames(); setInterval(loadGames,60000);
 </script>
 </body>
 </html>
