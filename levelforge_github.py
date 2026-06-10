@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v30.0 — COMPLETE FACTORY (FREE ART + ALL GAMES)
-Generates a new mobile game daily using free AI art (Pollinations + Hugging Face).
+DEATHROLL STUDIO v30.0 — COMPLETE FACTORY (FULL HTML5 GAMES + POLLINATIONS ART)
+Generates a new mobile game daily. Uses Pollinations.ai for free AI art (with fallback).
 All 5 game genres fully implemented, modern UI, no repeated mechanics.
 """
 import os, json, random, requests, shutil, zipfile, hashlib, math, time
@@ -58,90 +58,93 @@ def send_to_whatsapp(text, image_url=None):
         return r.status_code == 200
     except: return False
 
-# ---------- FREE ART GENERATION (no API key needed) ----------
-def generate_image_pollinations(prompt, max_retries=2):
+# ---------- POLLINATIONS AI (FIXED) ----------
+def generate_image_pollinations(prompt, max_retries=3):
+    """Generate image using Pollinations.ai with browser headers and retries"""
+    clean_prompt = prompt.replace("'", "").replace('"', '').replace("\n", " ")[:300]
+    clean_prompt += ", dark background, dramatic lighting, game icon, 512x512"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "image/webp,image/apng,image/*"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://pollinations.ai/",
+        "Origin": "https://pollinations.ai",
+        "Connection": "keep-alive"
     }
     for attempt in range(max_retries):
         try:
-            enc = prompt.replace(" ", "+").replace(",", "%2C").replace("'", "%27").replace("\n", " ")[:500]
+            enc = clean_prompt.replace(" ", "%20").replace(",", "%2C")
             url = f"https://image.pollinations.ai/prompt/{enc}?width=512&height=512&seed={random.randint(1,999999)}&nologo=true"
+            print(f"    Pollinations attempt {attempt+1}/{max_retries}...")
             r = requests.get(url, headers=headers, timeout=45)
-            if r.status_code == 200 and len(r.content) > 5000:
+            if r.status_code == 200 and len(r.content) > 5000 and r.headers.get('content-type', '').startswith('image'):
                 return r.content
-            time.sleep(2)
-        except:
+            print(f"    Failed: status {r.status_code}")
+            time.sleep(3 * (attempt + 1))
+        except Exception as e:
+            print(f"    Error: {e}")
             time.sleep(3)
     return None
 
-def generate_image_huggingface(prompt):
-    api_url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
-    headers = {"User-Agent": "DeathRollStudio/3.0"}
-    payload = {"inputs": prompt, "parameters": {"negative_prompt": "text, watermark, lowres, ugly"}}
-    try:
-        r = requests.post(api_url, headers=headers, json=payload, timeout=60)
-        if r.status_code == 200 and r.headers.get('content-type', '').startswith('image'):
-            return r.content
-    except:
-        pass
-    return None
-
-def generate_pil_cover(game_name, genre, mechanic, color, bg_color):
-    """Enhanced PIL fallback – looks like a premium game cover"""
+# ---------- ENHANCED PIL FALLBACK (PREMIUM COVER) ----------
+def generate_premium_cover(game_name, genre, mechanic, color, bg_color):
     img = Image.new("RGB", (512, 512), bg_color)
     draw = ImageDraw.Draw(img)
-    # Gradient background
-    for y in range(512):
-        factor = y / 512
-        r_val = int(20 + factor * 40)
-        g_val = int(10 + factor * 30)
-        b_val = int(30 + factor * 50)
-        draw.line([(0, y), (512, y)], fill=(r_val, g_val, b_val))
     cx, cy = 256, 256
-    # Glowing rings
-    for rad in range(200, 30, -15):
-        alpha = max(15, 80 - rad//2)
-        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(color[1:]), alpha), width=3)
-    # Diagonal scanlines
-    for i in range(-512, 512, 24):
-        draw.line([(i, 0), (i+512, 512)], fill=(*bytes.fromhex(color[1:]), 20), width=2)
-        draw.line([(0, i), (512, i+512)], fill=(*bytes.fromhex(color[1:]), 20), width=2)
-    # Hex grid
-    hex_size = 50
-    for x in range(-hex_size, 512+hex_size, hex_size):
-        for y in range(-hex_size, 512+hex_size, int(hex_size*0.86)):
-            xc = x + (y % (hex_size*2)) * 0.5
-            pts = []
-            for i in range(6):
-                ang = math.radians(60*i - 30)
-                px = xc + hex_size * 0.5 * math.cos(ang)
-                py = y + hex_size * 0.5 * math.sin(ang)
-                pts.append((px, py))
-            draw.polygon(pts, outline=(*bytes.fromhex(color[1:]), 45), width=1)
-    # Game title with shadow
+
+    # Radial gradient
+    for r in range(256, 0, -16):
+        intensity = int(20 + (r / 256) * 60)
+        draw.ellipse([cx-r, cy-r, cx+r, cy+r], fill=(intensity, intensity//2, intensity+10))
+
+    # Glowing aura
+    for rad in range(120, 40, -20):
+        alpha = max(10, 80 - rad//2)
+        draw.ellipse([cx-rad, cy-rad, cx+rad, cy+rad], outline=(*bytes.fromhex(color[1:]), alpha), width=8)
+
+    # Action lines
+    for angle in range(0, 360, 30):
+        rad = math.radians(angle)
+        x1 = cx + 200 * math.cos(rad)
+        y1 = cy + 200 * math.sin(rad)
+        x2 = cx + 250 * math.cos(rad + 0.2)
+        y2 = cy + 250 * math.sin(rad + 0.2)
+        draw.line([(x1, y1), (x2, y2)], fill=(*bytes.fromhex(color[1:]), 120), width=3)
+
+    # Character silhouette
+    draw.ellipse([cx-35, cy-90, cx+35, cy-20], fill=(*bytes.fromhex(color[1:]), 200))
+    draw.polygon([(cx-30, cy-20), (cx+30, cy-20), (cx+40, cy+50), (cx-40, cy+50)], fill=(*bytes.fromhex(color[1:]), 200))
+    if "shooter" in genre or "fighting" in genre:
+        draw.line([(cx+20, cy-10), (cx+80, cy-40)], fill=(*bytes.fromhex(color[1:]), 255), width=8)
+    elif "racer" in genre:
+        draw.ellipse([cx-60, cy+20, cx+60, cy+80], fill=(*bytes.fromhex(color[1:]), 200))
+    else:
+        draw.ellipse([cx-25, cy-10, cx+25, cy+40], fill=(*bytes.fromhex(color[1:]), 200))
+
+    # Title with shadow
     try:
         font = ImageFont.load_default()
-        title = game_name[:18]
-        for offset in range(-3, 4, 2):
-            for oy in range(-3, 4, 2):
-                draw.text((cx-150+offset, cy-70+oy), title, fill=(0,0,0), anchor="mm", font=font)
-        draw.text((cx-150, cy-70), title, fill=color, anchor="mm", font=font)
+        title = game_name[:15]
+        for offset in range(-2, 3):
+            for oy in range(-2, 3):
+                draw.text((cx-150+offset, cy-130+oy), title, fill=(0,0,0), anchor="mm", font=font)
+        draw.text((cx-150, cy-130), title, fill=color, anchor="mm", font=font)
     except:
-        draw.text((cx-150, cy-70), game_name[:18], fill=color, anchor="mm")
+        draw.text((cx-150, cy-130), game_name[:15], fill=color, anchor="mm")
+
     # Genre badge
     genre_text = genre.upper()
     bbox = draw.textbbox((0,0), genre_text, font=font)
     tw = bbox[2] - bbox[0]
     th = bbox[3] - bbox[1]
     badge_x = cx - tw//2 - 12
-    badge_y = cy + 10
-    draw.rectangle([badge_x, badge_y, badge_x+tw+24, badge_y+th+10], fill=(*bytes.fromhex(color[1:]), 70), outline=color, width=2)
-    draw.text((cx, cy+16), genre_text, fill=color, anchor="mm", font=font)
+    badge_y = cy - 50
+    draw.rectangle([badge_x, badge_y, badge_x+tw+24, badge_y+th+10], fill=(*bytes.fromhex(color[1:]), 80), outline=color, width=2)
+    draw.text((cx, cy-45), genre_text, fill=color, anchor="mm", font=font)
+
     # Mechanic text
     mech_text = f"⚡ {mechanic}"
-    draw.text((cx, cy+55), mech_text, fill=(220,220,240), anchor="mm", font=font)
+    draw.text((cx, cy+80), mech_text, fill=(220,220,240), anchor="mm", font=font)
     draw.text((15, 480), "DEATHROLL STUDIO", fill=(100,100,120), font=font)
     return img
 
@@ -162,7 +165,6 @@ GENRES = {
     "tower defense":      {"emojis": ["🏰","💣","🛡️"], "color": "#44ffbb", "bg": "#000d07"},
     "metroidvania":       {"emojis": ["🗺️","🔑","⚔️"], "color": "#cc88ff", "bg": "#06000d"},
 }
-
 PREFIXES = ["Neon","Cyber","Quantum","Astral","Void","Echo","Flux","Rogue","Crimson","Shadow","Phantom","Eclipse","Solar","Nova","Iron","Dark","Storm","Hyper","Apex","Omega","Zenith","Vortex","Blaze","Frost","Titan","Ghost","Pulse","Arc","Rift","Chrome","Surge","Static","Aether","Binary","Carbon","Delta","Ember","Forge","Glitch","Helix","Inferno","Jade","Kinetic","Lunar","Magma","Nexus","Obsidian","Prism","Quasar","Radiant","Sonic","Turbo","Ultra","Vapor","Warp","Xenon","Amber","Blitz","Cobalt","Dusk","Enigma","Fractal","Glacial","Hex","Ionic","Jinx","Krypto","Lancer","Mirage","Null","Optic","Pixel","Quake","Reaper","Scarlet","Thorn","Umbra","Venom","Wraith","Xeno","Yearn","Zeal","Abyssal","Brutal","Caustic","Desolate","Eternal","Feral","Grim","Hollow","Ironskin","Jagged","Kel","Lethal","Molten"]
 SUFFIXES = ["Runner","Drifter","Breach","Vector","Pulse","Shift","Core","Edge","Zone","Realm","Fury","Strike","Blade","Force","Maze","Hunt","War","Fall","Rise","Gate","Lab","Ops","Shard","Crash","Dash","Drive","Fight","Grid","Hook","Impact","Jump","Kill","Lock","March","Nexus","Orbit","Path","Quest","Race","Siege","Tank","Vault","Wing","Arena","Base","Chain","Dome","Echo","Field","Gloom","Haze","Isle","Jungle","Keep","Loop","Mire","Outpost","Peak","Ridge","Spire","Trail","Waste","Expanse","Abyss","Citadel","Den","Expanse","Front","Gulch","Hollow","Iris","Jaw","Knell","Lore","Mark","Night","Omen","Pyre","Ruin","Shroud","Tomb","Undertow","Vale","Wreck","Xenith","Yonder","Zenith","Deep"]
 MECHANICS_FALLBACK = [
@@ -233,7 +235,7 @@ G_EMOJIS = GENRES[GENRE]["emojis"]
 EMOJI_STR = " ".join(random.sample(G_EMOJIS, len(G_EMOJIS)))
 print(f"  🎮 Genre: {GENRE}  ({EMOJI_STR})")
 
-# Mechanic & Description (from fallback list – no OpenAI needed)
+# Mechanic & Description
 MECHANIC, MECH_DESC = random.choice(MECHANICS_FALLBACK)
 print(f"  ✨ {MECHANIC} — {MECH_DESC}")
 
@@ -258,14 +260,12 @@ IMG_URL = f"{RAW_URL}/workspace/{SAFE_NAME}/icon.png"
 ZIP_URL = f"{RAW_URL}/workspace/latest_game.zip"
 print(f"  🎯 Name: {GAME_NAME}")
 
-# Short description
 DESCRIPTION = f"Master {MECHANIC} in this {GENRE} — no two sessions are the same."
 HOOK = random.choice(HOOKS)
 TAGS = f"#gamedev #indiegame #mobilegame #{GENRE.replace(' ','').replace('-','')} #{MECHANIC.replace(' ','')} #DeathRollStudio"
 print(f"  📝 {DESCRIPTION}")
 
-# Art prompt
-ART_PROMPT = f"isometric 3D render, {GENRE} game character for '{GAME_NAME}', mechanic: {MECHANIC}, professional game art, dark background, dramatic lighting, high detail, 512x512 game icon"
+ART_PROMPT = f"{GENRE} game character for '{GAME_NAME}', main mechanic: {MECHANIC}, professional game art, dark background, dramatic lighting, 512x512 game icon"
 print(f"  🖌️  Art prompt: {ART_PROMPT[:80]}...")
 
 LICENSE_KEY = "DR-" + hashlib.md5(f"{GAME_NAME}{datetime.now().date()}{SOLANA_TRUST}".encode()).hexdigest()[:16].upper()
@@ -282,44 +282,33 @@ entries = entries[-300:]
 port_path.write_text(json.dumps(entries, indent=2))
 print(f"  💾 Portfolio: {len(entries)} games")
 
-# ---------- ART GENERATION (free APIs) ----------
+# ---------- ART GENERATION ----------
 print("  🎨 Generating game art...")
 sprite = Path("sprite.png")
 art_ok = False
 
-# Try Pollinations
-print("  🖼️  Pollinations.ai...")
-img_data = generate_image_pollinations(ART_PROMPT)
+print("  🖼️  Pollinations.ai (with retries)...")
+img_data = generate_image_pollinations(ART_PROMPT, max_retries=3)
 if img_data:
     sprite.write_bytes(img_data)
     art_ok = True
     print("  ✅ Pollinations art generated")
 else:
-    print("  ⚠️  Pollinations failed, trying Hugging Face...")
-    img_data = generate_image_huggingface(ART_PROMPT)
-    if img_data:
-        sprite.write_bytes(img_data)
+    print("  ⚠️  Pollinations failed. Using premium PIL cover...")
+    if PIL_OK:
+        img = generate_premium_cover(GAME_NAME, GENRE, MECHANIC, G_COLOR, G_BG)
+        img.save(sprite)
         art_ok = True
-        print("  ✅ Hugging Face art generated")
+        print("  ✅ Premium PIL cover generated")
+    else:
+        img = Image.new("RGB", (512,512), G_BG)
+        draw = ImageDraw.Draw(img)
+        draw.text((256,256), GAME_NAME, fill=G_COLOR, anchor="mm")
+        img.save(sprite)
+        art_ok = True
+        print("  ✅ Basic fallback art generated")
 
-# Fallback to PIL
-if not art_ok and PIL_OK:
-    print("  🎨 Using enhanced PIL cover...")
-    img = generate_pil_cover(GAME_NAME, GENRE, MECHANIC, G_COLOR, G_BG)
-    img.save(sprite)
-    art_ok = True
-    print("  ✅ PIL cover generated")
-
-if not art_ok:
-    img = Image.new("RGB", (512,512), G_BG)
-    draw = ImageDraw.Draw(img)
-    draw.text((256,256), GAME_NAME, fill=G_COLOR, anchor="mm")
-    img.save(sprite)
-    art_ok = True
-    print("  ✅ Basic fallback art generated")
-
-# ---------- HTML5 GAME BUILDERS (all 5, unique mechanics) ----------
-# Shared components
+# ---------- SHARED HTML5 COMPONENTS ----------
 SHARED_HEAD = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -525,7 +514,7 @@ function getJoyFromKeys() {
 }
 """
 
-# ---------- GAME 1: SHOOTER (twin-stick with special attack) ----------
+# ---------- GAME 1: SHOOTER ----------
 def build_shooter_game():
     return SHARED_HEAD + """
 <body>
@@ -644,7 +633,7 @@ function gameLoop() {
 </script>
 </body></html>"""
 
-# ---------- GAME 2: WAVE DEFENSE (melee + special) ----------
+# ---------- GAME 2: WAVE DEFENSE ----------
 def build_wave_game():
     return SHARED_HEAD + """
 <body>
@@ -756,7 +745,7 @@ function gameLoop() {
 </script>
 </body></html>"""
 
-# ---------- GAME 3: PLATFORMER (jump & run, collect coins) ----------
+# ---------- GAME 3: PLATFORMER ----------
 def build_platformer_game():
     return SHARED_HEAD + """
 <body>
@@ -862,7 +851,7 @@ function gameLoop() {
 </script>
 </body></html>"""
 
-# ---------- GAME 4: PUZZLE (sliding tiles) ----------
+# ---------- GAME 4: PUZZLE ----------
 def build_puzzle_game():
     return SHARED_HEAD + """
 <body>
@@ -984,7 +973,7 @@ function restartGame() { document.getElementById('gameOverScreen').classList.add
 </script>
 </body></html>"""
 
-# ---------- GAME 5: RACER (endless runner with boost) ----------
+# ---------- GAME 5: RACER ----------
 def build_racer_game():
     return SHARED_HEAD + """
 <body>
@@ -1105,7 +1094,7 @@ for g in cur:
         g["game_type"] = GAME_TYPE
 port_path.write_text(json.dumps(cur, indent=2))
 
-# ---------- STOREFRONT (Popular + Latest) ----------
+# ---------- STOREFRONT (PREMIUM) ----------
 print("  🌐 Generating storefront (Popular / Latest)...")
 storefront_html = '''<!DOCTYPE html>
 <html lang="en">
@@ -1261,7 +1250,7 @@ if TG_TOKEN and TG_ADMIN and zip_path.exists():
 if WHATSAPP_WEBHOOK_URL:
     send_to_whatsapp(f"🎮 NEW GAME: {GAME_NAME} ({GENRE})\n{MECHANIC}\n{DESCRIPTION}\nPlay: {PLAY_URL}\n{GAME_PRICE} SOL", IMG_URL)
 
-# ---------- SAR & LOGS ----------
+# ---------- SAR ----------
 SAR["study"]["total_runs"] += 1
 if art_ok: SAR["study"]["art_ok"] += 1
 else: SAR["study"]["art_fail"] += 1
