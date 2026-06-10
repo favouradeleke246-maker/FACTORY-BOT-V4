@@ -229,5 +229,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0012",
+    "date": "2026-06-10T13:11:48.054362",
+    "game": "Lethal Abyss",
+    "genre": "stealth game",
+    "mechanic": "Collapse Wave",
+    "mech_desc": "Every 10 kills trigger a screen-wide collapse dealing massive damage",
+    "description": "Master Collapse Wave in this stealth game \u2014 no two sessions are the same.",
+    "hook": "You've never played anything like this",
+    "hashtags": "#gamedev #indiegame #mobilegame #stealthgame #CollapseWave #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Lethal_Abyss/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Lethal_Abyss/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-2738B51D99DDAEAB",
+    "color": "#88ccff",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "shooter"
   }
 ]
