@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 36,
-    "art_ok": 11,
+    "total_runs": 37,
+    "art_ok": 12,
     "art_fail": 0,
     "games": [
       {
@@ -255,6 +255,13 @@
         "mechanic": "Null Field",
         "art": true,
         "ts": "2026-06-10T11:34:29.134821"
+      },
+      {
+        "name": "Lethal Abyss",
+        "genre": "stealth game",
+        "mechanic": "Collapse Wave",
+        "art": true,
+        "ts": "2026-06-10T13:12:09.483741"
       }
     ],
     "successful_art": 25,
@@ -262,7 +269,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.306,
+    "rate": 0.324,
     "best_mechanic": null,
     "success_rate": 0
   }
