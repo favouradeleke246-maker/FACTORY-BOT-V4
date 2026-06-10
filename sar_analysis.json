@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 34,
-    "art_ok": 9,
+    "total_runs": 35,
+    "art_ok": 10,
     "art_fail": 0,
     "games": [
       {
@@ -241,6 +241,13 @@
         "mechanic": "Chrono Fracture",
         "art": true,
         "ts": "2026-06-09T17:14:43.888793"
+      },
+      {
+        "name": "Crimson March",
+        "genre": "action RPG",
+        "mechanic": "Mirror Shell",
+        "art": true,
+        "ts": "2026-06-10T10:11:29.574150"
       }
     ],
     "successful_art": 25,
@@ -248,7 +255,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.265,
+    "rate": 0.286,
     "best_mechanic": null,
     "success_rate": 0
   }
