@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 37,
-    "art_ok": 12,
+    "total_runs": 38,
+    "art_ok": 13,
     "art_fail": 0,
     "games": [
       {
@@ -262,6 +262,13 @@
         "mechanic": "Collapse Wave",
         "art": true,
         "ts": "2026-06-10T13:12:09.483741"
+      },
+      {
+        "name": "Enigma Kill",
+        "genre": "action RPG",
+        "mechanic": "Soul Link",
+        "art": true,
+        "ts": "2026-06-11T10:45:52.045635"
       }
     ],
     "successful_art": 25,
@@ -269,7 +276,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.324,
+    "rate": 0.342,
     "best_mechanic": null,
     "success_rate": 0
   }

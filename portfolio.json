@@ -250,5 +250,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "shooter"
+  },
+  {
+    "id": "game_0013",
+    "date": "2026-06-11T10:45:30.976176",
+    "game": "Enigma Kill",
+    "genre": "action RPG",
+    "mechanic": "Soul Link",
+    "mech_desc": "Link to an enemy \u2014 you share health, so use them as a shield",
+    "description": "Master Soul Link in this action RPG \u2014 no two sessions are the same.",
+    "hook": "This one hits completely different",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #SoulLink #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Enigma_Kill/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Enigma_Kill/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-5F5F892CD5D3F8EF",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
