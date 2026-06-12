@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 38,
-    "art_ok": 13,
+    "total_runs": 39,
+    "art_ok": 14,
     "art_fail": 0,
     "games": [
       {
@@ -269,6 +269,13 @@
         "mechanic": "Soul Link",
         "art": true,
         "ts": "2026-06-11T10:45:52.045635"
+      },
+      {
+        "name": "Brutal Knell",
+        "genre": "fighting game",
+        "mechanic": "Death Bloom",
+        "art": true,
+        "ts": "2026-06-12T10:21:35.019117"
       }
     ],
     "successful_art": 25,
@@ -276,7 +283,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.342,
+    "rate": 0.359,
     "best_mechanic": null,
     "success_rate": 0
   }

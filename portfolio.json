@@ -271,5 +271,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0014",
+    "date": "2026-06-12T10:21:14.626762",
+    "game": "Brutal Knell",
+    "genre": "fighting game",
+    "mechanic": "Death Bloom",
+    "mech_desc": "Near-death triggers a massive radial shockwave instantly",
+    "description": "Master Death Bloom in this fighting game \u2014 no two sessions are the same.",
+    "hook": "Speed meets absolute chaos",
+    "hashtags": "#gamedev #indiegame #mobilegame #fightinggame #DeathBloom #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Brutal_Knell/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Brutal_Knell/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-B344FEF28909B37C",
+    "color": "#ff6600",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
