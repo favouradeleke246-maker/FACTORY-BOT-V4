@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 39,
-    "art_ok": 14,
+    "total_runs": 40,
+    "art_ok": 15,
     "art_fail": 0,
     "games": [
       {
@@ -276,6 +276,13 @@
         "mechanic": "Death Bloom",
         "art": true,
         "ts": "2026-06-12T10:21:35.019117"
+      },
+      {
+        "name": "Quake War",
+        "genre": "survival horror",
+        "mechanic": "Echo Strike",
+        "art": true,
+        "ts": "2026-06-13T09:23:41.945980"
       }
     ],
     "successful_art": 25,
@@ -283,7 +290,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.359,
+    "rate": 0.375,
     "best_mechanic": null,
     "success_rate": 0
   }

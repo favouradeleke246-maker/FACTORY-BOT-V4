@@ -292,5 +292,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0015",
+    "date": "2026-06-13T09:23:21.128630",
+    "game": "Quake War",
+    "genre": "survival horror",
+    "mechanic": "Echo Strike",
+    "mech_desc": "Every attack automatically repeats 0.8s later for free",
+    "description": "Master Echo Strike in this survival horror \u2014 no two sessions are the same.",
+    "hook": "Run. Or die trying",
+    "hashtags": "#gamedev #indiegame #mobilegame #survivalhorror #EchoStrike #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Quake_War/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quake_War/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-5FB210988C3C56B1",
+    "color": "#33ff99",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "shooter"
   }
 ]
