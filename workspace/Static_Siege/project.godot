@@ -1,0 +1,3 @@
+[application]
+config/name="Static Siege"
+config/icon="res://icon.png"

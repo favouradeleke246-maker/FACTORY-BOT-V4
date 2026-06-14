@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 40,
-    "art_ok": 15,
+    "total_runs": 41,
+    "art_ok": 16,
     "art_fail": 0,
     "games": [
       {
@@ -283,6 +283,13 @@
         "mechanic": "Echo Strike",
         "art": true,
         "ts": "2026-06-13T09:23:41.945980"
+      },
+      {
+        "name": "Static Siege",
+        "genre": "action RPG",
+        "mechanic": "Signal Jam",
+        "art": true,
+        "ts": "2026-06-14T09:43:40.927655"
       }
     ],
     "successful_art": 25,
@@ -290,7 +297,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.375,
+    "rate": 0.39,
     "best_mechanic": null,
     "success_rate": 0
   }
