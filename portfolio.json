@@ -313,5 +313,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "shooter"
+  },
+  {
+    "id": "game_0016",
+    "date": "2026-06-14T09:43:20.144762",
+    "game": "Static Siege",
+    "genre": "action RPG",
+    "mechanic": "Signal Jam",
+    "mech_desc": "Disable all enemy projectiles for 3 seconds with an EMP burst",
+    "description": "Master Signal Jam in this action RPG \u2014 no two sessions are the same.",
+    "hook": "Most intense drop this week",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #SignalJam #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Static_Siege/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Static_Siege/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-FF436E7DE1CB277E",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
