@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 41,
-    "art_ok": 16,
+    "total_runs": 42,
+    "art_ok": 17,
     "art_fail": 0,
     "games": [
       {
@@ -290,6 +290,13 @@
         "mechanic": "Signal Jam",
         "art": true,
         "ts": "2026-06-14T09:43:40.927655"
+      },
+      {
+        "name": "Static Mire",
+        "genre": "action RPG",
+        "mechanic": "Death Bloom",
+        "art": true,
+        "ts": "2026-06-15T12:26:34.419710"
       }
     ],
     "successful_art": 25,
@@ -297,7 +304,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.39,
+    "rate": 0.405,
     "best_mechanic": null,
     "success_rate": 0
   }
