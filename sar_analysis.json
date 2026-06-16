@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 42,
-    "art_ok": 17,
+    "total_runs": 43,
+    "art_ok": 18,
     "art_fail": 0,
     "games": [
       {
@@ -297,6 +297,13 @@
         "mechanic": "Death Bloom",
         "art": true,
         "ts": "2026-06-15T12:26:34.419710"
+      },
+      {
+        "name": "Enigma Force",
+        "genre": "action RPG",
+        "mechanic": "Void Step",
+        "art": true,
+        "ts": "2026-06-16T11:20:36.800109"
       }
     ],
     "successful_art": 25,
@@ -304,7 +311,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.405,
+    "rate": 0.419,
     "best_mechanic": null,
     "success_rate": 0
   }
