@@ -355,5 +355,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0018",
+    "date": "2026-06-16T11:20:34.455526",
+    "game": "Enigma Force",
+    "genre": "action RPG",
+    "mechanic": "Void Step",
+    "mech_desc": "Double-tap to teleport through any obstacle once per 4 seconds",
+    "description": "Master Void Step in this action RPG \u2014 no two sessions are the same.",
+    "hook": "You've never played anything like this",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #VoidStep #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Enigma_Force/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Enigma_Force/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-B4223C74C356EDCF",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
