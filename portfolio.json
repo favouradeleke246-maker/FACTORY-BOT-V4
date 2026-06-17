@@ -376,5 +376,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0019",
+    "date": "2026-06-17T11:05:41.986097",
+    "game": "Glitch Loop",
+    "genre": "action RPG",
+    "mechanic": "Phase Echo",
+    "mech_desc": "Tap to leave a ghost clone \u2014 enemies attack it instead of you",
+    "description": "Master Phase Echo in this action RPG \u2014 no two sessions are the same.",
+    "hook": "Speed meets absolute chaos",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #PhaseEcho #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Glitch_Loop/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Glitch_Loop/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-F699EEBE4845F9C6",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
