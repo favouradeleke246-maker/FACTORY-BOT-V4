@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 43,
-    "art_ok": 18,
+    "total_runs": 44,
+    "art_ok": 19,
     "art_fail": 0,
     "games": [
       {
@@ -304,6 +304,13 @@
         "mechanic": "Void Step",
         "art": true,
         "ts": "2026-06-16T11:20:36.800109"
+      },
+      {
+        "name": "Glitch Loop",
+        "genre": "action RPG",
+        "mechanic": "Phase Echo",
+        "art": true,
+        "ts": "2026-06-17T11:05:49.390691"
       }
     ],
     "successful_art": 25,
@@ -311,7 +318,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.419,
+    "rate": 0.432,
     "best_mechanic": null,
     "success_rate": 0
   }
