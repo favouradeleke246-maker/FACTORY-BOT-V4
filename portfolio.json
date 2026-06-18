@@ -397,5 +397,26 @@
     "status": "complete",
     "art_success": true,
     "game_type": "wave"
+  },
+  {
+    "id": "game_0020",
+    "date": "2026-06-18T10:37:37.247692",
+    "game": "Neon Xenith",
+    "genre": "action RPG",
+    "mechanic": "Echo Strike",
+    "mech_desc": "Every attack automatically repeats 0.8s later for free",
+    "description": "Master Echo Strike in this action RPG \u2014 no two sessions are the same.",
+    "hook": "This game will haunt you \ud83d\udd25",
+    "hashtags": "#gamedev #indiegame #mobilegame #actionRPG #EchoStrike #DeathRollStudio",
+    "image_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/Neon_Xenith/icon.png",
+    "play_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Xenith/index.html",
+    "zip_url": "https://raw.githubusercontent.com/favouradeleke246-maker/FACTORY-BOT-V4/main/workspace/latest_game.zip",
+    "price_sol": "7",
+    "license_key": "DR-182795CBE5A94D7A",
+    "color": "#ffd700",
+    "sales": 0,
+    "status": "complete",
+    "art_success": true,
+    "game_type": "wave"
   }
 ]
