@@ -1,7 +1,7 @@
 {
   "study": {
-    "total_runs": 44,
-    "art_ok": 19,
+    "total_runs": 45,
+    "art_ok": 20,
     "art_fail": 0,
     "games": [
       {
@@ -311,6 +311,13 @@
         "mechanic": "Phase Echo",
         "art": true,
         "ts": "2026-06-17T11:05:49.390691"
+      },
+      {
+        "name": "Neon Xenith",
+        "genre": "action RPG",
+        "mechanic": "Echo Strike",
+        "art": true,
+        "ts": "2026-06-18T10:37:39.930491"
       }
     ],
     "successful_art": 25,
@@ -318,7 +325,7 @@
   },
   "analysis": {
     "best_genre": "action RPG",
-    "rate": 0.432,
+    "rate": 0.444,
     "best_mechanic": null,
     "success_rate": 0
   }
