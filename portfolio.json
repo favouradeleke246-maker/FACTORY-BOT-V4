@@ -506,5 +506,19 @@
     "license_key": "DR-CD-20260619-93B3D920",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
     "version": "34.0.0"
+  },
+  {
+    "date": "2026-06-19T10:46:49.675582",
+    "game": "Void Pulse",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Void Pulse, a survival horror where Chrono Fracture changes everything. slow time. Can you survive the challenge?",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "waves",
+    "price": 5,
+    "license_key": "DR-VP-20260619-025F6C20",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
+    "version": "35.0.0"
   }
 ]
