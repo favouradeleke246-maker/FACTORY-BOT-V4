@@ -327,6 +327,13 @@
         "game_mode": "time_attack",
         "timestamp": "2026-06-19T10:00:44.198956",
         "price": 4
+      },
+      {
+        "name": "Astral Vector",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "timestamp": "2026-06-19T10:15:29.420547",
+        "price": 4
       }
     ],
     "successful_art": 25,

@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v31.0 - PROFESSIONAL AI GAME FACTORY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-AI-Powered Game Generation | No Loops | Clean Architecture
+DEATHROLL STUDIO v32.1 - FULLY FUNCTIONAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
 import os
 import json
 import random
-import hashlib
 import requests
 import time
 import shutil
@@ -24,13 +21,12 @@ from typing import Dict, List, Optional, Tuple, Any
 # CONFIGURATION
 # ============================================================================
 
-BOT_VERSION = "31.0.0"
+BOT_VERSION = "32.1.0"
 
 CONFIG = {
     "brand": {
         "name": "DeathRoll",
-        "email_primary": "favouradeleke246@gmail.com",
-        "email_secondary": "fadeleke246@gmail.com",
+        "email": "favouradeleke246@gmail.com",
         "telegram": "@deathroll1",
         "tiktok": "@deathroll.co",
         "website": "https://deathroll.co",
@@ -44,9 +40,9 @@ CONFIG = {
         "channel": "@drolltech"
     },
     "price": {
-        "default": 7,
         "min": 2,
-        "max": 10
+        "max": 10,
+        "default": 5
     }
 }
 
@@ -54,49 +50,76 @@ CONFIG = {
 # ENVIRONMENT
 # ============================================================================
 
-def get_env(key: str, default: Any = None) -> Any:
-    return os.getenv(key, default)
-
-TELEGRAM_TOKEN = get_env("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = get_env("TELEGRAM_CHAT_ID")
-OPENAI_KEY = get_env("OPENAI_API_KEY")
-GITHUB_TOKEN = get_env("GH_TOKEN")
-GAME_PRICE = get_env("GAME_PRICE", "7")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+GITHUB_TOKEN = os.getenv("GH_TOKEN")
 
 print("═" * 60)
-print("🔥 DEATHROLL STUDIO v31.0 - PROFESSIONAL AI GAME FACTORY")
+print("🔥 DEATHROLL STUDIO v32.1 - FULLY FUNCTIONAL")
 print("═" * 60)
 print(f"🤖 Version: {BOT_VERSION}")
-print(f"🏷️ Brand: {CONFIG['brand']['name']}")
-print(f"📧 Email: {CONFIG['brand']['email_primary']}")
-print(f"✅ Telegram: {'OK' if TELEGRAM_TOKEN else 'NO'}")
-print(f"✅ OpenAI: {'OK' if OPENAI_KEY else 'NO'}")
-print(f"✅ GitHub: {'OK' if GITHUB_TOKEN else 'NO'}")
+print(f"✅ Telegram Token: {'✅' if TELEGRAM_TOKEN else '❌'}")
+print(f"✅ OpenAI Key: {'✅' if OPENAI_KEY else '❌'}")
+print(f"✅ GitHub Token: {'✅' if GITHUB_TOKEN else '❌'}")
+print(f"📢 Channel: {CONFIG['telegram']['channel']}")
 print("═" * 60)
+
+# ============================================================================
+# ART DIRECTOR
+# ============================================================================
+
+class ArtDirector:
+    """Professional game art generation"""
+    
+    @staticmethod
+    def generate(name: str, genre: str, style: str) -> Path:
+        sprite_path = Path("sprite.png")
+        
+        # Try online generation
+        try:
+            style_map = {
+                "neon": "neon cyberpunk, glowing, futuristic",
+                "dark_fantasy": "dark fantasy, gothic, dramatic",
+                "cartoon": "cartoon style, colorful, playful",
+                "minimalist": "minimalist, clean, modern",
+                "pixel": "pixel art, retro, 8-bit"
+            }
+            style_desc = style_map.get(style, "neon cyberpunk")
+            prompt = f"professional game character art for '{name}', {genre}, {style_desc}, high quality"
+            url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '+')}?width=512&height=512"
+            response = requests.get(url, timeout=45)
+            if response.status_code == 200 and len(response.content) > 5000:
+                sprite_path.write_bytes(response.content)
+                return sprite_path
+        except:
+            pass
+        
+        # Fallback art
+        img = Image.new('RGB', (512, 512), color=(20, 20, 40))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([50, 50, 462, 462], outline=(78, 205, 196), width=4)
+        draw.text((180, 230), name[:15], fill=(255, 255, 255))
+        draw.text((200, 260), genre[:12], fill=(200, 200, 200))
+        img.save(sprite_path)
+        return sprite_path
 
 # ============================================================================
 # AI SERVICE
 # ============================================================================
 
 class AIService:
-    """Handles all AI interactions with clean error handling"""
-    
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key
         self.enabled = bool(api_key)
     
     def generate(self, prompt: str, max_tokens: int = 150, temperature: float = 0.8) -> Optional[str]:
-        """Generate text using OpenAI API"""
         if not self.enabled:
             return None
-        
         try:
             response = requests.post(
                 "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
+                headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"},
                 json={
                     "model": "gpt-4o-mini",
                     "messages": [{"role": "user", "content": prompt}],
@@ -111,78 +134,44 @@ class AIService:
             pass
         return None
     
-    def generate_game_design(self, genre: str, previous_games: List[Dict]) -> Dict:
-        """Generate a complete game design using AI"""
-        
+    def generate_game_design(self, genre: str, previous: List[Dict]) -> Dict:
         if not self.enabled:
-            return self._fallback_design(genre)
+            return self._fallback(genre)
         
-        # Build context from previous games
-        recent_mechanics = [g.get("mechanic", "") for g in previous_games[-5:] if g.get("mechanic")]
-        recent_names = [g.get("name", "") for g in previous_games[-5:] if g.get("name")]
+        recent_mechanics = [g.get("mechanic", "") for g in previous[-5:] if g.get("mechanic")]
+        recent_names = [g.get("name", "") for g in previous[-5:] if g.get("name")]
         
-        prompt = f"""Design a unique game with these requirements:
-
+        prompt = f"""Design a unique game:
 Genre: {genre}
-Avoid these mechanics: {', '.join(recent_mechanics[:3]) if recent_mechanics else 'none'}
-Avoid these names: {', '.join(recent_names[:3]) if recent_names else 'none'}
+Avoid: {', '.join(recent_mechanics[:3]) if recent_mechanics else 'none'}
+Avoid names: {', '.join(recent_names[:3]) if recent_names else 'none'}
 
-Return EXACTLY this JSON format:
-{{
-    "name": "creative game name (2-3 words)",
-    "mechanic": "unique mechanic name (2-3 words)",
-    "mechanic_description": "how the mechanic works (one sentence)",
-    "hook": "one-line hook to sell the game",
-    "visual_style": "art style (neon, dark, cartoon, pixel, minimalist)",
-    "game_mode": "game mode (endless, waves, time_attack, boss_fight, survival)",
-    "difficulty": "easy, medium, hard"
-}}
-
-Make it creative and different from typical games."""
+Return JSON:
+{{"name":"creative name","mechanic":"unique mechanic","mechanic_description":"how it works","hook":"one-line hook","visual_style":"neon/dark_fantasy/cartoon/pixel/minimalist","game_mode":"endless/waves/time_attack/boss_fight/survival","difficulty":"easy/medium/hard"}}"""
 
         result = self.generate(prompt, max_tokens=300, temperature=1.0)
-        
         if result:
             try:
-                # Extract JSON from response
                 import re
-                json_match = re.search(r'\{.*\}', result, re.DOTALL)
-                if json_match:
-                    return json.loads(json_match.group())
+                match = re.search(r'\{.*\}', result, re.DOTALL)
+                if match:
+                    return json.loads(match.group())
             except:
                 pass
-        
-        return self._fallback_design(genre)
+        return self._fallback(genre)
     
-    def _fallback_design(self, genre: str) -> Dict:
-        """Fallback design when AI fails"""
-        mechanics = [
-            ("Phase Echo", "summon a temporal duplicate"),
-            ("Chrono Fracture", "slow time around you"),
-            ("Void Step", "teleport through obstacles"),
-            ("Mirror Shell", "reflect projectiles"),
-            ("Gravity Well", "pull enemies together"),
-            ("Soul Link", "share damage with enemies"),
-            ("Shadow Cloak", "become invisible when still"),
-            ("Berserker Rage", "gain power as health drops")
-        ]
-        hooks = [
-            "Every second counts. Master the unknown.",
-            "Death is temporary. Glory is forever.",
-            "One mechanic changes everything.",
-            "Fight. Survive. Evolve.",
-            "Darkness awaits. Are you ready?"
-        ]
+    def _fallback(self, genre: str) -> Dict:
+        names = [("Neon", "Runner"), ("Cyber", "Drifter"), ("Quantum", "Breach"), ("Astral", "Vector"), ("Void", "Pulse")]
+        mechanics = [("Phase Echo", "summon a temporal duplicate"), ("Chrono Fracture", "slow time"), ("Void Step", "teleport")]
+        hooks = ["Every second counts.", "One mechanic changes everything.", "Fight. Survive. Evolve."]
         styles = ["neon", "dark_fantasy", "cartoon", "pixel", "minimalist"]
         modes = ["endless", "waves", "time_attack", "boss_fight", "survival"]
         
-        name_prefixes = ["Neon", "Cyber", "Quantum", "Astral", "Void", "Echo", "Flux", "Rogue", "Crimson", "Shadow"]
-        name_suffixes = ["Runner", "Drifter", "Breach", "Vector", "Pulse", "Shift", "Core", "Edge", "Zone", "Fury"]
-        
+        name = f"{random.choice(names)[0]} {random.choice(names)[1]}"
         mechanic = random.choice(mechanics)
         
         return {
-            "name": f"{random.choice(name_prefixes)} {random.choice(name_suffixes)}",
+            "name": name,
             "mechanic": mechanic[0],
             "mechanic_description": mechanic[1],
             "hook": random.choice(hooks),
@@ -192,1004 +181,480 @@ Make it creative and different from typical games."""
         }
     
     def generate_description(self, game_data: Dict) -> str:
-        """Generate a professional game description"""
-        
         if not self.enabled:
-            return self._fallback_description(game_data)
+            return f"Step into {game_data['name']}, a {game_data['genre']} where {game_data['mechanic']} changes everything."
         
-        prompt = f"""Write a professional, compelling game description for:
-
+        prompt = f"""Write a professional game description for:
 Game: {game_data['name']}
 Genre: {game_data['genre']}
 Mechanic: {game_data['mechanic']} - {game_data['mechanic_description']}
 Hook: {game_data['hook']}
-
-Write 2-3 sentences that would make someone want to play. Professional tone, no emojis.
-Make it sound like a real game store description."""
-
-        result = self.generate(prompt, max_tokens=120, temperature=0.7)
-        if result and len(result) > 30:
-            return result
+Write 2-3 sentences. Professional tone, no emojis."""
         
-        return self._fallback_description(game_data)
+        result = self.generate(prompt, max_tokens=120, temperature=0.7)
+        return result if result and len(result) > 30 else self._fallback_description(game_data)
     
     def _fallback_description(self, game_data: Dict) -> str:
-        """Fallback description"""
-        templates = [
-            f"Step into {game_data['name']}, a {game_data['genre']} where {game_data['mechanic']} changes everything. {game_data['mechanic_description']}. Experience thrilling gameplay in this unique adventure.",
-            f"Welcome to {game_data['name']}. This {game_data['genre']} challenges you to master {game_data['mechanic']}. {game_data['mechanic_description']}. Can you survive the challenge?",
-            f"{game_data['name']} redefines the {game_data['genre']} genre with {game_data['mechanic']}. {game_data['mechanic_description']}. Prepare for an unforgettable gaming experience."
-        ]
-        return random.choice(templates)
-
+        return f"Step into {game_data['name']}, a {game_data['genre']} where {game_data['mechanic']} changes everything. {game_data['mechanic_description']}. Can you survive the challenge?"
 
 # ============================================================================
 # GAME DESIGN SYSTEM
 # ============================================================================
 
 class GameDesignSystem:
-    """Manages game design and generation"""
-    
     GENRES = [
         "top-down shooter", "action RPG", "racing game", "puzzle game",
         "survival horror", "fighting game", "strategy game",
-        "extraction shooter", "cozy builder", "roguelite",
-        "platformer", "tower defense", "battle royale"
+        "platformer", "tower defense", "roguelite"
     ]
     
-    VISUAL_THEMES = {
-        "neon": {
-            "bg": ["#0a0a2e", "#1a1a3e", "#0f0f1a"],
-            "primary": "#4ecdc4",
-            "secondary": "#ff6b6b",
-            "accent": "#ffd93d",
-            "glow": True
-        },
-        "dark_fantasy": {
-            "bg": ["#0a0a0a", "#1a0a0a", "#0a0a0f"],
-            "primary": "#8b0000",
-            "secondary": "#ff4444",
-            "accent": "#ffd700",
-            "glow": False
-        },
-        "cartoon": {
-            "bg": ["#1a2a3a", "#2a4a5a", "#0a1a2a"],
-            "primary": "#ff6b35",
-            "secondary": "#f7c948",
-            "accent": "#4ecdc4",
-            "glow": False
-        },
-        "minimalist": {
-            "bg": ["#f5f5f5", "#e8e8e8", "#ffffff"],
-            "primary": "#2c3e50",
-            "secondary": "#3498db",
-            "accent": "#2ecc71",
-            "glow": False
-        },
-        "pixel": {
-            "bg": ["#1a1a2e", "#16213e", "#0f0f23"],
-            "primary": "#00ff88",
-            "secondary": "#ff0066",
-            "accent": "#ffcc00",
-            "glow": True
-        }
+    THEMES = {
+        "neon": {"bg": ["#0a0a2e", "#1a1a3e"], "primary": "#4ecdc4", "secondary": "#ff6b6b", "accent": "#ffd93d", "glow": True},
+        "dark_fantasy": {"bg": ["#0a0a0a", "#1a0a0a"], "primary": "#8b0000", "secondary": "#ff4444", "accent": "#ffd700", "glow": False},
+        "cartoon": {"bg": ["#1a2a3a", "#2a4a5a"], "primary": "#ff6b35", "secondary": "#f7c948", "accent": "#4ecdc4", "glow": False},
+        "minimalist": {"bg": ["#f5f5f5", "#e8e8e8"], "primary": "#2c3e50", "secondary": "#3498db", "accent": "#2ecc71", "glow": False},
+        "pixel": {"bg": ["#1a1a2e", "#16213e"], "primary": "#00ff88", "secondary": "#ff0066", "accent": "#ffcc00", "glow": True}
     }
     
-    GAME_MODES = {
-        "endless": {"name": "Endless", "description": "Keep going until you fall"},
-        "waves": {"name": "Wave Defense", "description": "Survive wave after wave"},
-        "time_attack": {"name": "Time Attack", "description": "Score as much as possible in 60s"},
-        "boss_fight": {"name": "Boss Fight", "description": "Defeat the massive boss"},
-        "survival": {"name": "Survival", "description": "Survive as long as possible"}
+    MODES = {
+        "endless": "Endless",
+        "waves": "Wave Defense",
+        "time_attack": "Time Attack",
+        "boss_fight": "Boss Fight",
+        "survival": "Survival"
     }
     
-    GAME_STYLES = {
-        "shooter": {"enemy_speed": 1.2, "spawn_rate": 4, "player_health": 50, "mechanic_effect": "shoot"},
-        "platformer": {"enemy_speed": 1.0, "spawn_rate": 3, "player_health": 60, "mechanic_effect": "double_jump"},
-        "survival": {"enemy_speed": 1.5, "spawn_rate": 3, "player_health": 100, "mechanic_effect": "push"},
-        "collector": {"enemy_speed": 0.8, "spawn_rate": 2, "player_health": 75, "mechanic_effect": "speed_boost"},
-        "wave_defense": {"enemy_speed": 1.8, "spawn_rate": 5, "player_health": 80, "mechanic_effect": "shield"}
+    STYLES = {
+        "shooter": {"enemy_speed": 1.2, "spawn_rate": 4, "player_health": 50},
+        "survival": {"enemy_speed": 1.5, "spawn_rate": 3, "player_health": 100},
+        "collector": {"enemy_speed": 0.8, "spawn_rate": 2, "player_health": 75},
+        "wave_defense": {"enemy_speed": 1.8, "spawn_rate": 5, "player_health": 80}
     }
     
-    def __init__(self, ai_service: AIService):
-        self.ai = ai_service
-        self.sar_data = self._load_sar()
+    def __init__(self, ai: AIService):
+        self.ai = ai
+        self.sar = self._load_sar()
     
     def _load_sar(self) -> Dict:
-        """Load SAR data for learning"""
-        sar_path = Path("sar_analysis.json")
-        if sar_path.exists():
+        path = Path("sar_analysis.json")
+        if path.exists():
             try:
-                return json.loads(sar_path.read_text())
+                return json.loads(path.read_text())
             except:
                 pass
         return {"study": {"games": []}, "analysis": {}}
     
-    def _save_sar(self):
-        """Save SAR data"""
-        Path("sar_analysis.json").write_text(json.dumps(self.sar_data, indent=2))
-    
     def select_genre(self) -> str:
-        """Select genre with SAR weighting"""
-        sar_best = self.sar_data.get("analysis", {}).get("best_genre")
-        candidates = []
-        weights = []
-        
-        if sar_best and sar_best in self.GENRES:
-            candidates.append(sar_best)
-            weights.append(0.4)
-        
-        # Random from genres
-        candidates.append(random.choice(self.GENRES))
-        weights.append(0.6)
-        
-        return random.choices(candidates, weights=weights)[0]
+        best = self.sar.get("analysis", {}).get("best_genre")
+        if best and best in self.GENRES and random.random() < 0.4:
+            return best
+        return random.choice(self.GENRES)
     
-    def generate_game(self) -> Dict:
-        """Generate a complete game design"""
-        
-        # Select genre
+    def generate(self) -> Dict:
         genre = self.select_genre()
+        previous = self.sar.get("study", {}).get("games", [])
+        design = self.ai.generate_game_design(genre, previous)
         
-        # Get AI design
-        previous_games = self.sar_data.get("study", {}).get("games", [])
-        design = self.ai.generate_game_design(genre, previous_games)
-        
-        # Merge with system data
-        game_data = {
+        return {
             "genre": genre,
             "name": design.get("name", f"{random.choice(['Neon','Cyber','Quantum'])} {random.choice(['Runner','Drifter','Breach'])}"),
             "mechanic": design.get("mechanic", "Phase Echo"),
             "mechanic_description": design.get("mechanic_description", "summon a temporal duplicate"),
-            "hook": design.get("hook", "Every second counts. Master the unknown."),
-            "visual_style": design.get("visual_style", random.choice(list(self.VISUAL_THEMES.keys()))),
-            "game_mode": design.get("game_mode", random.choice(list(self.GAME_MODES.keys()))),
+            "hook": design.get("hook", "Every second counts."),
+            "visual_style": design.get("visual_style", random.choice(list(self.THEMES.keys()))),
+            "game_mode": design.get("game_mode", random.choice(list(self.MODES.keys()))),
             "difficulty": design.get("difficulty", "medium"),
-            "game_style": random.choice(list(self.GAME_STYLES.keys()))
+            "game_style": random.choice(list(self.STYLES.keys()))
         }
-        
-        # Generate description via AI
-        game_data["description"] = self.ai.generate_description(game_data)
-        
-        return game_data
-
 
 # ============================================================================
 # LICENSE SYSTEM
 # ============================================================================
 
-class LicenseSystem:
-    """Manages license key generation and verification"""
-    
-    @staticmethod
-    def generate(game_name: str, buyer_username: Optional[str] = None) -> str:
-        """Generate a unique license key"""
-        timestamp = datetime.now().strftime("%Y%m%d")
-        unique_id = str(uuid.uuid4())[:8].upper()
-        game_code = ''.join([w[0] for w in game_name.split()[:2]]).upper()
-        
-        if buyer_username:
-            clean = buyer_username.replace('@', '').upper()[:6]
-            return f"DR-{game_code}-{timestamp}-{unique_id}-{clean}"
-        return f"DR-{game_code}-{timestamp}-{unique_id}"
-    
-    @staticmethod
-    def verify(key: str) -> bool:
-        """Verify a license key format"""
-        parts = key.split('-')
-        if len(parts) < 4:
-            return False
-        if not parts[0] == "DR":
-            return False
-        return True
-
+def generate_license(game_name: str) -> str:
+    timestamp = datetime.now().strftime("%Y%m%d")
+    unique = str(uuid.uuid4())[:8].upper()
+    code = ''.join([w[0] for w in game_name.split()[:2]]).upper()
+    return f"DR-{code}-{timestamp}-{unique}"
 
 # ============================================================================
 # PORTFOLIO SYSTEM
 # ============================================================================
 
-class PortfolioSystem:
-    """Manages the game portfolio"""
+class Portfolio:
+    def __init__(self):
+        self.path = Path("portfolio.json")
+        self._ensure()
     
-    def __init__(self, path: Path = Path("portfolio.json")):
-        self.path = path
-        self._ensure_exists()
-    
-    def _ensure_exists(self):
+    def _ensure(self):
         if not self.path.exists():
             self.path.write_text("[]")
     
-    def load(self) -> List[Dict]:
+    def add(self, entry: Dict) -> int:
+        data = self._load()
+        data.append(entry)
+        self._save(data[-200:])
+        return len(data)
+    
+    def _load(self) -> List[Dict]:
         try:
             data = json.loads(self.path.read_text())
             return data if isinstance(data, list) else []
         except:
             return []
     
-    def save(self, games: List[Dict]):
-        self.path.write_text(json.dumps(games, indent=2))
-    
-    def add_game(self, game_data: Dict):
-        games = self.load()
-        games.append(game_data)
-        self.save(games[-200:])  # Keep last 200
-        return len(games)
-
+    def _save(self, data: List[Dict]):
+        self.path.write_text(json.dumps(data, indent=2))
 
 # ============================================================================
 # TELEGRAM SERVICE
 # ============================================================================
 
-class TelegramService:
-    """Handles Telegram messaging"""
-    
-    def __init__(self, token: Optional[str], channel: str):
+class Telegram:
+    def __init__(self, token: Optional[str]):
         self.token = token
-        self.channel = channel
         self.enabled = bool(token)
     
-    def send(self, chat_id: str, text: str, parse_mode: str = "Markdown") -> bool:
+    def send(self, chat_id: str, text: str) -> bool:
         if not self.enabled:
             return False
         try:
-            response = requests.post(
+            r = requests.post(
                 f"https://api.telegram.org/bot{self.token}/sendMessage",
-                json={"chat_id": chat_id, "text": text, "parse_mode": parse_mode},
+                json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
                 timeout=30
             )
-            return response.status_code == 200
+            return r.status_code == 200
         except:
             return False
     
-    def send_photo(self, chat_id: str, photo_path: Path, caption: str) -> bool:
+    def send_photo(self, chat_id: str, photo: Path, caption: str) -> bool:
         if not self.enabled:
             return False
         try:
-            with open(photo_path, "rb") as f:
-                response = requests.post(
+            with open(photo, "rb") as f:
+                r = requests.post(
                     f"https://api.telegram.org/bot{self.token}/sendPhoto",
                     files={"photo": f},
                     data={"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"},
                     timeout=60
                 )
-            return response.status_code == 200
+            return r.status_code == 200
         except:
             return False
     
-    def send_document(self, chat_id: str, doc_path: Path, caption: str) -> bool:
+    def send_document(self, chat_id: str, doc: Path, caption: str) -> bool:
         if not self.enabled:
             return False
         try:
-            with open(doc_path, "rb") as f:
-                response = requests.post(
+            with open(doc, "rb") as f:
+                r = requests.post(
                     f"https://api.telegram.org/bot{self.token}/sendDocument",
                     files={"document": f},
                     data={"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"},
                     timeout=60
                 )
-            return response.status_code == 200
+            return r.status_code == 200
         except:
             return False
+
+# ============================================================================
+# HTML5 GAME GENERATOR
+# ============================================================================
+
+def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
+    p = theme["primary"]
+    s = theme["secondary"]
+    a = theme["accent"]
+    glow = "true" if theme["glow"] else "false"
+    bg0 = theme["bg"][0]
+    bg1 = theme["bg"][1]
     
-    def send_game_post(self, game_data: Dict, license_key: str, html5_url: str) -> bool:
-        """Send the full game sales post"""
-        
-        theme = GameDesignSystem.VISUAL_THEMES.get(game_data["visual_style"], {})
-        emojis = ["🎮", "🔥", "⚡", "💀", "🎯"]
-        selected_emojis = " ".join(random.sample(emojis, 3))
-        
-        post = f"""
-{selected_emojis} *{game_data['hook']}* {selected_emojis}
-
-✨ *{game_data['name']}*
-*Genre:* {game_data['genre']}
-*Mechanic:* `{game_data['mechanic']}`
-*Difficulty:* {game_data['difficulty']}
-
-{game_data['description']}
-
-━━━━━━━━━━━━━━━━━━━━━
-🎮 *PLAY INSTANTLY (HTML5)*
-{html5_url}
-
-🔑 *License Key:* `{license_key}`
-💰 *Price:* ${game_data.get('price', 7)} SOL
-━━━━━━━━━━━━━━━━━━━━━
-
-🔵 Trust: `{CONFIG['wallets']['trust']}`
-🟣 Phantom: `{CONFIG['wallets']['phantom']}`
-
-Send ${game_data.get('price', 7)} SOL + your @username → receive full game
-
-#gamedev #indiegame #{game_data['genre'].replace(' ', '')} #DeathRollStudio
-"""
-        return self.send_photo(self.channel, Path("sprite.png"), post)
-
+    hp = style["player_health"]
+    speed = style["enemy_speed"]
+    spawn = style["spawn_rate"]
+    
+    name = game_data["name"]
+    genre = game_data["genre"]
+    mechanic = game_data["mechanic"]
+    
+    return f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{name}</title>
+    <style>
+        * {{ margin:0; padding:0; box-sizing:border-box; }}
+        body {{
+            background: linear-gradient(135deg, {bg0}, {bg1});
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-family:'Segoe UI',sans-serif;
+        }}
+        .wrapper {{ text-align:center; padding:15px; }}
+        .title {{
+            font-size:2rem;
+            color:{p};
+            text-shadow: {'0 0 20px ' + p if theme['glow'] else 'none'};
+            font-weight:bold;
+        }}
+        .genre {{ color:{s}; font-size:0.9rem; }}
+        .mechanic {{ color:{a}; font-size:0.85rem; margin-top:5px; }}
+        canvas {{
+            border:3px solid {p};
+            border-radius:15px;
+            box-shadow: {'0 0 40px ' + p if theme['glow'] else '0 0 20px rgba(0,0,0,0.5)'};
+            max-width:100%;
+            background:{bg0};
+            display:block;
+            margin:0 auto;
+        }}
+        .controls {{ margin-top:15px; color:#aaa; font-size:0.8rem; }}
+        .controls span {{ display:inline-block; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; margin:0 3px; }}
+        @media (max-width:768px) {{ .title {{ font-size:1.3rem; }} canvas {{ width:100%; height:auto; }} }}
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="title">{name}</div>
+        <div class="genre">{genre}</div>
+        <div class="mechanic">⚡ {mechanic}</div>
+        <canvas id="c" width="900" height="600"></canvas>
+        <div class="controls"><span>WASD</span> or <span>←→↑↓</span> move | <span>SPACE</span> {mechanic}</div>
+    </div>
+    <script>
+        const c=document.getElementById('c'),ctx=c.getContext('2d');
+        const C={{p:'{p}',s:'{s}',a:'{a}',g:{glow}}};
+        const state={{p:{{x:450,y:300,size:25,h:{hp},mh:{hp}}},e:[],parts:[],score:0,combo:0,go:false,started:false,cd:0,maxCd:90}};
+        let keys={{}};
+        function spawn(){{const x=Math.random()*880+10,y=Math.random()*580+10;state.e.push({{x,y,size:25,hp:3,mh:3,speed:{speed}}});}}
+        function useM(){{if(state.cd>0)return;state.cd=state.maxCd;state.e.forEach(e=>{{const dx=e.x-state.p.x,dy=e.y-state.p.y,d=Math.hypot(dx,dy);if(d<150){{const a=Math.atan2(dy,dx);e.x+=Math.cos(a)*80;e.y+=Math.sin(a)*80;e.hp-=2;}}}});addP(state.p.x,state.p.y,C.p,20);}}
+        function addP(x,y,color,c){{for(let i=0;i<c;i++)state.parts.push({{x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:30+Math.random()*20,maxLife:50,color,size:3+Math.random()*4}});}}
+        function update(){{if(state.go||!state.started)return;let dx=0,dy=0,s=4.5;if(keys['w']||keys['ArrowUp'])dy=-s;if(keys['s']||keys['ArrowDown'])dy=s;if(keys['a']||keys['ArrowLeft'])dx=-s;if(keys['d']||keys['ArrowRight'])dx=s;if(dx&&dy){{dx*=0.707;dy*=0.707;}}state.p.x=Math.max(20,Math.min(880,state.p.x+dx));state.p.y=Math.max(20,Math.min(580,state.p.y+dy));if(state.cd>0)state.cd--;if(Math.random()<0.02*{spawn})spawn();for(let i=0;i<state.e.length;i++){{const e=state.e[i],dx2=state.p.x-e.x,dy2=state.p.y-e.y,d=Math.hypot(dx2,dy2);if(d>0){{e.x+=(dx2/d)*e.speed;e.y+=(dy2/d)*e.speed;}}e.x=Math.max(10,Math.min(890,e.x));e.y=Math.max(10,Math.min(590,e.y));const cd=Math.hypot(state.p.x-e.x,state.p.y-e.y);if(cd<state.p.size/2+e.size/2){{state.p.h-=10;state.combo=0;if(state.p.h<=0){{state.p.h=0;state.go=true;return;}}}}if(e.hp<=0){{state.score+=10*(1+Math.floor(state.combo/10));state.combo++;addP(e.x,e.y,C.s,15);state.e.splice(i,1);i--;}}}}for(let i=0;i<state.parts.length;i++){{const p=state.parts[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.98;p.vy*=0.98;p.life--;if(p.life<=0){{state.parts.splice(i,1);i--;}}}}}}
+        function draw(){{const g=ctx.createRadialGradient(450,300,100,450,300,500);g.addColorStop(0,'{bg1}');g.addColorStop(1,'{bg0}');ctx.fillStyle=g;ctx.fillRect(0,0,900,600);ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;for(let i=0;i<900;i+=50){{ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();}}state.e.forEach(e=>{{const g2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size);g2.addColorStop(0,C.s);g2.addColorStop(1,'#cc4444');ctx.fillStyle=g2;ctx.shadowColor=C.s;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;const w=e.size;ctx.fillStyle='#444';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4);ctx.fillStyle='#4ecdc4';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w*(e.hp/e.mh),4);ctx.fillStyle='#fff';ctx.font='18px monospace';ctx.fillText('👾',e.x-12,e.y-8);}});const g3=ctx.createRadialGradient(state.p.x-8,state.p.y-8,5,state.p.x,state.p.y,state.p.size);g3.addColorStop(0,C.p);g3.addColorStop(1,'#2a7d8f');ctx.fillStyle=g3;ctx.shadowColor=C.p;ctx.shadowBlur=20;ctx.beginPath();ctx.arc(state.p.x,state.p.y,state.p.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='24px monospace';ctx.fillText('🎮',state.p.x-15,state.p.y-12);state.parts.forEach(p=>{{const a=p.life/p.maxLife;ctx.globalAlpha=a;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;}});ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='bold 22px monospace';ctx.fillText('SCORE: '+state.score,20,45);ctx.fillStyle='#ff4444';ctx.fillRect(20,65,200,14);ctx.fillStyle=C.p;ctx.fillRect(20,65,(state.p.h/state.p.mh)*200,14);if(state.combo>0){{ctx.fillStyle=C.a;ctx.font='bold 18px monospace';ctx.fillText('⚡ '+state.combo+'x COMBO!',20,120);}}if(state.cd>0){{ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(20,150,state.cd*2,6);}}ctx.fillStyle='#888';ctx.font='12px monospace';ctx.fillText('⚡ {mechanic} (SPACE)',20,165);if(state.go){{ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 48px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',450,250);ctx.font='24px monospace';ctx.fillStyle=C.a;ctx.fillText('Score: '+state.score,450,320);ctx.font='16px monospace';ctx.fillStyle='#aaa';ctx.fillText('Press R to restart',450,370);ctx.textAlign='left';}}if(!state.started&&!state.go){{ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 36px monospace';ctx.textAlign='center';ctx.fillText('🎮 {name}',450,230);ctx.font='18px monospace';ctx.fillStyle=C.p;ctx.fillText('Press SPACE to start',450,320);ctx.textAlign='left';}}}}
+        function loop(){{update();draw();requestAnimationFrame(loop);}}
+        document.addEventListener('keydown',function(e){{const k=e.key.toLowerCase();keys[k]=true;if(e.key===' '){{e.preventDefault();if(!state.started){{state.started=true;for(let i=0;i<5;i++)spawn();}}else{{useM();}}}}if((e.key==='r'||e.key==='R')&&state.go){{state.p={{x:450,y:300,size:25,h:{hp},mh:{hp}}};state.e=[];state.parts=[];state.score=0;state.combo=0;state.go=false;state.cd=0;for(let i=0;i<5;i++)spawn();}}}});
+        document.addEventListener('keyup',function(e){{keys[e.key.toLowerCase()]=false;}});
+        loop();
+    </script>
+</body>
+</html>'''
 
 # ============================================================================
 # MAIN BOT
 # ============================================================================
 
 class DeathRollStudio:
-    """Main bot class"""
-    
     def __init__(self):
         self.ai = AIService(OPENAI_KEY)
-        self.design_system = GameDesignSystem(self.ai)
-        self.portfolio = PortfolioSystem()
-        self.telegram = TelegramService(TELEGRAM_TOKEN, CONFIG["telegram"]["channel"])
-        self.license_system = LicenseSystem()
-        
-        self.config = CONFIG
-        self.version = BOT_VERSION
+        self.design = GameDesignSystem(self.ai)
+        self.portfolio = Portfolio()
+        self.telegram = Telegram(TELEGRAM_TOKEN)
     
     def run(self):
-        """Run the game factory"""
-        
         print("\n" + "═" * 60)
         print("🎮 GENERATING NEW GAME")
         print("═" * 60)
         
-        # 1. Design the game
-        game_data = self.design_system.generate_game()
-        print(f"   📝 Game: {game_data['name']}")
-        print(f"   🎭 Genre: {game_data['genre']}")
-        print(f"   ⚡ Mechanic: {game_data['mechanic']}")
-        print(f"   🎨 Style: {game_data['visual_style']}")
-        print(f"   🏆 Mode: {game_data['game_mode']}")
+        # 1. Design
+        game = self.design.generate()
+        print(f"   📝 Name: {game['name']}")
+        print(f"   🎭 Genre: {game['genre']}")
+        print(f"   ⚡ Mechanic: {game['mechanic']}")
+        print(f"   🎨 Style: {game['visual_style']}")
         
-        # 2. Calculate price
-        price = self._calculate_price(game_data)
-        game_data["price"] = price
+        # 2. Price
+        price = self._price(game)
+        game["price"] = price
         print(f"   💰 Price: ${price} SOL")
         
-        # 3. Generate description (if not already)
-        if "description" not in game_data or not game_data["description"]:
-            game_data["description"] = self.ai.generate_description(game_data)
-        print(f"   📝 {game_data['description'][:100]}...")
+        # 3. Description
+        if "description" not in game:
+            game["description"] = self.ai.generate_description(game)
+        print(f"   📝 {game['description'][:80]}...")
         
-        # 4. Generate license key
-        license_key = self.license_system.generate(game_data["name"])
+        # 4. License
+        license_key = generate_license(game["name"])
         print(f"   🔑 License: {license_key}")
         
-        # 5. Generate art
-        art_url = self._generate_art(game_data)
-        print(f"   🎨 Art: {'Success' if art_url else 'Fallback'}")
+        # 5. Art
+        art = ArtDirector.generate(game["name"], game["genre"], game["visual_style"])
+        art_url = f"https://raw.githubusercontent.com/{CONFIG['brand']['github']}/FACTORY-BOT-V4/main/sprite.png"
+        print(f"   🎨 Art: Generated")
         
-        # 6. Build game files
-        html5_url = self._build_game(game_data, license_key)
+        # 6. Build game
+        html5_url = self._build(game, license_key)
         print(f"   🌐 HTML5: {html5_url}")
         
-        # 7. Update portfolio
-        portfolio_entry = self._create_portfolio_entry(game_data, license_key, art_url, html5_url)
-        total_games = self.portfolio.add_game(portfolio_entry)
-        print(f"   📊 Portfolio: {total_games} games")
+        # 7. Portfolio
+        entry = {
+            "date": datetime.now().isoformat(),
+            "game": game["name"],
+            "genre": game["genre"],
+            "mechanic": game["mechanic"],
+            "description": game["description"],
+            "hook": game["hook"],
+            "visual_style": game["visual_style"],
+            "game_mode": game["game_mode"],
+            "price": price,
+            "license_key": license_key,
+            "html5_url": html5_url,
+            "version": BOT_VERSION
+        }
+        total = self.portfolio.add(entry)
+        print(f"   📊 Portfolio: {total} games")
         
-        # 8. Send to Telegram
+        # 8. Telegram
+        print(f"   📱 Sending to Telegram...")
         if self.telegram.enabled:
-            self.telegram.send_game_post(game_data, license_key, html5_url)
-            print(f"   📱 Telegram: Posted")
+            self._send_telegram(game, license_key, html5_url)
+        else:
+            print("   ⚠️ Telegram token missing")
         
-        # 9. Update SAR
-        self._update_sar(game_data)
+        # 9. SAR
+        self._update_sar(game)
         print(f"   🧠 SAR: Updated")
         
-        # 10. Final verification
+        # 10. Done
         print("\n" + "═" * 60)
         print("✅ GAME COMPLETE")
         print("═" * 60)
-        print(f"   Game: {game_data['name']}")
+        print(f"   Game: {game['name']}")
         print(f"   License: {license_key}")
         print(f"   HTML5: {html5_url}")
-        print(f"   Portfolio: {total_games} games")
+        print(f"   Portfolio: {total} games")
         print("═" * 60)
     
-    def _calculate_price(self, game_data: Dict) -> int:
-        """Calculate dynamic price"""
+    def _price(self, game: Dict) -> int:
         base = 3
-        
-        # Art quality bonus
-        if game_data.get("visual_style") in ["neon", "pixel"]:
+        if game["visual_style"] in ["neon", "pixel"]:
             base += 1
-        
-        # Difficulty bonus
-        if game_data.get("difficulty") == "hard":
+        if game["difficulty"] == "hard":
             base += 2
-        elif game_data.get("difficulty") == "medium":
+        elif game["difficulty"] == "medium":
             base += 1
-        
-        # Mode bonus
-        if game_data.get("game_mode") == "boss_fight":
+        if game["game_mode"] == "boss_fight":
             base += 2
-        
         return min(max(base, CONFIG["price"]["min"]), CONFIG["price"]["max"])
     
-    def _generate_art(self, game_data: Dict) -> Optional[str]:
-        """Generate game art"""
-        sprite_path = Path("sprite.png")
+    def _build(self, game: Dict, license_key: str) -> str:
+        theme = GameDesignSystem.THEMES.get(game["visual_style"], GameDesignSystem.THEMES["neon"])
+        style = GameDesignSystem.STYLES.get(game["game_style"], GameDesignSystem.STYLES["survival"])
         
-        try:
-            style = game_data.get("visual_style", "neon")
-            prompt = f"3D {style} render of a {game_data['genre']} character for '{game_data['name']}'"
-            url = f"https://image.pollinations.ai/prompt/{prompt.replace(' ', '+')}?width=512&height=512"
-            response = requests.get(url, timeout=45)
-            if response.status_code == 200 and len(response.content) > 5000:
-                sprite_path.write_bytes(response.content)
-                return f"https://raw.githubusercontent.com/{CONFIG['brand']['github']}/FACTORY-BOT-V4/main/sprite.png"
-        except:
-            pass
-        
-        # Fallback art
-        try:
-            img = Image.new('RGB', (512, 512), color=(30, 30, 60))
-            draw = ImageDraw.Draw(img)
-            draw.rectangle([50, 50, 462, 462], outline=(78, 205, 196), width=4)
-            draw.text((180, 230), game_data['name'][:15], fill=(255, 255, 255))
-            img.save(sprite_path)
-            return None
-        except:
-            return None
-    
-    def _build_game(self, game_data: Dict, license_key: str) -> str:
-        """Build HTML5 game files"""
-        
-        # Get theme and mode
-        visual_theme = GameDesignSystem.VISUAL_THEMES.get(
-            game_data["visual_style"], 
-            GameDesignSystem.VISUAL_THEMES["neon"]
-        )
-        game_mode = GameDesignSystem.GAME_MODES.get(
-            game_data["game_mode"],
-            GameDesignSystem.GAME_MODES["endless"]
-        )
-        game_style = GameDesignSystem.GAME_STYLES.get(
-            game_data.get("game_style", "survival"),
-            GameDesignSystem.GAME_STYLES["survival"]
-        )
-        
-        # Create workspace
-        project_dir = Path(f"workspace/{game_data['name'].replace(' ', '_')}")
-        project_dir.mkdir(parents=True, exist_ok=True)
+        folder = Path(f"workspace/{game['name'].replace(' ', '_')}")
+        folder.mkdir(parents=True, exist_ok=True)
         
         # Copy art
-        sprite_path = Path("sprite.png")
-        if sprite_path.exists():
-            shutil.copy(sprite_path, project_dir / "icon.png")
+        sprite = Path("sprite.png")
+        if sprite.exists():
+            shutil.copy(sprite, folder / "icon.png")
         
-        # Generate HTML5 game
-        html_content = self._generate_html5_game(game_data, visual_theme, game_mode, game_style)
-        (project_dir / "index.html").write_text(html_content)
+        # HTML5
+        html = generate_html5(game, theme, style)
+        (folder / "index.html").write_text(html)
         
-        # Create license file
-        (project_dir / "LICENSE.txt").write_text(f"""
-╔══════════════════════════════════════════════════════════╗
-║              DEATHROLL STUDIO - GAME LICENSE             ║
-╠══════════════════════════════════════════════════════════╣
-║  Game: {game_data['name']:<47} ║
-║  License Key: {license_key:<44} ║
-║  Price: {game_data.get('price', 7)} SOL{' ' * 44}║
-║  Date: {datetime.now().strftime('%Y-%m-%d'):<44} ║
-╠══════════════════════════════════════════════════════════╣
-║  ✓ Personal, non-commercial use                          ║
-║  ✓ Access to all future updates                          ║
-║  ✓ Play on any device you own                           ║
-╠══════════════════════════════════════════════════════════╣
-║  Support: @deathroll1                                    ║
-║  Website: deathroll.co                                   ║
-╚══════════════════════════════════════════════════════════╝
+        # License
+        (folder / "LICENSE.txt").write_text(f"""
+DEATHROLL STUDIO LICENSE
+Game: {game['name']}
+License: {license_key}
+Price: {game['price']} SOL
+Date: {datetime.now().strftime('%Y-%m-%d')}
 """)
         
-        # Create README
-        (project_dir / "README.md").write_text(f"""
-# {game_data['name']}
-
-## Description
-{game_data['description']}
-
-## Genre
-{game_data['genre']}
-
-## Key Mechanic
-**{game_data['mechanic']}**: {game_data['mechanic_description']}
-
-## How to Play
-- **HTML5**: Open `index.html` in any browser
-- **Controls**: WASD or Arrow Keys to move, SPACE for {game_data['mechanic']}
-
-## License
-{license_key}
-
-## Price
-{game_data.get('price', 7)} SOL
-
----
-Generated by DeathRoll Studio v{BOT_VERSION}
-""")
-        
-        # Create ZIP
+        # ZIP
         zip_path = Path("workspace/latest_game.zip")
         try:
             if zip_path.exists():
                 zip_path.unlink()
-            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                for file in project_dir.rglob("*"):
-                    if file.is_file():
-                        zipf.write(file, file.relative_to(project_dir.parent))
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as z:
+                for f in folder.rglob("*"):
+                    if f.is_file():
+                        z.write(f, f.relative_to(folder.parent))
         except:
             pass
         
-        return f"https://{CONFIG['brand']['github']}.github.io/FACTORY-BOT-V4/workspace/{game_data['name'].replace(' ', '_')}/index.html"
+        return f"https://{CONFIG['brand']['github']}.github.io/FACTORY-BOT-V4/workspace/{game['name'].replace(' ', '_')}/index.html"
     
-    def _generate_html5_game(self, game_data: Dict, visual_theme: Dict, game_mode: Dict, game_style: Dict) -> str:
-        """Generate clean HTML5 game with proper variable handling"""
-        
-        theme = visual_theme
-        mode = game_mode
-        style = game_style
-        theme_primary = theme["primary"]
-        theme_secondary = theme["secondary"]
-        theme_accent = theme["accent"]
-        theme_glow = "true" if theme["glow"] else "false"
-        theme_bg0 = theme["bg"][0]
-        theme_bg1 = theme["bg"][1]
-        
-        player_health = style["player_health"]
-        enemy_speed = style["enemy_speed"]
-        spawn_rate = style["spawn_rate"]
-        game_style_id = style.get("id", "survival")
-        
-        mode_name = mode["name"]
-        time_limit = 60 if mode_name == "Time Attack" else 0
-        
-        game_name = game_data["name"]
-        game_genre = game_data["genre"]
-        game_mechanic = game_data["mechanic"]
-        game_hook = game_data.get("hook", "Master the unknown.")
-        
-        return f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{game_name} - DeathRoll Studio</title>
-    <style>
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{
-            background: linear-gradient(135deg, {theme_bg0}, {theme_bg1});
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }}
-        .game-wrapper {{ text-align: center; padding: 15px; }}
-        .game-title {{
-            font-size: 2rem;
-            color: {theme_primary};
-            text-shadow: {'0 0 20px ' + theme_primary if theme['glow'] else 'none'};
-            font-weight: bold;
-        }}
-        .game-genre {{ color: {theme_secondary}; font-size: 0.9rem; }}
-        .game-mechanic {{ color: {theme_accent}; font-size: 0.85rem; margin-top: 5px; }}
-        canvas {{
-            border: 3px solid {theme_primary};
-            border-radius: 15px;
-            box-shadow: {'0 0 40px ' + theme_primary if theme['glow'] else '0 0 20px rgba(0,0,0,0.5)'};
-            max-width: 100%;
-            background: {theme_bg0};
-            display: block;
-            margin: 0 auto;
-        }}
-        .controls {{ margin-top: 15px; color: #aaa; font-size: 0.8rem; }}
-        .controls span {{
-            display: inline-block;
-            background: rgba(255,255,255,0.1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            margin: 0 3px;
-        }}
-        @media (max-width: 768px) {{
-            .game-title {{ font-size: 1.3rem; }}
-            canvas {{ width: 100%; height: auto; }}
-        }}
-    </style>
-</head>
-<body>
-    <div class="game-wrapper">
-        <div class="game-title">{game_name}</div>
-        <div class="game-genre">{game_genre}</div>
-        <div class="game-mechanic">⚡ {game_mechanic}</div>
-        <canvas id="gameCanvas" width="900" height="600"></canvas>
-        <div class="controls">
-            <span>WASD</span> or <span>← → ↑ ↓</span> move &nbsp;|&nbsp; <span>SPACE</span> {game_mechanic}
-        </div>
-    </div>
+    def _send_telegram(self, game: Dict, license_key: str, html5_url: str):
+        post = f"""
+🎮 *{game['name']}*
+Genre: {game['genre']}
+Mechanic: `{game['mechanic']}`
+{game['description']}
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+🔑 License: `{license_key}`
+💰 Price: ${game['price']} SOL
+
+🌐 Play: {html5_url}
+
+🔵 Trust: `{CONFIG['wallets']['trust']}`
+🟣 Phantom: `{CONFIG['wallets']['phantom']}`
+
+Send ${game['price']} SOL + @username → receive full game
+"""
+        channel = CONFIG["telegram"]["channel"]
+        sprite = Path("sprite.png")
         
-        // Theme colors
-        const COLORS = {{
-            primary: '{theme_primary}',
-            secondary: '{theme_secondary}',
-            accent: '{theme_accent}',
-            glow: {theme_glow}
-        }};
+        # Send to channel
+        if channel:
+            print(f"   📢 To channel: {channel}")
+            if sprite.exists():
+                self.telegram.send_photo(channel, sprite, post)
+            else:
+                self.telegram.send(channel, post)
         
-        // Game state
-        const state = {{
-            player: {{ x: 450, y: 300, size: 25, health: {player_health}, maxHealth: {player_health} }},
-            enemies: [],
-            particles: [],
-            bullets: [],
-            score: 0,
-            combo: 0,
-            wave: 1,
-            gameOver: false,
-            started: false,
-            mechanicCooldown: 0,
-            maxCooldown: 90
-        }};
-        
-        let keys = {{}};
-        
-        function spawnEnemy() {{
-            const x = Math.random() * 880 + 10;
-            const y = Math.random() * 580 + 10;
-            state.enemies.push({{
-                x: x, y: y,
-                size: 25,
-                hp: 3,
-                maxHp: 3,
-                speed: {enemy_speed} * (1 + state.wave * 0.1)
-            }});
-        }}
-        
-        function useMechanic() {{
-            if (state.mechanicCooldown > 0) return;
-            state.mechanicCooldown = state.maxCooldown;
+        # Send to admin DM
+        if TELEGRAM_CHAT_ID:
+            print(f"   📨 To admin DM: {TELEGRAM_CHAT_ID}")
+            if sprite.exists():
+                self.telegram.send_photo(TELEGRAM_CHAT_ID, sprite, post)
+            else:
+                self.telegram.send(TELEGRAM_CHAT_ID, post)
             
-            state.enemies.forEach(e => {{
-                const dx = e.x - state.player.x;
-                const dy = e.y - state.player.y;
-                const dist = Math.hypot(dx, dy);
-                if(dist < 150) {{
-                    const angle = Math.atan2(dy, dx);
-                    e.x += Math.cos(angle) * 80;
-                    e.y += Math.sin(angle) * 80;
-                    e.hp -= 2;
-                }}
-            }});
-            addParticles(state.player.x, state.player.y, COLORS.primary, 20);
-        }}
-        
-        function addParticles(x, y, color, count) {{
-            for(let i = 0; i < count; i++) {{
-                state.particles.push({{
-                    x: x + (Math.random() - 0.5) * 20,
-                    y: y + (Math.random() - 0.5) * 20,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.5) * 6,
-                    life: 30 + Math.random() * 20,
-                    maxLife: 50,
-                    color: color,
-                    size: 3 + Math.random() * 4
-                }});
-            }}
-        }}
-        
-        function update() {{
-            if (state.gameOver || !state.started) return;
-            
-            // Player movement
-            let dx = 0, dy = 0, speed = 4.5;
-            if(keys['w'] || keys['ArrowUp']) dy = -speed;
-            if(keys['s'] || keys['ArrowDown']) dy = speed;
-            if(keys['a'] || keys['ArrowLeft']) dx = -speed;
-            if(keys['d'] || keys['ArrowRight']) dx = speed;
-            if(dx && dy) {{ dx *= 0.707; dy *= 0.707; }}
-            state.player.x = Math.max(20, Math.min(880, state.player.x + dx));
-            state.player.y = Math.max(20, Math.min(580, state.player.y + dy));
-            
-            // Cooldowns
-            if(state.mechanicCooldown > 0) state.mechanicCooldown--;
-            
-            // Spawn enemies
-            if(Math.random() < 0.02 * {spawn_rate}) spawnEnemy();
-            
-            // Update enemies
-            for(let i = 0; i < state.enemies.length; i++) {{
-                const e = state.enemies[i];
-                const dx2 = state.player.x - e.x;
-                const dy2 = state.player.y - e.y;
-                const dist = Math.hypot(dx2, dy2);
-                if(dist > 0) {{
-                    e.x += (dx2 / dist) * e.speed;
-                    e.y += (dy2 / dist) * e.speed;
-                }}
-                e.x = Math.max(10, Math.min(890, e.x));
-                e.y = Math.max(10, Math.min(590, e.y));
-                
-                // Collision
-                const cd = Math.hypot(state.player.x - e.x, state.player.y - e.y);
-                if(cd < state.player.size/2 + e.size/2) {{
-                    state.player.health -= 10;
-                    state.combo = 0;
-                    if(state.player.health <= 0) {{
-                        state.player.health = 0;
-                        state.gameOver = true;
-                        return;
-                    }}
-                }}
-                
-                // Enemy death
-                if(e.hp <= 0) {{
-                    state.score += 10 * (1 + Math.floor(state.combo / 10));
-                    state.combo++;
-                    addParticles(e.x, e.y, COLORS.secondary, 15);
-                    state.enemies.splice(i,1);
-                    i--;
-                }}
-            }}
-            
-            // Update particles
-            for(let i = 0; i < state.particles.length; i++) {{
-                const p = state.particles[i];
-                p.x += p.vx; p.y += p.vy;
-                p.vx *= 0.98; p.vy *= 0.98;
-                p.life--;
-                if(p.life <= 0) {{
-                    state.particles.splice(i,1);
-                    i--;
-                }}
-            }}
-        }}
-        
-        function draw() {{
-            // Background
-            const grad = ctx.createRadialGradient(450, 300, 100, 450, 300, 500);
-            grad.addColorStop(0, '{theme_bg1}');
-            grad.addColorStop(1, '{theme_bg0}');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, 900, 600);
-            
-            // Grid
-            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-            ctx.lineWidth = 1;
-            for(let i = 0; i < 900; i += 50) {{
-                ctx.beginPath();
-                ctx.moveTo(i, 0); ctx.lineTo(i, 600);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(0, i); ctx.lineTo(900, i);
-                ctx.stroke();
-            }}
-            
-            // Draw enemies
-            state.enemies.forEach(e => {{
-                const grad2 = ctx.createRadialGradient(e.x-5, e.y-5, 5, e.x, e.y, e.size);
-                grad2.addColorStop(0, COLORS.secondary);
-                grad2.addColorStop(1, '#cc4444');
-                ctx.fillStyle = grad2;
-                ctx.shadowColor = COLORS.secondary;
-                ctx.shadowBlur = 10;
-                ctx.beginPath();
-                ctx.arc(e.x, e.y, e.size/2, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                
-                // Health bar
-                const hpWidth = e.size;
-                ctx.fillStyle = '#444';
-                ctx.fillRect(e.x - hpWidth/2, e.y - e.size/2 - 10, hpWidth, 4);
-                ctx.fillStyle = '#4ecdc4';
-                ctx.fillRect(e.x - hpWidth/2, e.y - e.size/2 - 10, hpWidth * (e.hp/e.maxHp), 4);
-                
-                ctx.fillStyle = '#fff';
-                ctx.font = '18px monospace';
-                ctx.fillText('👾', e.x-12, e.y-8);
-            }});
-            
-            // Draw player
-            const grad3 = ctx.createRadialGradient(state.player.x-8, state.player.y-8, 5, state.player.x, state.player.y, state.player.size);
-            grad3.addColorStop(0, COLORS.primary);
-            grad3.addColorStop(1, '#2a7d8f');
-            ctx.fillStyle = grad3;
-            ctx.shadowColor = COLORS.primary;
-            ctx.shadowBlur = 20;
-            ctx.beginPath();
-            ctx.arc(state.player.x, state.player.y, state.player.size/2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#fff';
-            ctx.font = '24px monospace';
-            ctx.fillText('🎮', state.player.x-15, state.player.y-12);
-            
-            // Particles
-            state.particles.forEach(p => {{
-                const alpha = p.life / p.maxLife;
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = p.color;
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.globalAlpha = 1;
-            }});
-            
-            // UI
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 22px monospace';
-            ctx.fillText('SCORE: ' + state.score, 20, 45);
-            
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(20, 65, 200, 14);
-            ctx.fillStyle = COLORS.primary;
-            ctx.fillRect(20, 65, (state.player.health / state.player.maxHealth) * 200, 14);
-            
-            if(state.combo > 0) {{
-                ctx.fillStyle = COLORS.accent;
-                ctx.font = 'bold 18px monospace';
-                ctx.fillText('⚡ ' + state.combo + 'x COMBO!', 20, 120);
-            }}
-            
-            if(state.mechanicCooldown > 0) {{
-                ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                ctx.fillRect(20, 150, state.mechanicCooldown * 2, 6);
-            }}
-            ctx.fillStyle = '#888';
-            ctx.font = '12px monospace';
-            ctx.fillText('⚡ {game_mechanic} (SPACE)', 20, 165);
-            
-            // Game Over
-            if(state.gameOver) {{
-                ctx.fillStyle = 'rgba(0,0,0,0.7)';
-                ctx.fillRect(0, 0, 900, 600);
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 48px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText('GAME OVER', 450, 250);
-                ctx.font = '24px monospace';
-                ctx.fillStyle = COLORS.accent;
-                ctx.fillText('Score: ' + state.score, 450, 320);
-                ctx.font = '16px monospace';
-                ctx.fillStyle = '#aaa';
-                ctx.fillText('Press R to restart', 450, 370);
-                ctx.textAlign = 'left';
-            }}
-            
-            // Start
-            if(!state.started && !state.gameOver) {{
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(0, 0, 900, 600);
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 36px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText('🎮 {game_name}', 450, 230);
-                ctx.font = '18px monospace';
-                ctx.fillStyle = COLORS.primary;
-                ctx.fillText('Press SPACE to start', 450, 320);
-                ctx.textAlign = 'left';
-            }}
-        }}
-        
-        function gameLoop() {{
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }}
-        
-        // Controls
-        document.addEventListener('keydown', function(e) {{
-            const key = e.key.toLowerCase();
-            keys[key] = true;
-            if(e.key === ' ') {{
-                e.preventDefault();
-                if(!state.started) {{
-                    state.started = true;
-                    for(let i = 0; i < 5; i++) spawnEnemy();
-                }} else {{
-                    useMechanic();
-                }}
-            }}
-            if((e.key === 'r' || e.key === 'R') && state.gameOver) {{
-                state.player = {{ x: 450, y: 300, size: 25, health: {player_health}, maxHealth: {player_health} }};
-                state.enemies = [];
-                state.particles = [];
-                state.bullets = [];
-                state.score = 0;
-                state.combo = 0;
-                state.wave = 1;
-                state.gameOver = false;
-                state.mechanicCooldown = 0;
-                for(let i = 0; i < 5; i++) spawnEnemy();
-            }}
-        }});
-        document.addEventListener('keyup', function(e) {{
-            keys[e.key.toLowerCase()] = false;
-        }});
-        
-        gameLoop();
-    </script>
-</body>
-</html>'''
+            # Send ZIP
+            zip_path = Path("workspace/latest_game.zip")
+            if zip_path.exists():
+                self.telegram.send_document(
+                    TELEGRAM_CHAT_ID,
+                    zip_path,
+                    f"🎮 {game['name']}\n🔑 {license_key}"
+                )
     
-    def _create_portfolio_entry(self, game_data: Dict, license_key: str, art_url: Optional[str], html5_url: str) -> Dict:
-        """Create portfolio entry"""
-        return {
-            "date": datetime.now().isoformat(),
-            "game": game_data["name"],
-            "genre": game_data["genre"],
-            "mechanic": game_data["mechanic"],
-            "mechanic_description": game_data.get("mechanic_description", ""),
-            "description": game_data.get("description", ""),
-            "hook": game_data.get("hook", ""),
-            "visual_style": game_data.get("visual_style", "neon"),
-            "game_mode": game_data.get("game_mode", "endless"),
-            "difficulty": game_data.get("difficulty", "medium"),
-            "price": game_data.get("price", 7),
-            "license_key": license_key,
-            "image_url": art_url or "",
-            "html5_url": html5_url,
-            "version": self.version,
-            "status": "complete"
-        }
-    
-    def _update_sar(self, game_data: Dict):
-        """Update SAR learning system"""
-        sar_path = Path("sar_analysis.json")
-        
-        if sar_path.exists():
+    def _update_sar(self, game: Dict):
+        path = Path("sar_analysis.json")
+        if path.exists():
             try:
-                sar_data = json.loads(sar_path.read_text())
+                data = json.loads(path.read_text())
             except:
-                sar_data = {"study": {"games": []}, "analysis": {}}
+                data = {"study": {"games": []}, "analysis": {}}
         else:
-            sar_data = {"study": {"games": []}, "analysis": {}}
+            data = {"study": {"games": []}, "analysis": {}}
         
-        # Add game
-        if "study" not in sar_data:
-            sar_data["study"] = {"games": []}
-        if "games" not in sar_data["study"]:
-            sar_data["study"]["games"] = []
-        
-        sar_data["study"]["games"].append({
-            "name": game_data["name"],
-            "genre": game_data["genre"],
-            "mechanic": game_data["mechanic"],
-            "visual_style": game_data.get("visual_style"),
-            "game_mode": game_data.get("game_mode"),
+        data["study"]["games"].append({
+            "name": game["name"],
+            "genre": game["genre"],
+            "mechanic": game["mechanic"],
             "timestamp": datetime.now().isoformat(),
-            "price": game_data.get("price", 7)
+            "price": game["price"]
         })
+        data["study"]["games"] = data["study"]["games"][-100:]
         
-        # Keep last 100
-        sar_data["study"]["games"] = sar_data["study"]["games"][-100:]
-        
-        # Update best genre
         genre_counts = {}
-        for g in sar_data["study"]["games"]:
+        for g in data["study"]["games"]:
             genre = g.get("genre")
             if genre:
                 genre_counts[genre] = genre_counts.get(genre, 0) + 1
-        
         if genre_counts:
-            sar_data["analysis"]["best_genre"] = max(genre_counts, key=genre_counts.get)
+            data["analysis"]["best_genre"] = max(genre_counts, key=genre_counts.get)
         
-        # Update average price
-        total_price = sum(g.get("price", 0) for g in sar_data["study"]["games"])
-        if sar_data["study"]["games"]:
-            sar_data["analysis"]["avg_price"] = total_price / len(sar_data["study"]["games"])
-        
-        sar_path.write_text(json.dumps(sar_data, indent=2))
-
+        path.write_text(json.dumps(data, indent=2))
 
 # ============================================================================
-# MAIN EXECUTION
+# MAIN
 # ============================================================================
 
 if __name__ == "__main__":
