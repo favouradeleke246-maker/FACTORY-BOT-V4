@@ -348,6 +348,13 @@
         "mechanic": "Chrono Fracture",
         "timestamp": "2026-06-19T10:32:39.558075",
         "price": 4
+      },
+      {
+        "name": "Quantum Vector",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "timestamp": "2026-06-19T10:35:39.869779",
+        "price": 5
       }
     ],
     "successful_art": 25,

@@ -478,5 +478,19 @@
     "license_key": "DR-QB-20260619-071B7BAE",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
     "version": "34.0.0"
+  },
+  {
+    "date": "2026-06-19T10:35:38.333216",
+    "game": "Quantum Vector",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Quantum Vector, a survival horror where Void Step changes everything. teleport. Can you survive the challenge?",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "pixel",
+    "game_mode": "time_attack",
+    "price": 5,
+    "license_key": "DR-QV-20260619-74C31D19",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
+    "version": "34.0.0"
   }
 ]
