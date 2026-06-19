@@ -334,6 +334,13 @@
         "mechanic": "Chrono Fracture",
         "timestamp": "2026-06-19T10:15:29.420547",
         "price": 4
+      },
+      {
+        "name": "Neon Runner",
+        "genre": "tower defense",
+        "mechanic": "Void Step",
+        "timestamp": "2026-06-19T10:24:26.035219",
+        "price": 5
       }
     ],
     "successful_art": 25,
