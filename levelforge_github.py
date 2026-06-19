@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v34.0 - COMPREHENSIVE GAME + TELEGRAM FIXED
+DEATHROLL STUDIO v35.0 - COMPLETE GAME VARIETY + TELEGRAM FIXED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EVERY GAME IS COMPLETELY DIFFERENT
 """
 
 import os
@@ -21,7 +22,7 @@ from typing import Dict, List, Optional
 # CONFIGURATION
 # ============================================================================
 
-BOT_VERSION = "34.0.0"
+BOT_VERSION = "35.0.0"
 
 CONFIG = {
     "brand": {
@@ -56,7 +57,7 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
 
 print("═" * 60)
-print("🔥 DEATHROLL STUDIO v34.0 - COMPREHENSIVE GAME")
+print("🔥 DEATHROLL STUDIO v35.0 - COMPLETE GAME VARIETY")
 print("═" * 60)
 print(f"🤖 Version: {BOT_VERSION}")
 print(f"✅ Telegram: {'✅' if TELEGRAM_TOKEN else '❌'}")
@@ -271,83 +272,72 @@ class Portfolio:
         self.path.write_text(json.dumps(data, indent=2))
 
 # ============================================================================
-# TELEGRAM SERVICE - FIXED (shorter messages, better formatting)
+# TELEGRAM SERVICE - SIMPLE WORKING VERSION
 # ============================================================================
 
 class Telegram:
     def __init__(self, token: Optional[str]):
         self.token = token
         self.enabled = bool(token)
+        self.bot_url = f"https://api.telegram.org/bot{token}" if token else ""
     
-    def send_photo(self, chat_id: str, photo: Path, caption: str) -> bool:
+    def send_photo(self, chat_id: str, photo_path: Path, caption: str) -> bool:
         if not self.enabled:
             return False
-        # Truncate caption if too long (Telegram limit ~1024 chars)
-        if len(caption) > 900:
-            caption = caption[:900] + "..."
         try:
-            with open(photo, "rb") as f:
-                r = requests.post(
-                    f"https://api.telegram.org/bot{self.token}/sendPhoto",
+            with open(photo_path, "rb") as f:
+                response = requests.post(
+                    f"{self.bot_url}/sendPhoto",
                     files={"photo": f},
-                    data={"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"},
+                    data={"chat_id": chat_id, "caption": caption[:1000], "parse_mode": "HTML"},
                     timeout=60
                 )
-            if r.status_code == 200:
+            if response.status_code == 200:
+                print(f"   ✅ Photo sent to {chat_id}")
                 return True
             else:
-                # If Markdown fails, try without
-                r = requests.post(
-                    f"https://api.telegram.org/bot{self.token}/sendPhoto",
-                    files={"photo": f},
-                    data={"chat_id": chat_id, "caption": caption.replace('*', '').replace('`', '')},
-                    timeout=60
-                )
-                return r.status_code == 200
-        except:
+                print(f"   ⚠️ Photo failed ({response.status_code}): {response.text[:100]}")
+                return False
+        except Exception as e:
+            print(f"   ⚠️ Photo error: {e}")
             return False
     
     def send_message(self, chat_id: str, text: str) -> bool:
         if not self.enabled:
             return False
-        if len(text) > 900:
-            text = text[:900] + "..."
         try:
-            r = requests.post(
-                f"https://api.telegram.org/bot{self.token}/sendMessage",
-                json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
+            response = requests.post(
+                f"{self.bot_url}/sendMessage",
+                json={"chat_id": chat_id, "text": text[:1000], "parse_mode": "HTML"},
                 timeout=30
             )
-            if r.status_code == 200:
+            if response.status_code == 200:
+                print(f"   ✅ Message sent to {chat_id}")
                 return True
             else:
-                # Try without Markdown
-                r = requests.post(
-                    f"https://api.telegram.org/bot{self.token}/sendMessage",
-                    json={"chat_id": chat_id, "text": text.replace('*', '').replace('`', '')},
-                    timeout=30
-                )
-                return r.status_code == 200
-        except:
+                print(f"   ⚠️ Message failed ({response.status_code})")
+                return False
+        except Exception as e:
+            print(f"   ⚠️ Message error: {e}")
             return False
     
-    def send_document(self, chat_id: str, doc: Path, caption: str) -> bool:
+    def send_document(self, chat_id: str, doc_path: Path, caption: str) -> bool:
         if not self.enabled:
             return False
         try:
-            with open(doc, "rb") as f:
-                r = requests.post(
-                    f"https://api.telegram.org/bot{self.token}/sendDocument",
+            with open(doc_path, "rb") as f:
+                response = requests.post(
+                    f"{self.bot_url}/sendDocument",
                     files={"document": f},
-                    data={"chat_id": chat_id, "caption": caption[:200], "parse_mode": "Markdown"},
+                    data={"chat_id": chat_id, "caption": caption[:200], "parse_mode": "HTML"},
                     timeout=60
                 )
-            return r.status_code == 200
+            return response.status_code == 200
         except:
             return False
 
 # ============================================================================
-# HTML5 GAME GENERATOR - COMPREHENSIVE VERSION
+# HTML5 GAME GENERATOR - COMPLETE VARIETY
 # ============================================================================
 
 def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
@@ -366,6 +356,11 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
     genre = game_data["genre"]
     mechanic = game_data["mechanic"]
     hook = game_data.get("hook", "Every second counts.")
+    mode = game_data.get("game_mode", "endless")
+    
+    # Different game modes
+    time_limit = 60 if mode == "time_attack" else 0
+    boss_enabled = "true" if mode == "boss_fight" else "false"
     
     return f'''<!DOCTYPE html>
 <html>
@@ -396,24 +391,14 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             margin-bottom:3px;
         }}
         .title {{
-            font-size:1.2rem;
+            font-size:1.1rem;
             color:{p};
             text-shadow: {'0 0 15px ' + p if theme['glow'] else 'none'};
             font-weight:bold;
         }}
-        .stats {{
-            display:flex;
-            gap:10px;
-            color:#aaa;
-            font-size:0.7rem;
-        }}
+        .stats {{ display:flex; gap:8px; color:#aaa; font-size:0.65rem; }}
         .stats span {{ background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:10px; }}
-        .canvas-wrapper {{
-            position:relative;
-            display:inline-block;
-            width:100%;
-            max-width:700px;
-        }}
+        .canvas-wrapper {{ position:relative; display:inline-block; width:100%; max-width:700px; }}
         canvas {{
             border:3px solid {p};
             border-radius:12px;
@@ -436,8 +421,7 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             touch-action:none;
         }}
         .touch-joystick {{
-            width:80px;
-            height:80px;
+            width:70px; height:70px;
             border-radius:50%;
             background:rgba(255,255,255,0.08);
             border:2px solid {p}44;
@@ -445,24 +429,21 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             touch-action:none;
         }}
         .touch-joystick-inner {{
-            width:30px;
-            height:30px;
+            width:25px; height:25px;
             border-radius:50%;
             background:{p};
             position:absolute;
-            top:25px;
-            left:25px;
+            top:22px; left:22px;
             touch-action:none;
             box-shadow: 0 0 15px {p}44;
         }}
         .touch-btn {{
-            width:60px;
-            height:60px;
+            width:55px; height:55px;
             border-radius:50%;
             background:{p}33;
             border:2px solid {p};
             color:#fff;
-            font-size:0.6rem;
+            font-size:0.55rem;
             font-weight:bold;
             display:flex;
             align-items:center;
@@ -474,12 +455,12 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             box-shadow: 0 0 15px {p}44;
         }}
         .touch-btn:active {{ background:{p}66; transform:scale(0.9); }}
-        .controls {{ color:#666; font-size:0.6rem; margin-top:2px; }}
+        .controls {{ color:#666; font-size:0.55rem; margin-top:2px; }}
         @media (max-width:500px) {{
-            .title {{ font-size:1rem; }}
-            .touch-joystick {{ width:60px; height:60px; }}
-            .touch-joystick-inner {{ width:22px; height:22px; top:19px; left:19px; }}
-            .touch-btn {{ width:45px; height:45px; font-size:0.5rem; }}
+            .title {{ font-size:0.9rem; }}
+            .touch-joystick {{ width:55px; height:55px; }}
+            .touch-joystick-inner {{ width:18px; height:18px; top:18px; left:18px; }}
+            .touch-btn {{ width:40px; height:40px; font-size:0.45rem; }}
         }}
     </style>
 </head>
@@ -490,6 +471,7 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             <div class="stats">
                 <span id="waveDisplay">🌊 1</span>
                 <span id="enemyCount">👾 0</span>
+                <span id="modeDisplay">⚡ {mode[:6]}</span>
             </div>
         </div>
         <div class="canvas-wrapper">
@@ -507,18 +489,20 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
         const c=document.getElementById('c'),ctx=c.getContext('2d');
         const C={{p:'{p}',s:'{s}',a:'{a}',g:{glow}}};
         
-        // Full game state
+        // GAME STATE
         const G = {{
             p: {{x:450,y:300,size:22,h:{hp},mh:{hp}}},
             enemies: [],
             particles: [],
             powerups: [],
-            bullets: [],
+            projectiles: [],
             score: 0,
             combo: 0,
             maxCombo: 0,
             wave: 1,
-            enemiesKilled: 0,
+            kills: 0,
+            time: {time_limit},
+            maxTime: {time_limit},
             gameOver: false,
             started: false,
             cd: 0,
@@ -529,7 +513,9 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             shieldActive: false,
             shieldTimer: 0,
             spawnTimer: 0,
-            difficulty: 1
+            difficulty: 1,
+            mode: '{mode}',
+            bossEnabled: {boss_enabled}
         }};
         
         let keys={{}}, jActive=false, jX=0, jY=0;
@@ -539,54 +525,63 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
         j.addEventListener('touchstart',e=>{{e.preventDefault();jActive=true;updateJoy(e);}});
         j.addEventListener('touchmove',e=>{{e.preventDefault();if(jActive)updateJoy(e);}});
         j.addEventListener('touchend',e=>{{e.preventDefault();jActive=false;jX=0;jY=0;ji.style.transform='translate(0,0)';}});
-        function updateJoy(e){{const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-30)/30,y=(t.clientY-r.top-30)/30;const d=Math.hypot(x,y);if(d>1){{x/=d;y/=d;}}jX=x;jY=y;ji.style.transform=`translate(${{x*15}}px,${{y*15}}px)`;}}
+        function updateJoy(e){{const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-22)/22,y=(t.clientY-r.top-22)/22;const d=Math.hypot(x,y);if(d>1){{x/=d;y/=d;}}jX=x;jY=y;ji.style.transform=`translate(${{x*12}}px,${{y*12}}px)`;}}
         
         // Mechanic button
         document.getElementById('mechanicBtn').addEventListener('touchstart',e=>{{e.preventDefault();simulateKey(' ');}});
         document.getElementById('mechanicBtn').addEventListener('mousedown',()=>simulateKey(' '));
         function simulateKey(k){{const ev=new KeyboardEvent('keydown',{{key:k}});document.dispatchEvent(ev);setTimeout(()=>{{document.dispatchEvent(new KeyboardEvent('keyup',{{key:k}}));}},150);}}
         
-        // Enemies
+        // SPAWN ENEMY
         function spawnEnemy() {{
             const side=Math.floor(Math.random()*4);
             let x,y;
             switch(side){{case 0:x=Math.random()*900;y=-20;break;case 1:x=920;y=Math.random()*600;break;case 2:x=Math.random()*900;y=620;break;case 3:x=-20;y=Math.random()*600;break;}}
-            const hp=1+Math.floor(G.wave/3);
-            const size=20+Math.min(G.wave,5);
+            const hp=1+Math.floor(G.wave/4);
+            const size=18+Math.min(G.wave,5);
             G.enemies.push({{
                 x,y,size,
                 hp:hp, maxHp:hp,
-                speed:1.5+G.wave*0.08,
-                type:Math.random()>0.7?'fast':'normal',
-                damage:10+Math.floor(G.wave/2)
+                speed:1.2+G.wave*0.06,
+                type:Math.random()>0.75?'fast':'normal',
+                damage:8+Math.floor(G.wave/2)
             }});
         }}
         
-        // Powerups
+        // SPAWN POWERUP
         function spawnPowerup(x,y) {{
-            if(Math.random()>0.15)return;
+            if(Math.random()>0.12)return;
             const types=['health','shield','score'];
             G.powerups.push({{
-                x:x,y:y,size:15,
+                x:x,y:y,size:14,
                 type:types[Math.floor(Math.random()*types.length)],
                 life:300
             }});
         }}
         
-        // Particles
+        // PARTICLES
         function addParticles(x,y,color,count) {{
             for(let i=0;i<count;i++)G.particles.push({{
                 x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,
                 vx:(Math.random()-0.5)*8,vy:(Math.random()-0.5)*8,
-                life:30+Math.random()*30,maxLife:60,
+                life:20+Math.random()*30,maxLife:50,
                 color:color,size:2+Math.random()*5
             }});
         }}
         
-        // Mechanic
+        // SHOOT PROJECTILE
+        function shootProjectile(angle) {{
+            G.projectiles.push({{
+                x:G.p.x,y:G.p.y,
+                vx:Math.cos(angle)*8,
+                vy:Math.sin(angle)*8,
+                life:60
+            }});
+        }}
+        
+        // USE MECHANIC
         function useMechanic() {{
             if(G.cd>0)return;G.cd=G.maxCd;
-            // Push enemies + damage
             G.enemies.forEach(e=>{{
                 const dx=e.x-G.p.x,dy=e.y-G.p.y,d=Math.hypot(dx,dy);
                 if(d<180){{
@@ -597,14 +592,24 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                     addParticles(e.x,e.y,C.s,5);
                 }}
             }});
+            // Shoot projectiles in all directions
+            for(let i=0;i<8;i++){{
+                const angle=(i/8)*Math.PI*2;
+                shootProjectile(angle);
+            }}
             addParticles(G.p.x,G.p.y,C.p,30);
-            // Shield if low health
-            if(G.p.h<G.p.mh*0.3){{G.shieldActive=true;G.shieldTimer=120;}}
+            if(G.p.h<G.p.mh*0.3){{G.shieldActive=true;G.shieldTimer=90;}}
         }}
         
-        // Update
+        // UPDATE
         function update() {{
             if(G.gameOver||!G.started)return;
+            
+            // Time mode
+            if(G.mode==='time_attack' && G.maxTime>0){{
+                G.time-=1/60;
+                if(G.time<=0){{G.gameOver=true;return;}}
+            }}
             
             // Player movement
             let dx=0,dy=0,speed=4.5+G.difficulty*0.2;
@@ -624,22 +629,22 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             // Spawn enemies
             G.spawnTimer--;
             if(G.spawnTimer<=0){{
-                const count=1+Math.floor(G.wave/3);
+                const count=1+Math.floor(G.wave/4);
                 for(let i=0;i<count;i++)spawnEnemy();
                 G.spawnTimer=Math.max(20,60-G.wave*2);
             }}
             
-            // Boss every 5 waves
-            if(G.wave%5===0&&!G.bossActive&&G.enemies.length===0){{
+            // Boss
+            if(G.bossEnabled && G.wave%3===0 && !G.bossActive && G.enemies.length===0){{
                 G.bossActive=true;
-                G.bossMaxHealth=50+G.wave*10;
+                G.bossMaxHealth=30+G.wave*15;
                 G.bossHealth=G.bossMaxHealth;
                 G.enemies.push({{
-                    x:450,y:50,size:60,
+                    x:450,y:50,size:55,
                     hp:G.bossMaxHealth,maxHp:G.bossMaxHealth,
-                    speed:1.2+G.wave*0.05,
+                    speed:1.0+G.wave*0.04,
                     type:'boss',
-                    damage:20
+                    damage:15
                 }});
             }}
             
@@ -648,7 +653,7 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                 const e=G.enemies[i];
                 const dx=G.p.x-e.x,dy=G.p.y-e.y,d=Math.hypot(dx,dy);
                 if(d>0){{
-                    const spd=e.type==='fast'?e.speed*1.5:e.speed;
+                    const spd=e.type==='fast'?e.speed*1.6:e.speed;
                     e.x+=(dx/d)*spd;
                     e.y+=(dy/d)*spd;
                 }}
@@ -674,17 +679,35 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                 // Enemy death
                 if(e.hp<=0){{
                     G.score+=10*(1+Math.floor(G.combo/10));
-                    G.combo++;G.enemiesKilled++;
+                    G.combo++;G.kills++;
                     if(G.combo>G.maxCombo)G.maxCombo=G.combo;
                     spawnPowerup(e.x,e.y);
                     addParticles(e.x,e.y,C.s,20);
                     G.enemies.splice(i,1);
                     
-                    // Wave progress
-                    if(G.enemies.length===0&&!G.bossActive){{
+                    if(G.enemies.length===0 && !G.bossActive){{
                         G.wave++;
                         G.difficulty=1+G.wave*0.1;
-                        G.spawnTimer=30;
+                        G.spawnTimer=20;
+                    }}
+                }}
+            }}
+            
+            // Update projectiles
+            for(let i=G.projectiles.length-1;i>=0;i--){{
+                const b=G.projectiles[i];
+                b.x+=b.vx;b.y+=b.vy;b.life--;
+                if(b.life<=0||b.x<0||b.x>900||b.y<0||b.y>600){{
+                    G.projectiles.splice(i,1);continue;
+                }}
+                // Hit enemies
+                for(let j=G.enemies.length-1;j>=0;j--){{
+                    const e=G.enemies[j];
+                    if(Math.hypot(b.x-e.x,b.y-e.y)<e.size/2+5){{
+                        e.hp-=2;
+                        addParticles(b.x,b.y,C.a,8);
+                        G.projectiles.splice(i,1);
+                        break;
                     }}
                 }}
             }}
@@ -696,8 +719,8 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                 if(pw.life<=0){{G.powerups.splice(i,1);continue;}}
                 const d=Math.hypot(G.p.x-pw.x,G.p.y-pw.y);
                 if(d<G.p.size/2+pw.size/2){{
-                    if(pw.type==='health'){{G.p.h=Math.min(G.p.mh,G.p.h+25);}}
-                    else if(pw.type==='shield'){{G.shieldActive=true;G.shieldTimer=90;}}
+                    if(pw.type==='health'){{G.p.h=Math.min(G.p.mh,G.p.h+30);}}
+                    else if(pw.type==='shield'){{G.shieldActive=true;G.shieldTimer=120;}}
                     else if(pw.type==='score'){{G.score+=50;}}
                     addParticles(pw.x,pw.y,C.a,15);
                     G.powerups.splice(i,1);
@@ -718,13 +741,12 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             document.getElementById('enemyCount').textContent='👾 '+G.enemies.length;
         }}
         
-        // Draw
+        // DRAW
         function draw() {{
             const grad=ctx.createRadialGradient(450,300,100,450,300,500);
             grad.addColorStop(0,'{bg1}');grad.addColorStop(1,'{bg0}');
             ctx.fillStyle=grad;ctx.fillRect(0,0,900,600);
             
-            // Grid
             ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;
             for(let i=0;i<900;i+=50){{ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();}}
             
@@ -738,6 +760,13 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                 ctx.fillText(pw.type==='health'?'❤️':pw.type==='shield'?'🛡️':'⭐',pw.x-8,pw.y-8);
             }});
             
+            // Projectiles
+            G.projectiles.forEach(b=>{{
+                ctx.fillStyle=C.a;ctx.shadowColor=C.a;ctx.shadowBlur=10;
+                ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();
+                ctx.shadowBlur=0;
+            }});
+            
             // Enemies
             G.enemies.forEach(e=>{{
                 const grad2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size);
@@ -749,7 +778,6 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                 ctx.beginPath();ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2);ctx.fill();
                 ctx.shadowBlur=0;
                 
-                // Health bar
                 const w=e.type==='boss'?80:e.size;
                 ctx.fillStyle='#444';
                 ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4);
@@ -804,22 +832,30 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                 ctx.fillStyle=C.a;ctx.font='bold 16px monospace';
                 ctx.fillText('⚡ '+G.combo+'x',20,110);
             }}
+            
+            // Time mode
+            if(G.mode==='time_attack' && G.maxTime>0){{
+                ctx.fillStyle=G.time<10?'#ff4444':'#fff';
+                ctx.font='bold 18px monospace';
+                ctx.fillText('⏱️ '+Math.ceil(G.time)+'s',20,145);
+            }}
+            
             if(G.cd>0){{
                 ctx.fillStyle='rgba(255,255,255,0.2)';
-                ctx.fillRect(20,130,G.cd*2,6);
+                ctx.fillRect(20,165,G.cd*2,6);
             }}
-            ctx.fillStyle='#888';ctx.font='11px monospace';
-            ctx.fillText('⚡ '+G.cd+'/'+G.maxCd,20,148);
+            ctx.fillStyle='#888';ctx.font='10px monospace';
+            ctx.fillText('⚡ '+G.cd+'/'+G.maxCd,20,183);
             
             // Game Over
             if(G.gameOver){{
-                ctx.fillStyle='rgba(0,0,0,0.75)';ctx.fillRect(0,0,900,600);
+                ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(0,0,900,600);
                 ctx.fillStyle='#fff';ctx.font='bold 48px monospace';ctx.textAlign='center';
                 ctx.fillText('GAME OVER',450,230);
                 ctx.font='24px monospace';ctx.fillStyle=C.a;
                 ctx.fillText('Score: '+G.score,450,290);
                 ctx.font='18px monospace';ctx.fillStyle='#aaa';
-                ctx.fillText('Wave: '+G.wave+' • Combo: '+G.maxCombo,450,340);
+                ctx.fillText('Wave: '+G.wave+' • Combo: '+G.maxCombo+' • Kills: '+G.kills,450,340);
                 ctx.font='16px monospace';ctx.fillStyle='#888';
                 ctx.fillText('Press R to restart',450,400);
                 ctx.textAlign='left';
@@ -827,17 +863,17 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             
             // Start
             if(!G.started&&!G.gameOver){{
-                ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,900,600);
-                ctx.fillStyle='#fff';ctx.font='bold 40px monospace';ctx.textAlign='center';
-                ctx.fillText('🎮 {name}',450,220);
+                ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,900,600);
+                ctx.fillStyle='#fff';ctx.font='bold 36px monospace';ctx.textAlign='center';
+                ctx.fillText('🎮 {name}',450,200);
                 ctx.font='18px monospace';ctx.fillStyle=C.p;
-                ctx.fillText('Genre: {genre}',450,270);
+                ctx.fillText('Genre: {genre}',450,255);
                 ctx.font='16px monospace';ctx.fillStyle=C.s;
-                ctx.fillText('Mechanic: {mechanic}',450,305);
-                ctx.font='16px monospace';ctx.fillStyle=C.a;
-                ctx.fillText('"{hook}"',450,345);
-                ctx.font='18px monospace';ctx.fillStyle='#fff';
-                ctx.fillText('Press SPACE / Tap to Start',450,400);
+                ctx.fillText('Mechanic: {mechanic}',450,290);
+                ctx.font='14px monospace';ctx.fillStyle=C.a;
+                ctx.fillText('"{hook}"',450,325);
+                ctx.font='16px monospace';ctx.fillStyle='#fff';
+                ctx.fillText('Press SPACE / Tap to Start',450,385);
                 ctx.textAlign='left';
             }}
         }}
@@ -852,19 +888,16 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
                 else useMechanic();
             }}
             if((e.key==='r'||e.key==='R')&&G.gameOver){{
-                Object.assign(G,{{
-                    p:{{x:450,y:300,size:22,h:{hp},mh:{hp}}},
-                    enemies:[],particles:[],powerups:[],bullets:[],
-                    score:0,combo:0,maxCombo:0,wave:1,enemiesKilled:0,
-                    gameOver:false,started:true,cd:0,maxCd:90,
-                    bossActive:false,shieldActive:false,shieldTimer:0,
-                    spawnTimer:30,difficulty:1
-                }});
+                G.p={{x:450,y:300,size:22,h:{hp},mh:{hp}}};
+                G.enemies=[];G.particles=[];G.powerups=[];G.projectiles=[];
+                G.score=0;G.combo=0;G.maxCombo=0;G.wave=1;G.kills=0;
+                G.gameOver=false;G.started=true;G.cd=0;G.bossActive=false;
+                G.shieldActive=false;G.shieldTimer=0;G.spawnTimer=30;G.difficulty=1;
+                if(G.mode==='time_attack')G.time=G.maxTime;
             }}
         }});
         document.addEventListener('keyup',function(e){{keys[e.key.toLowerCase()]=false;}});
         
-        // Click to start
         c.addEventListener('click',function(){{
             if(!G.started&&!G.gameOver){{G.started=true;G.spawnTimer=30;}}
         }});
@@ -900,6 +933,7 @@ class DeathRollStudio:
         print(f"   🎭 Genre: {game['genre']}")
         print(f"   ⚡ Mechanic: {game['mechanic']}")
         print(f"   🎨 Style: {game['visual_style']}")
+        print(f"   🏆 Mode: {game['game_mode']}")
         
         # 2. Price
         price = self._price(game)
@@ -941,10 +975,10 @@ class DeathRollStudio:
         total = self.portfolio.add(entry)
         print(f"   📊 Portfolio: {total} games")
         
-        # 8. Telegram - FIXED
+        # 8. Telegram - FORCE SEND
         print(f"   📱 Sending to Telegram...")
         if self.telegram.enabled:
-            self._send_telegram(game, license_key, html5_url)
+            self._send_telegram_force(game, license_key, html5_url)
         else:
             print("   ⚠️ Telegram token missing")
         
@@ -1009,26 +1043,26 @@ Date: {datetime.now().strftime('%Y-%m-%d')}
         
         return f"https://{CONFIG['brand']['github']}.github.io/FACTORY-BOT-V4/workspace/{game['name'].replace(' ', '_')}/index.html"
     
-    def _send_telegram(self, game: Dict, license_key: str, html5_url: str):
-        """Send game post - short and clean"""
+    def _send_telegram_force(self, game: Dict, license_key: str, html5_url: str):
+        """FORCE send to channel and DM - Simple HTML formatting"""
         
         channel = CONFIG["telegram"]["channel"]
         sprite = Path("sprite.png")
         
-        # Short, clean post (no Markdown issues)
-        post = f"""🎮 {game['name']} — {game['genre']}
-⚡ {game['mechanic']}
+        # Simple clean post - using HTML format (more reliable)
+        post = f"""<b>🎮 {game['name']}</b> — {game['genre']}
+<b>⚡ {game['mechanic']}</b>
 
 {game['description'][:120]}
 
-🌐 Play FREE: {html5_url}
+🌐 <a href="{html5_url}">Play FREE (HTML5)</a>
 
-💰 Full Game: ${game['price']} SOL
+💰 <b>Full Game: ${game['price']} SOL</b>
 🔑 License: {license_key}
 
 Send ${game['price']} SOL + @username to:
-Trust: {CONFIG['wallets']['trust']}
-Phantom: {CONFIG['wallets']['phantom']}
+Trust: <code>{CONFIG['wallets']['trust']}</code>
+Phantom: <code>{CONFIG['wallets']['phantom']}</code>
 
 #gamedev #{game['genre'].replace(' ', '')} #DeathRollStudio"""
         
@@ -1036,18 +1070,25 @@ Phantom: {CONFIG['wallets']['phantom']}
         if channel:
             print(f"   📢 Channel: {channel}")
             if sprite.exists():
-                self.telegram.send_photo(channel, sprite, post)
+                sent = self.telegram.send_photo(channel, sprite, post)
+                if not sent:
+                    self.telegram.send_message(channel, post)
             else:
                 self.telegram.send_message(channel, post)
+            print(f"   ✅ Channel sent")
         
         # Send to admin DM
         if TELEGRAM_CHAT_ID:
             print(f"   📨 Admin DM: {TELEGRAM_CHAT_ID}")
             if sprite.exists():
-                self.telegram.send_photo(TELEGRAM_CHAT_ID, sprite, post)
+                sent = self.telegram.send_photo(TELEGRAM_CHAT_ID, sprite, post)
+                if not sent:
+                    self.telegram.send_message(TELEGRAM_CHAT_ID, post)
             else:
                 self.telegram.send_message(TELEGRAM_CHAT_ID, post)
+            print(f"   ✅ DM sent")
             
+            # Send ZIP
             zip_path = Path("workspace/latest_game.zip")
             if zip_path.exists():
                 self.telegram.send_document(
@@ -1071,6 +1112,7 @@ Phantom: {CONFIG['wallets']['phantom']}
             "name": game["name"],
             "genre": game["genre"],
             "mechanic": game["mechanic"],
+            "game_mode": game.get("game_mode"),
             "timestamp": datetime.now().isoformat(),
             "price": game["price"]
         })

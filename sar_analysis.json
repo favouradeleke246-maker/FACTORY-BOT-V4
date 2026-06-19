@@ -362,6 +362,14 @@
         "mechanic": "Void Step",
         "timestamp": "2026-06-19T10:45:16.426454",
         "price": 3
+      },
+      {
+        "name": "Void Pulse",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "waves",
+        "timestamp": "2026-06-19T10:46:51.928266",
+        "price": 5
       }
     ],
     "successful_art": 25,
