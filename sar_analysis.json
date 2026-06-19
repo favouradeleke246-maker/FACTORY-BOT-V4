@@ -318,15 +318,25 @@
         "mechanic": "Echo Strike",
         "art": true,
         "ts": "2026-06-18T10:37:39.930491"
+      },
+      {
+        "name": "Cyber Core",
+        "genre": "fighting game",
+        "mechanic": "Shadow Cloak",
+        "visual_style": "minimalist",
+        "game_mode": "time_attack",
+        "timestamp": "2026-06-19T10:00:44.198956",
+        "price": 4
       }
     ],
     "successful_art": 25,
     "failed_art": 0
   },
   "analysis": {
-    "best_genre": "action RPG",
+    "best_genre": "survival horror",
     "rate": 0.444,
     "best_mechanic": null,
-    "success_rate": 0
+    "success_rate": 0,
+    "avg_price": 0.08695652173913043
   }
 }
