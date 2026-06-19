@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astral Vector</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-family:'Segoe UI',sans-serif;
+        }
+        .wrapper { text-align:center; padding:15px; }
+        .title {
+            font-size:2rem;
+            color:#00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            font-weight:bold;
+        }
+        .genre { color:#ff0066; font-size:0.9rem; }
+        .mechanic { color:#ffcc00; font-size:0.85rem; margin-top:5px; }
+        canvas {
+            border:3px solid #00ff88;
+            border-radius:15px;
+            box-shadow: 0 0 40px #00ff88;
+            max-width:100%;
+            background:#1a1a2e;
+            display:block;
+            margin:0 auto;
+        }
+        .controls { margin-top:15px; color:#aaa; font-size:0.8rem; }
+        .controls span { display:inline-block; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; margin:0 3px; }
+        @media (max-width:768px) { .title { font-size:1.3rem; } canvas { width:100%; height:auto; } }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="title">Astral Vector</div>
+        <div class="genre">survival horror</div>
+        <div class="mechanic">⚡ Chrono Fracture</div>
+        <canvas id="c" width="900" height="600"></canvas>
+        <div class="controls"><span>WASD</span> or <span>←→↑↓</span> move | <span>SPACE</span> Chrono Fracture</div>
+    </div>
+    <script>
+        const c=document.getElementById('c'),ctx=c.getContext('2d');
+        const C={p:'#00ff88',s:'#ff0066',a:'#ffcc00',g:true};
+        const state={p:{x:450,y:300,size:25,h:75,mh:75},e:[],parts:[],score:0,combo:0,go:false,started:false,cd:0,maxCd:90};
+        let keys={};
+        function spawn(){const x=Math.random()*880+10,y=Math.random()*580+10;state.e.push({x,y,size:25,hp:3,mh:3,speed:0.8});}
+        function useM(){if(state.cd>0)return;state.cd=state.maxCd;state.e.forEach(e=>{const dx=e.x-state.p.x,dy=e.y-state.p.y,d=Math.hypot(dx,dy);if(d<150){const a=Math.atan2(dy,dx);e.x+=Math.cos(a)*80;e.y+=Math.sin(a)*80;e.hp-=2;}});addP(state.p.x,state.p.y,C.p,20);}
+        function addP(x,y,color,c){for(let i=0;i<c;i++)state.parts.push({x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:30+Math.random()*20,maxLife:50,color,size:3+Math.random()*4});}
+        function update(){if(state.go||!state.started)return;let dx=0,dy=0,s=4.5;if(keys['w']||keys['ArrowUp'])dy=-s;if(keys['s']||keys['ArrowDown'])dy=s;if(keys['a']||keys['ArrowLeft'])dx=-s;if(keys['d']||keys['ArrowRight'])dx=s;if(dx&&dy){dx*=0.707;dy*=0.707;}state.p.x=Math.max(20,Math.min(880,state.p.x+dx));state.p.y=Math.max(20,Math.min(580,state.p.y+dy));if(state.cd>0)state.cd--;if(Math.random()<0.02*2)spawn();for(let i=0;i<state.e.length;i++){const e=state.e[i],dx2=state.p.x-e.x,dy2=state.p.y-e.y,d=Math.hypot(dx2,dy2);if(d>0){e.x+=(dx2/d)*e.speed;e.y+=(dy2/d)*e.speed;}e.x=Math.max(10,Math.min(890,e.x));e.y=Math.max(10,Math.min(590,e.y));const cd=Math.hypot(state.p.x-e.x,state.p.y-e.y);if(cd<state.p.size/2+e.size/2){state.p.h-=10;state.combo=0;if(state.p.h<=0){state.p.h=0;state.go=true;return;}}if(e.hp<=0){state.score+=10*(1+Math.floor(state.combo/10));state.combo++;addP(e.x,e.y,C.s,15);state.e.splice(i,1);i--;}}for(let i=0;i<state.parts.length;i++){const p=state.parts[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.98;p.vy*=0.98;p.life--;if(p.life<=0){state.parts.splice(i,1);i--;}}}
+        function draw(){const g=ctx.createRadialGradient(450,300,100,450,300,500);g.addColorStop(0,'#16213e');g.addColorStop(1,'#1a1a2e');ctx.fillStyle=g;ctx.fillRect(0,0,900,600);ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;for(let i=0;i<900;i+=50){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();}state.e.forEach(e=>{const g2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size);g2.addColorStop(0,C.s);g2.addColorStop(1,'#cc4444');ctx.fillStyle=g2;ctx.shadowColor=C.s;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;const w=e.size;ctx.fillStyle='#444';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4);ctx.fillStyle='#4ecdc4';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w*(e.hp/e.mh),4);ctx.fillStyle='#fff';ctx.font='18px monospace';ctx.fillText('👾',e.x-12,e.y-8);});const g3=ctx.createRadialGradient(state.p.x-8,state.p.y-8,5,state.p.x,state.p.y,state.p.size);g3.addColorStop(0,C.p);g3.addColorStop(1,'#2a7d8f');ctx.fillStyle=g3;ctx.shadowColor=C.p;ctx.shadowBlur=20;ctx.beginPath();ctx.arc(state.p.x,state.p.y,state.p.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='24px monospace';ctx.fillText('🎮',state.p.x-15,state.p.y-12);state.parts.forEach(p=>{const a=p.life/p.maxLife;ctx.globalAlpha=a;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;});ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='bold 22px monospace';ctx.fillText('SCORE: '+state.score,20,45);ctx.fillStyle='#ff4444';ctx.fillRect(20,65,200,14);ctx.fillStyle=C.p;ctx.fillRect(20,65,(state.p.h/state.p.mh)*200,14);if(state.combo>0){ctx.fillStyle=C.a;ctx.font='bold 18px monospace';ctx.fillText('⚡ '+state.combo+'x COMBO!',20,120);}if(state.cd>0){ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(20,150,state.cd*2,6);}ctx.fillStyle='#888';ctx.font='12px monospace';ctx.fillText('⚡ Chrono Fracture (SPACE)',20,165);if(state.go){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 48px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',450,250);ctx.font='24px monospace';ctx.fillStyle=C.a;ctx.fillText('Score: '+state.score,450,320);ctx.font='16px monospace';ctx.fillStyle='#aaa';ctx.fillText('Press R to restart',450,370);ctx.textAlign='left';}if(!state.started&&!state.go){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 36px monospace';ctx.textAlign='center';ctx.fillText('🎮 Astral Vector',450,230);ctx.font='18px monospace';ctx.fillStyle=C.p;ctx.fillText('Press SPACE to start',450,320);ctx.textAlign='left';}}
+        function loop(){update();draw();requestAnimationFrame(loop);}
+        document.addEventListener('keydown',function(e){const k=e.key.toLowerCase();keys[k]=true;if(e.key===' '){e.preventDefault();if(!state.started){state.started=true;for(let i=0;i<5;i++)spawn();}else{useM();}}if((e.key==='r'||e.key==='R')&&state.go){state.p={x:450,y:300,size:25,h:75,mh:75};state.e=[];state.parts=[];state.score=0;state.combo=0;state.go=false;state.cd=0;for(let i=0;i<5;i++)spawn();}});
+        document.addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
+        loop();
+    </script>
+</body>
+</html>
