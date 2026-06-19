@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v33.0 - TELEGRAM FIXED + MOBILE TOUCH
+DEATHROLL STUDIO v34.0 - COMPREHENSIVE GAME + TELEGRAM FIXED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
@@ -21,7 +21,7 @@ from typing import Dict, List, Optional
 # CONFIGURATION
 # ============================================================================
 
-BOT_VERSION = "33.0.0"
+BOT_VERSION = "34.0.0"
 
 CONFIG = {
     "brand": {
@@ -56,7 +56,7 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
 
 print("═" * 60)
-print("🔥 DEATHROLL STUDIO v33.0 - MOBILE + TELEGRAM FIXED")
+print("🔥 DEATHROLL STUDIO v34.0 - COMPREHENSIVE GAME")
 print("═" * 60)
 print(f"🤖 Version: {BOT_VERSION}")
 print(f"✅ Telegram: {'✅' if TELEGRAM_TOKEN else '❌'}")
@@ -271,7 +271,7 @@ class Portfolio:
         self.path.write_text(json.dumps(data, indent=2))
 
 # ============================================================================
-# TELEGRAM SERVICE - FIXED
+# TELEGRAM SERVICE - FIXED (shorter messages, better formatting)
 # ============================================================================
 
 class Telegram:
@@ -282,6 +282,9 @@ class Telegram:
     def send_photo(self, chat_id: str, photo: Path, caption: str) -> bool:
         if not self.enabled:
             return False
+        # Truncate caption if too long (Telegram limit ~1024 chars)
+        if len(caption) > 900:
+            caption = caption[:900] + "..."
         try:
             with open(photo, "rb") as f:
                 r = requests.post(
@@ -291,18 +294,24 @@ class Telegram:
                     timeout=60
                 )
             if r.status_code == 200:
-                print(f"   ✅ Photo sent to {chat_id}")
                 return True
             else:
-                print(f"   ⚠️ Photo failed: {r.status_code}")
-                return False
-        except Exception as e:
-            print(f"   ⚠️ Photo error: {e}")
+                # If Markdown fails, try without
+                r = requests.post(
+                    f"https://api.telegram.org/bot{self.token}/sendPhoto",
+                    files={"photo": f},
+                    data={"chat_id": chat_id, "caption": caption.replace('*', '').replace('`', '')},
+                    timeout=60
+                )
+                return r.status_code == 200
+        except:
             return False
     
     def send_message(self, chat_id: str, text: str) -> bool:
         if not self.enabled:
             return False
+        if len(text) > 900:
+            text = text[:900] + "..."
         try:
             r = requests.post(
                 f"https://api.telegram.org/bot{self.token}/sendMessage",
@@ -310,13 +319,16 @@ class Telegram:
                 timeout=30
             )
             if r.status_code == 200:
-                print(f"   ✅ Message sent to {chat_id}")
                 return True
             else:
-                print(f"   ⚠️ Message failed: {r.status_code}")
-                return False
-        except Exception as e:
-            print(f"   ⚠️ Message error: {e}")
+                # Try without Markdown
+                r = requests.post(
+                    f"https://api.telegram.org/bot{self.token}/sendMessage",
+                    json={"chat_id": chat_id, "text": text.replace('*', '').replace('`', '')},
+                    timeout=30
+                )
+                return r.status_code == 200
+        except:
             return False
     
     def send_document(self, chat_id: str, doc: Path, caption: str) -> bool:
@@ -327,7 +339,7 @@ class Telegram:
                 r = requests.post(
                     f"https://api.telegram.org/bot{self.token}/sendDocument",
                     files={"document": f},
-                    data={"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"},
+                    data={"chat_id": chat_id, "caption": caption[:200], "parse_mode": "Markdown"},
                     timeout=60
                 )
             return r.status_code == 200
@@ -335,7 +347,7 @@ class Telegram:
             return False
 
 # ============================================================================
-# HTML5 GAME GENERATOR - WITH TOUCH CONTROLS
+# HTML5 GAME GENERATOR - COMPREHENSIVE VERSION
 # ============================================================================
 
 def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
@@ -375,21 +387,32 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             user-select:none;
             -webkit-user-select:none;
         }}
-        .wrapper {{ text-align:center; padding:10px; max-width:100%; }}
+        .wrapper {{ text-align:center; padding:5px; max-width:100%; }}
+        .header {{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:0 5px;
+            margin-bottom:3px;
+        }}
         .title {{
-            font-size:1.5rem;
+            font-size:1.2rem;
             color:{p};
-            text-shadow: {'0 0 20px ' + p if theme['glow'] else 'none'};
+            text-shadow: {'0 0 15px ' + p if theme['glow'] else 'none'};
             font-weight:bold;
         }}
-        .genre {{ color:{s}; font-size:0.8rem; }}
-        .mechanic {{ color:{a}; font-size:0.75rem; margin-top:3px; }}
+        .stats {{
+            display:flex;
+            gap:10px;
+            color:#aaa;
+            font-size:0.7rem;
+        }}
+        .stats span {{ background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:10px; }}
         .canvas-wrapper {{
             position:relative;
             display:inline-block;
             width:100%;
             max-width:700px;
-            margin:5px auto;
         }}
         canvas {{
             border:3px solid {p};
@@ -402,90 +425,73 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             touch-action:none;
             cursor:pointer;
         }}
-        /* Touch Controls */
         .touch-controls {{
-            position:relative;
             width:100%;
             max-width:700px;
-            margin:5px auto 0;
+            margin:3px auto 0;
             display:flex;
             justify-content:space-between;
             align-items:center;
-            padding:5px 10px;
+            padding:3px 8px;
             touch-action:none;
         }}
         .touch-joystick {{
-            width:120px;
-            height:120px;
+            width:80px;
+            height:80px;
             border-radius:50%;
-            background:rgba(255,255,255,0.1);
+            background:rgba(255,255,255,0.08);
             border:2px solid {p}44;
             position:relative;
             touch-action:none;
         }}
         .touch-joystick-inner {{
-            width:50px;
-            height:50px;
+            width:30px;
+            height:30px;
             border-radius:50%;
             background:{p};
             position:absolute;
-            top:35px;
-            left:35px;
+            top:25px;
+            left:25px;
             touch-action:none;
-            box-shadow: 0 0 20px {p}44;
+            box-shadow: 0 0 15px {p}44;
         }}
         .touch-btn {{
-            width:70px;
-            height:70px;
+            width:60px;
+            height:60px;
             border-radius:50%;
             background:{p}33;
             border:2px solid {p};
             color:#fff;
-            font-size:0.7rem;
+            font-size:0.6rem;
             font-weight:bold;
             display:flex;
             align-items:center;
             justify-content:center;
             touch-action:none;
-            box-shadow: 0 0 20px {p}44;
             text-align:center;
-            line-height:1.2;
-            padding:5px;
+            line-height:1.1;
+            padding:4px;
+            box-shadow: 0 0 15px {p}44;
         }}
-        .touch-btn:active {{
-            background:{p}66;
-            transform:scale(0.95);
-        }}
-        .controls {{
-            margin-top:5px;
-            color:#888;
-            font-size:0.7rem;
-        }}
-        .controls span {{
-            display:inline-block;
-            background:rgba(255,255,255,0.1);
-            padding:2px 8px;
-            border-radius:20px;
-            margin:0 2px;
-        }}
-        @media (max-width:600px) {{
-            .title {{ font-size:1.2rem; }}
-            .touch-joystick {{ width:80px; height:80px; }}
-            .touch-joystick-inner {{ width:35px; height:35px; top:22.5px; left:22.5px; }}
-            .touch-btn {{ width:55px; height:55px; font-size:0.6rem; }}
-        }}
-        @media (max-width:400px) {{
+        .touch-btn:active {{ background:{p}66; transform:scale(0.9); }}
+        .controls {{ color:#666; font-size:0.6rem; margin-top:2px; }}
+        @media (max-width:500px) {{
+            .title {{ font-size:1rem; }}
             .touch-joystick {{ width:60px; height:60px; }}
-            .touch-joystick-inner {{ width:25px; height:25px; top:17.5px; left:17.5px; }}
+            .touch-joystick-inner {{ width:22px; height:22px; top:19px; left:19px; }}
             .touch-btn {{ width:45px; height:45px; font-size:0.5rem; }}
         }}
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <div class="title">{name}</div>
-        <div class="genre">{genre}</div>
-        <div class="mechanic">⚡ {mechanic}</div>
+        <div class="header">
+            <div class="title">{name}</div>
+            <div class="stats">
+                <span id="waveDisplay">🌊 1</span>
+                <span id="enemyCount">👾 0</span>
+            </div>
+        </div>
         <div class="canvas-wrapper">
             <canvas id="c" width="900" height="600"></canvas>
         </div>
@@ -493,66 +499,379 @@ def generate_html5(game_data: Dict, theme: Dict, style: Dict) -> str:
             <div class="touch-joystick" id="joystick">
                 <div class="touch-joystick-inner" id="joystickInner"></div>
             </div>
-            <div class="touch-btn" id="mechanicBtn">⚡<br>{mechanic[:8]}</div>
+            <div class="touch-btn" id="mechanicBtn">⚡<br>{mechanic[:6]}</div>
         </div>
-        <div class="controls"><span>WASD</span> or <span>←→↑↓</span> move | <span>SPACE</span> {mechanic}</div>
+        <div class="controls">WASD / Joystick • SPACE / Button for {mechanic}</div>
     </div>
     <script>
         const c=document.getElementById('c'),ctx=c.getContext('2d');
         const C={{p:'{p}',s:'{s}',a:'{a}',g:{glow}}};
-        const state={{p:{{x:450,y:300,size:25,h:{hp},mh:{hp}}},e:[],parts:[],score:0,combo:0,go:false,started:false,cd:0,maxCd:90}};
-        let keys={{}},touchX=0,touchY=0,touchActive=false;
+        
+        // Full game state
+        const G = {{
+            p: {{x:450,y:300,size:22,h:{hp},mh:{hp}}},
+            enemies: [],
+            particles: [],
+            powerups: [],
+            bullets: [],
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            wave: 1,
+            enemiesKilled: 0,
+            gameOver: false,
+            started: false,
+            cd: 0,
+            maxCd: 90,
+            bossActive: false,
+            bossHealth: 0,
+            bossMaxHealth: 0,
+            shieldActive: false,
+            shieldTimer: 0,
+            spawnTimer: 0,
+            difficulty: 1
+        }};
+        
+        let keys={{}}, jActive=false, jX=0, jY=0;
         
         // Joystick
-        const joystick=document.getElementById('joystick');
-        const joystickInner=document.getElementById('joystickInner');
-        let jActive=false,jX=0,jY=0;
-        
-        joystick.addEventListener('touchstart',function(e){{e.preventDefault();jActive=true;const r=this.getBoundingClientRect();const t=e.touches[0];jX=(t.clientX-r.left-40)/40;jY=(t.clientY-r.top-40)/40;updateJoystick();}});
-        joystick.addEventListener('touchmove',function(e){{e.preventDefault();if(!jActive)return;const r=this.getBoundingClientRect();const t=e.touches[0];jX=(t.clientX-r.left-40)/40;jY=(t.clientY-r.top-40)/40;updateJoystick();}});
-        joystick.addEventListener('touchend',function(e){{e.preventDefault();jActive=false;jX=0;jY=0;updateJoystick();}});
-        
-        function updateJoystick(){{const max=1;let x=Math.max(-max,Math.min(max,jX));let y=Math.max(-max,Math.min(max,jY));const d=Math.hypot(x,y);if(d>max){{x/=d;y/=d;}}jX=x;jY=y;joystickInner.style.transform=`translate(${{jX*20}}px,${{jY*20}}px)`;}}
+        const j=document.getElementById('joystick'), ji=document.getElementById('joystickInner');
+        j.addEventListener('touchstart',e=>{{e.preventDefault();jActive=true;updateJoy(e);}});
+        j.addEventListener('touchmove',e=>{{e.preventDefault();if(jActive)updateJoy(e);}});
+        j.addEventListener('touchend',e=>{{e.preventDefault();jActive=false;jX=0;jY=0;ji.style.transform='translate(0,0)';}});
+        function updateJoy(e){{const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-30)/30,y=(t.clientY-r.top-30)/30;const d=Math.hypot(x,y);if(d>1){{x/=d;y/=d;}}jX=x;jY=y;ji.style.transform=`translate(${{x*15}}px,${{y*15}}px)`;}}
         
         // Mechanic button
-        document.getElementById('mechanicBtn').addEventListener('touchstart',function(e){{e.preventDefault();simulateKey(' ');}});
-        document.getElementById('mechanicBtn').addEventListener('mousedown',function(e){{simulateKey(' ');}});
+        document.getElementById('mechanicBtn').addEventListener('touchstart',e=>{{e.preventDefault();simulateKey(' ');}});
+        document.getElementById('mechanicBtn').addEventListener('mousedown',()=>simulateKey(' '));
+        function simulateKey(k){{const ev=new KeyboardEvent('keydown',{{key:k}});document.dispatchEvent(ev);setTimeout(()=>{{document.dispatchEvent(new KeyboardEvent('keyup',{{key:k}}));}},150);}}
         
-        function simulateKey(k){{const ev=new KeyboardEvent('keydown',{{key:k,code:k===' '?'Space':k}});document.dispatchEvent(ev);setTimeout(()=>{{const up=new KeyboardEvent('keyup',{{key:k,code:k===' '?'Space':k}});document.dispatchEvent(up);}},200);}}
+        // Enemies
+        function spawnEnemy() {{
+            const side=Math.floor(Math.random()*4);
+            let x,y;
+            switch(side){{case 0:x=Math.random()*900;y=-20;break;case 1:x=920;y=Math.random()*600;break;case 2:x=Math.random()*900;y=620;break;case 3:x=-20;y=Math.random()*600;break;}}
+            const hp=1+Math.floor(G.wave/3);
+            const size=20+Math.min(G.wave,5);
+            G.enemies.push({{
+                x,y,size,
+                hp:hp, maxHp:hp,
+                speed:1.5+G.wave*0.08,
+                type:Math.random()>0.7?'fast':'normal',
+                damage:10+Math.floor(G.wave/2)
+            }});
+        }}
         
-        function spawn(){{const x=Math.random()*880+10,y=Math.random()*580+10;state.e.push({{x,y,size:25,hp:3,mh:3,speed:{speed}}});}}
-        function useM(){{if(state.cd>0)return;state.cd=state.maxCd;state.e.forEach(e=>{{const dx=e.x-state.p.x,dy=e.y-state.p.y,d=Math.hypot(dx,dy);if(d<150){{const a=Math.atan2(dy,dx);e.x+=Math.cos(a)*80;e.y+=Math.sin(a)*80;e.hp-=2;}}}});addP(state.p.x,state.p.y,C.p,20);}}
-        function addP(x,y,color,c){{for(let i=0;i<c;i++)state.parts.push({{x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:30+Math.random()*20,maxLife:50,color,size:3+Math.random()*4}});}}
+        // Powerups
+        function spawnPowerup(x,y) {{
+            if(Math.random()>0.15)return;
+            const types=['health','shield','score'];
+            G.powerups.push({{
+                x:x,y:y,size:15,
+                type:types[Math.floor(Math.random()*types.length)],
+                life:300
+            }});
+        }}
         
-        function update(){{if(state.go||!state.started)return;let dx=0,dy=0,s=4.5;
-        // Keyboard
-        if(keys['w']||keys['ArrowUp'])dy=-s;if(keys['s']||keys['ArrowDown'])dy=s;if(keys['a']||keys['ArrowLeft'])dx=-s;if(keys['d']||keys['ArrowRight'])dx=s;
-        // Touch
-        if(jActive){{dx+=jX*s*0.7;dy+=jY*s*0.7;}}
-        if(dx&&dy){{dx*=0.707;dy*=0.707;}}
-        state.p.x=Math.max(20,Math.min(880,state.p.x+dx));state.p.y=Math.max(20,Math.min(580,state.p.y+dy));
-        if(state.cd>0)state.cd--;if(Math.random()<0.02*{spawn})spawn();
-        for(let i=0;i<state.e.length;i++){{const e=state.e[i],dx2=state.p.x-e.x,dy2=state.p.y-e.y,d=Math.hypot(dx2,dy2);if(d>0){{e.x+=(dx2/d)*e.speed;e.y+=(dy2/d)*e.speed;}}e.x=Math.max(10,Math.min(890,e.x));e.y=Math.max(10,Math.min(590,e.y));const cd=Math.hypot(state.p.x-e.x,state.p.y-e.y);if(cd<state.p.size/2+e.size/2){{state.p.h-=10;state.combo=0;if(state.p.h<=0){{state.p.h=0;state.go=true;return;}}}}if(e.hp<=0){{state.score+=10*(1+Math.floor(state.combo/10));state.combo++;addP(e.x,e.y,C.s,15);state.e.splice(i,1);i--;}}}}
-        for(let i=0;i<state.parts.length;i++){{const p=state.parts[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.98;p.vy*=0.98;p.life--;if(p.life<=0){{state.parts.splice(i,1);i--;}}}}}}
+        // Particles
+        function addParticles(x,y,color,count) {{
+            for(let i=0;i<count;i++)G.particles.push({{
+                x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,
+                vx:(Math.random()-0.5)*8,vy:(Math.random()-0.5)*8,
+                life:30+Math.random()*30,maxLife:60,
+                color:color,size:2+Math.random()*5
+            }});
+        }}
         
-        function draw(){{const g=ctx.createRadialGradient(450,300,100,450,300,500);g.addColorStop(0,'{bg1}');g.addColorStop(1,'{bg0}');ctx.fillStyle=g;ctx.fillRect(0,0,900,600);ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;for(let i=0;i<900;i+=50){{ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();}}
-        state.e.forEach(e=>{{const g2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size);g2.addColorStop(0,C.s);g2.addColorStop(1,'#cc4444');ctx.fillStyle=g2;ctx.shadowColor=C.s;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;const w=e.size;ctx.fillStyle='#444';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4);ctx.fillStyle='#4ecdc4';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w*(e.hp/e.mh),4);ctx.fillStyle='#fff';ctx.font='18px monospace';ctx.fillText('👾',e.x-12,e.y-8);}});
-        const g3=ctx.createRadialGradient(state.p.x-8,state.p.y-8,5,state.p.x,state.p.y,state.p.size);g3.addColorStop(0,C.p);g3.addColorStop(1,'#2a7d8f');ctx.fillStyle=g3;ctx.shadowColor=C.p;ctx.shadowBlur=20;ctx.beginPath();ctx.arc(state.p.x,state.p.y,state.p.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='24px monospace';ctx.fillText('🎮',state.p.x-15,state.p.y-12);
-        state.parts.forEach(p=>{{const a=p.life/p.maxLife;ctx.globalAlpha=a;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;}});
-        ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='bold 22px monospace';ctx.fillText('SCORE: '+state.score,20,45);ctx.fillStyle='#ff4444';ctx.fillRect(20,65,200,14);ctx.fillStyle=C.p;ctx.fillRect(20,65,(state.p.h/state.p.mh)*200,14);
-        if(state.combo>0){{ctx.fillStyle=C.a;ctx.font='bold 18px monospace';ctx.fillText('⚡ '+state.combo+'x COMBO!',20,120);}}
-        if(state.cd>0){{ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(20,150,state.cd*2,6);}}ctx.fillStyle='#888';ctx.font='12px monospace';ctx.fillText('⚡ {mechanic} (SPACE)',20,165);
-        if(state.go){{ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 48px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',450,250);ctx.font='24px monospace';ctx.fillStyle=C.a;ctx.fillText('Score: '+state.score,450,320);ctx.font='16px monospace';ctx.fillStyle='#aaa';ctx.fillText('Press R to restart',450,370);ctx.textAlign='left';}}
-        if(!state.started&&!state.go){{ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 36px monospace';ctx.textAlign='center';ctx.fillText('🎮 {name}',450,230);ctx.font='18px monospace';ctx.fillStyle=C.p;ctx.fillText('Press SPACE to start',450,320);ctx.textAlign='left';}}}}
+        // Mechanic
+        function useMechanic() {{
+            if(G.cd>0)return;G.cd=G.maxCd;
+            // Push enemies + damage
+            G.enemies.forEach(e=>{{
+                const dx=e.x-G.p.x,dy=e.y-G.p.y,d=Math.hypot(dx,dy);
+                if(d<180){{
+                    const ang=Math.atan2(dy,dx);
+                    e.x+=Math.cos(ang)*100;
+                    e.y+=Math.sin(ang)*100;
+                    e.hp-=2;
+                    addParticles(e.x,e.y,C.s,5);
+                }}
+            }});
+            addParticles(G.p.x,G.p.y,C.p,30);
+            // Shield if low health
+            if(G.p.h<G.p.mh*0.3){{G.shieldActive=true;G.shieldTimer=120;}}
+        }}
+        
+        // Update
+        function update() {{
+            if(G.gameOver||!G.started)return;
+            
+            // Player movement
+            let dx=0,dy=0,speed=4.5+G.difficulty*0.2;
+            if(keys['w']||keys['ArrowUp'])dy=-speed;
+            if(keys['s']||keys['ArrowDown'])dy=speed;
+            if(keys['a']||keys['ArrowLeft'])dx=-speed;
+            if(keys['d']||keys['ArrowRight'])dx=speed;
+            if(jActive){{dx+=jX*speed*0.6;dy+=jY*speed*0.6;}}
+            if(dx&&dy){{dx*=0.707;dy*=0.707;}}
+            G.p.x=Math.max(20,Math.min(880,G.p.x+dx));
+            G.p.y=Math.max(20,Math.min(580,G.p.y+dy));
+            
+            // Cooldowns
+            if(G.cd>0)G.cd--;
+            if(G.shieldActive){{G.shieldTimer--;if(G.shieldTimer<=0)G.shieldActive=false;}}
+            
+            // Spawn enemies
+            G.spawnTimer--;
+            if(G.spawnTimer<=0){{
+                const count=1+Math.floor(G.wave/3);
+                for(let i=0;i<count;i++)spawnEnemy();
+                G.spawnTimer=Math.max(20,60-G.wave*2);
+            }}
+            
+            // Boss every 5 waves
+            if(G.wave%5===0&&!G.bossActive&&G.enemies.length===0){{
+                G.bossActive=true;
+                G.bossMaxHealth=50+G.wave*10;
+                G.bossHealth=G.bossMaxHealth;
+                G.enemies.push({{
+                    x:450,y:50,size:60,
+                    hp:G.bossMaxHealth,maxHp:G.bossMaxHealth,
+                    speed:1.2+G.wave*0.05,
+                    type:'boss',
+                    damage:20
+                }});
+            }}
+            
+            // Update enemies
+            for(let i=G.enemies.length-1;i>=0;i--){{
+                const e=G.enemies[i];
+                const dx=G.p.x-e.x,dy=G.p.y-e.y,d=Math.hypot(dx,dy);
+                if(d>0){{
+                    const spd=e.type==='fast'?e.speed*1.5:e.speed;
+                    e.x+=(dx/d)*spd;
+                    e.y+=(dy/d)*spd;
+                }}
+                e.x=Math.max(10,Math.min(890,e.x));
+                e.y=Math.max(10,Math.min(590,e.y));
+                
+                // Collision
+                const cd=Math.hypot(G.p.x-e.x,G.p.y-e.y);
+                if(cd<G.p.size/2+e.size/2){{
+                    if(G.shieldActive){{
+                        const ang=Math.atan2(e.y-G.p.y,e.x-G.p.x);
+                        e.x+=Math.cos(ang)*60;e.y+=Math.sin(ang)*60;
+                        e.hp-=3;
+                        addParticles(e.x,e.y,C.p,10);
+                    }}else{{
+                        G.p.h-=e.damage;
+                        G.combo=0;
+                        addParticles(G.p.x,G.p.y,C.s,15);
+                        if(G.p.h<=0){{G.p.h=0;G.gameOver=true;return;}}
+                    }}
+                }}
+                
+                // Enemy death
+                if(e.hp<=0){{
+                    G.score+=10*(1+Math.floor(G.combo/10));
+                    G.combo++;G.enemiesKilled++;
+                    if(G.combo>G.maxCombo)G.maxCombo=G.combo;
+                    spawnPowerup(e.x,e.y);
+                    addParticles(e.x,e.y,C.s,20);
+                    G.enemies.splice(i,1);
+                    
+                    // Wave progress
+                    if(G.enemies.length===0&&!G.bossActive){{
+                        G.wave++;
+                        G.difficulty=1+G.wave*0.1;
+                        G.spawnTimer=30;
+                    }}
+                }}
+            }}
+            
+            // Update powerups
+            for(let i=G.powerups.length-1;i>=0;i--){{
+                const pw=G.powerups[i];
+                pw.life--;
+                if(pw.life<=0){{G.powerups.splice(i,1);continue;}}
+                const d=Math.hypot(G.p.x-pw.x,G.p.y-pw.y);
+                if(d<G.p.size/2+pw.size/2){{
+                    if(pw.type==='health'){{G.p.h=Math.min(G.p.mh,G.p.h+25);}}
+                    else if(pw.type==='shield'){{G.shieldActive=true;G.shieldTimer=90;}}
+                    else if(pw.type==='score'){{G.score+=50;}}
+                    addParticles(pw.x,pw.y,C.a,15);
+                    G.powerups.splice(i,1);
+                }}
+            }}
+            
+            // Update particles
+            for(let i=G.particles.length-1;i>=0;i--){{
+                const p=G.particles[i];
+                p.x+=p.vx;p.y+=p.vy;
+                p.vx*=0.97;p.vy*=0.97;
+                p.life--;
+                if(p.life<=0)G.particles.splice(i,1);
+            }}
+            
+            // Update UI
+            document.getElementById('waveDisplay').textContent='🌊 '+G.wave;
+            document.getElementById('enemyCount').textContent='👾 '+G.enemies.length;
+        }}
+        
+        // Draw
+        function draw() {{
+            const grad=ctx.createRadialGradient(450,300,100,450,300,500);
+            grad.addColorStop(0,'{bg1}');grad.addColorStop(1,'{bg0}');
+            ctx.fillStyle=grad;ctx.fillRect(0,0,900,600);
+            
+            // Grid
+            ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;
+            for(let i=0;i<900;i+=50){{ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();}}
+            
+            // Powerups
+            G.powerups.forEach(pw=>{{
+                ctx.fillStyle=pw.type==='health'?'#ff4444':pw.type==='shield'?'#4ecdc4':'#ffd93d';
+                ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=15;
+                ctx.beginPath();ctx.arc(pw.x,pw.y,pw.size/2,0,Math.PI*2);ctx.fill();
+                ctx.shadowBlur=0;
+                ctx.fillStyle='#fff';ctx.font='12px monospace';
+                ctx.fillText(pw.type==='health'?'❤️':pw.type==='shield'?'🛡️':'⭐',pw.x-8,pw.y-8);
+            }});
+            
+            // Enemies
+            G.enemies.forEach(e=>{{
+                const grad2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size);
+                grad2.addColorStop(0,e.type==='boss'?'#ff0044':C.s);
+                grad2.addColorStop(1,e.type==='boss'?'#cc0033':'#cc4444');
+                ctx.fillStyle=grad2;
+                ctx.shadowColor=e.type==='boss'?'#ff0000':C.s;
+                ctx.shadowBlur=e.type==='boss'?30:10;
+                ctx.beginPath();ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2);ctx.fill();
+                ctx.shadowBlur=0;
+                
+                // Health bar
+                const w=e.type==='boss'?80:e.size;
+                ctx.fillStyle='#444';
+                ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4);
+                ctx.fillStyle=e.type==='boss'?'#ff0044':'#4ecdc4';
+                ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w*(e.hp/e.maxHp),4);
+                
+                ctx.fillStyle='#fff';
+                ctx.font=e.type==='boss'?'30px monospace':'18px monospace';
+                ctx.fillText(e.type==='boss'?'👹':'👾',e.x-12,e.y-8);
+                if(e.type==='boss'){{
+                    ctx.fillStyle='#ff0044';ctx.font='bold 14px monospace';
+                    ctx.fillText('BOSS',e.x-20,e.y-e.size/2-18);
+                }}
+            }});
+            
+            // Player
+            const grad3=ctx.createRadialGradient(G.p.x-8,G.p.y-8,5,G.p.x,G.p.y,G.p.size);
+            grad3.addColorStop(0,G.shieldActive?'#4ecdc4':C.p);
+            grad3.addColorStop(1,G.shieldActive?'#2a9d8f':'#2a7d8f');
+            ctx.fillStyle=grad3;
+            ctx.shadowColor=G.shieldActive?'#4ecdc4':C.p;
+            ctx.shadowBlur=G.shieldActive?40:20;
+            ctx.beginPath();ctx.arc(G.p.x,G.p.y,G.p.size/2,0,Math.PI*2);ctx.fill();
+            ctx.shadowBlur=0;
+            if(G.shieldActive){{
+                ctx.strokeStyle=C.p;ctx.lineWidth=3;ctx.shadowColor=C.p;ctx.shadowBlur=30;
+                ctx.beginPath();ctx.arc(G.p.x,G.p.y,G.p.size/2+8,0,Math.PI*2);ctx.stroke();
+                ctx.shadowBlur=0;
+            }}
+            ctx.fillStyle='#fff';ctx.font='22px monospace';
+            ctx.fillText('🎮',G.p.x-14,G.p.y-10);
+            
+            // Particles
+            G.particles.forEach(p=>{{
+                const a=p.life/p.maxLife;
+                ctx.globalAlpha=a;ctx.fillStyle=p.color;
+                ctx.shadowColor=p.color;ctx.shadowBlur=8;
+                ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill();
+                ctx.shadowBlur=0;ctx.globalAlpha=1;
+            }});
+            
+            // UI
+            ctx.shadowBlur=0;
+            ctx.fillStyle='#fff';ctx.font='bold 22px monospace';
+            ctx.fillText('SCORE: '+G.score,20,40);
+            ctx.fillStyle='#ff4444';ctx.fillRect(20,55,200,12);
+            ctx.fillStyle=C.p;ctx.fillRect(20,55,(G.p.h/G.p.mh)*200,12);
+            ctx.fillStyle='#fff';ctx.font='10px monospace';
+            ctx.fillText('HP: '+Math.round(G.p.h)+'/'+G.p.mh,25,67);
+            
+            if(G.combo>0){{
+                ctx.fillStyle=C.a;ctx.font='bold 16px monospace';
+                ctx.fillText('⚡ '+G.combo+'x',20,110);
+            }}
+            if(G.cd>0){{
+                ctx.fillStyle='rgba(255,255,255,0.2)';
+                ctx.fillRect(20,130,G.cd*2,6);
+            }}
+            ctx.fillStyle='#888';ctx.font='11px monospace';
+            ctx.fillText('⚡ '+G.cd+'/'+G.maxCd,20,148);
+            
+            // Game Over
+            if(G.gameOver){{
+                ctx.fillStyle='rgba(0,0,0,0.75)';ctx.fillRect(0,0,900,600);
+                ctx.fillStyle='#fff';ctx.font='bold 48px monospace';ctx.textAlign='center';
+                ctx.fillText('GAME OVER',450,230);
+                ctx.font='24px monospace';ctx.fillStyle=C.a;
+                ctx.fillText('Score: '+G.score,450,290);
+                ctx.font='18px monospace';ctx.fillStyle='#aaa';
+                ctx.fillText('Wave: '+G.wave+' • Combo: '+G.maxCombo,450,340);
+                ctx.font='16px monospace';ctx.fillStyle='#888';
+                ctx.fillText('Press R to restart',450,400);
+                ctx.textAlign='left';
+            }}
+            
+            // Start
+            if(!G.started&&!G.gameOver){{
+                ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,900,600);
+                ctx.fillStyle='#fff';ctx.font='bold 40px monospace';ctx.textAlign='center';
+                ctx.fillText('🎮 {name}',450,220);
+                ctx.font='18px monospace';ctx.fillStyle=C.p;
+                ctx.fillText('Genre: {genre}',450,270);
+                ctx.font='16px monospace';ctx.fillStyle=C.s;
+                ctx.fillText('Mechanic: {mechanic}',450,305);
+                ctx.font='16px monospace';ctx.fillStyle=C.a;
+                ctx.fillText('"{hook}"',450,345);
+                ctx.font='18px monospace';ctx.fillStyle='#fff';
+                ctx.fillText('Press SPACE / Tap to Start',450,400);
+                ctx.textAlign='left';
+            }}
+        }}
         
         function loop(){{update();draw();requestAnimationFrame(loop);}}
         
-        document.addEventListener('keydown',function(e){{const k=e.key.toLowerCase();keys[k]=true;if(e.key===' '){{e.preventDefault();if(!state.started){{state.started=true;for(let i=0;i<5;i++)spawn();}}else{{useM();}}}}if((e.key==='r'||e.key==='R')&&state.go){{state.p={{x:450,y:300,size:25,h:{hp},mh:{hp}}};state.e=[];state.parts=[];state.score=0;state.combo=0;state.go=false;state.cd=0;for(let i=0;i<5;i++)spawn();}}}});
+        // Controls
+        document.addEventListener('keydown',function(e){{
+            const k=e.key.toLowerCase();keys[k]=true;
+            if(e.key===' '){{e.preventDefault();
+                if(!G.started){{G.started=true;G.spawnTimer=30;}}
+                else useMechanic();
+            }}
+            if((e.key==='r'||e.key==='R')&&G.gameOver){{
+                Object.assign(G,{{
+                    p:{{x:450,y:300,size:22,h:{hp},mh:{hp}}},
+                    enemies:[],particles:[],powerups:[],bullets:[],
+                    score:0,combo:0,maxCombo:0,wave:1,enemiesKilled:0,
+                    gameOver:false,started:true,cd:0,maxCd:90,
+                    bossActive:false,shieldActive:false,shieldTimer:0,
+                    spawnTimer:30,difficulty:1
+                }});
+            }}
+        }});
         document.addEventListener('keyup',function(e){{keys[e.key.toLowerCase()]=false;}});
         
-        // Click/tap to start
-        c.addEventListener('click',function(){{if(!state.started&&!state.go){{state.started=true;for(let i=0;i<5;i++)spawn();}}}});
-        c.addEventListener('touchstart',function(e){{e.preventDefault();if(!state.started&&!state.go){{state.started=true;for(let i=0;i<5;i++)spawn();}}}});
+        // Click to start
+        c.addEventListener('click',function(){{
+            if(!G.started&&!G.gameOver){{G.started=true;G.spawnTimer=30;}}
+        }});
+        c.addEventListener('touchstart',function(e){{
+            e.preventDefault();
+            if(!G.started&&!G.gameOver){{G.started=true;G.spawnTimer=30;}}
+        }});
         
         loop();
     </script>
@@ -625,7 +944,7 @@ class DeathRollStudio:
         # 8. Telegram - FIXED
         print(f"   📱 Sending to Telegram...")
         if self.telegram.enabled:
-            self._send_telegram_fixed(game, license_key, html5_url)
+            self._send_telegram(game, license_key, html5_url)
         else:
             print("   ⚠️ Telegram token missing")
         
@@ -690,68 +1009,53 @@ Date: {datetime.now().strftime('%Y-%m-%d')}
         
         return f"https://{CONFIG['brand']['github']}.github.io/FACTORY-BOT-V4/workspace/{game['name'].replace(' ', '_')}/index.html"
     
-    def _send_telegram_fixed(self, game: Dict, license_key: str, html5_url: str):
-        """FIXED: Send proper game post to channel and DM"""
+    def _send_telegram(self, game: Dict, license_key: str, html5_url: str):
+        """Send game post - short and clean"""
         
         channel = CONFIG["telegram"]["channel"]
         sprite = Path("sprite.png")
         
-        # Build the game post
-        post = f"""
-🎮 *{game['name']}* — {game['genre']}
-⚡ *Mechanic:* `{game['mechanic']}`
+        # Short, clean post (no Markdown issues)
+        post = f"""🎮 {game['name']} — {game['genre']}
+⚡ {game['mechanic']}
 
-{game['description']}
+{game['description'][:120]}
 
-🌐 *Play FREE:* {html5_url}
+🌐 Play FREE: {html5_url}
 
-━━━━━━━━━━━━━━━━━━━━━
-💰 *Full Game:* ${game['price']} SOL
+💰 Full Game: ${game['price']} SOL
+🔑 License: {license_key}
 
-🔵 *Trust Wallet:*
-`{CONFIG['wallets']['trust']}`
+Send ${game['price']} SOL + @username to:
+Trust: {CONFIG['wallets']['trust']}
+Phantom: {CONFIG['wallets']['phantom']}
 
-🟣 *Phantom Wallet:*
-`{CONFIG['wallets']['phantom']}`
-
-📩 Send ${game['price']} SOL + @username → receive full game + license key
-
-🔑 *License:* `{license_key}`
-
-#gamedev #indiegame #{game['genre'].replace(' ', '')} #DeathRollStudio
-"""
+#gamedev #{game['genre'].replace(' ', '')} #DeathRollStudio"""
         
         # Send to channel
         if channel:
-            print(f"   📢 Sending to channel: {channel}")
+            print(f"   📢 Channel: {channel}")
             if sprite.exists():
-                sent = self.telegram.send_photo(channel, sprite, post)
-                if not sent:
-                    self.telegram.send_message(channel, post)
+                self.telegram.send_photo(channel, sprite, post)
             else:
                 self.telegram.send_message(channel, post)
-            print(f"   ✅ Channel post sent")
         
         # Send to admin DM
         if TELEGRAM_CHAT_ID:
-            print(f"   📨 Sending to admin DM: {TELEGRAM_CHAT_ID}")
+            print(f"   📨 Admin DM: {TELEGRAM_CHAT_ID}")
             if sprite.exists():
-                sent = self.telegram.send_photo(TELEGRAM_CHAT_ID, sprite, post)
-                if not sent:
-                    self.telegram.send_message(TELEGRAM_CHAT_ID, post)
+                self.telegram.send_photo(TELEGRAM_CHAT_ID, sprite, post)
             else:
                 self.telegram.send_message(TELEGRAM_CHAT_ID, post)
-            print(f"   ✅ DM sent")
             
-            # Send ZIP
             zip_path = Path("workspace/latest_game.zip")
             if zip_path.exists():
                 self.telegram.send_document(
                     TELEGRAM_CHAT_ID,
                     zip_path,
-                    f"🎮 {game['name']}\n🔑 {license_key}\n🌐 {html5_url}"
+                    f"🎮 {game['name']}\n🔑 {license_key}"
                 )
-                print(f"   ✅ ZIP sent to DM")
+                print(f"   ✅ ZIP sent")
     
     def _update_sar(self, game: Dict):
         path = Path("sar_analysis.json")
