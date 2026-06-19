@@ -355,6 +355,13 @@
         "mechanic": "Void Step",
         "timestamp": "2026-06-19T10:35:39.869779",
         "price": 5
+      },
+      {
+        "name": "Cyber Drifter",
+        "genre": "strategy game",
+        "mechanic": "Void Step",
+        "timestamp": "2026-06-19T10:45:16.426454",
+        "price": 3
       }
     ],
     "successful_art": 25,

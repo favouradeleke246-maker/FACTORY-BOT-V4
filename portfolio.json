@@ -492,5 +492,19 @@
     "license_key": "DR-QV-20260619-74C31D19",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
     "version": "34.0.0"
+  },
+  {
+    "date": "2026-06-19T10:45:14.930446",
+    "game": "Cyber Drifter",
+    "genre": "strategy game",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Drifter, a strategy game where Void Step changes everything. teleport. Can you survive the challenge?",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "cartoon",
+    "game_mode": "waves",
+    "price": 3,
+    "license_key": "DR-CD-20260619-93B3D920",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
+    "version": "34.0.0"
   }
 ]
