@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Runner</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a2e, #1a1a3e);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-family:'Segoe UI',sans-serif;
+            touch-action:none;
+            overflow:hidden;
+            user-select:none;
+            -webkit-user-select:none;
+        }
+        .wrapper { text-align:center; padding:10px; max-width:100%; }
+        .title {
+            font-size:1.5rem;
+            color:#4ecdc4;
+            text-shadow: 0 0 20px #4ecdc4;
+            font-weight:bold;
+        }
+        .genre { color:#ff6b6b; font-size:0.8rem; }
+        .mechanic { color:#ffd93d; font-size:0.75rem; margin-top:3px; }
+        .canvas-wrapper {
+            position:relative;
+            display:inline-block;
+            width:100%;
+            max-width:700px;
+            margin:5px auto;
+        }
+        canvas {
+            border:3px solid #4ecdc4;
+            border-radius:12px;
+            box-shadow: 0 0 30px #4ecdc4;
+            width:100%;
+            height:auto;
+            background:#0a0a2e;
+            display:block;
+            touch-action:none;
+            cursor:pointer;
+        }
+        /* Touch Controls */
+        .touch-controls {
+            position:relative;
+            width:100%;
+            max-width:700px;
+            margin:5px auto 0;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:5px 10px;
+            touch-action:none;
+        }
+        .touch-joystick {
+            width:120px;
+            height:120px;
+            border-radius:50%;
+            background:rgba(255,255,255,0.1);
+            border:2px solid #4ecdc444;
+            position:relative;
+            touch-action:none;
+        }
+        .touch-joystick-inner {
+            width:50px;
+            height:50px;
+            border-radius:50%;
+            background:#4ecdc4;
+            position:absolute;
+            top:35px;
+            left:35px;
+            touch-action:none;
+            box-shadow: 0 0 20px #4ecdc444;
+        }
+        .touch-btn {
+            width:70px;
+            height:70px;
+            border-radius:50%;
+            background:#4ecdc433;
+            border:2px solid #4ecdc4;
+            color:#fff;
+            font-size:0.7rem;
+            font-weight:bold;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            touch-action:none;
+            box-shadow: 0 0 20px #4ecdc444;
+            text-align:center;
+            line-height:1.2;
+            padding:5px;
+        }
+        .touch-btn:active {
+            background:#4ecdc466;
+            transform:scale(0.95);
+        }
+        .controls {
+            margin-top:5px;
+            color:#888;
+            font-size:0.7rem;
+        }
+        .controls span {
+            display:inline-block;
+            background:rgba(255,255,255,0.1);
+            padding:2px 8px;
+            border-radius:20px;
+            margin:0 2px;
+        }
+        @media (max-width:600px) {
+            .title { font-size:1.2rem; }
+            .touch-joystick { width:80px; height:80px; }
+            .touch-joystick-inner { width:35px; height:35px; top:22.5px; left:22.5px; }
+            .touch-btn { width:55px; height:55px; font-size:0.6rem; }
+        }
+        @media (max-width:400px) {
+            .touch-joystick { width:60px; height:60px; }
+            .touch-joystick-inner { width:25px; height:25px; top:17.5px; left:17.5px; }
+            .touch-btn { width:45px; height:45px; font-size:0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="title">Neon Runner</div>
+        <div class="genre">tower defense</div>
+        <div class="mechanic">⚡ Void Step</div>
+        <div class="canvas-wrapper">
+            <canvas id="c" width="900" height="600"></canvas>
+        </div>
+        <div class="touch-controls">
+            <div class="touch-joystick" id="joystick">
+                <div class="touch-joystick-inner" id="joystickInner"></div>
+            </div>
+            <div class="touch-btn" id="mechanicBtn">⚡<br>Void Ste</div>
+        </div>
+        <div class="controls"><span>WASD</span> or <span>←→↑↓</span> move | <span>SPACE</span> Void Step</div>
+    </div>
+    <script>
+        const c=document.getElementById('c'),ctx=c.getContext('2d');
+        const C={p:'#4ecdc4',s:'#ff6b6b',a:'#ffd93d',g:true};
+        const state={p:{x:450,y:300,size:25,h:50,mh:50},e:[],parts:[],score:0,combo:0,go:false,started:false,cd:0,maxCd:90};
+        let keys={},touchX=0,touchY=0,touchActive=false;
+        
+        // Joystick
+        const joystick=document.getElementById('joystick');
+        const joystickInner=document.getElementById('joystickInner');
+        let jActive=false,jX=0,jY=0;
+        
+        joystick.addEventListener('touchstart',function(e){e.preventDefault();jActive=true;const r=this.getBoundingClientRect();const t=e.touches[0];jX=(t.clientX-r.left-40)/40;jY=(t.clientY-r.top-40)/40;updateJoystick();});
+        joystick.addEventListener('touchmove',function(e){e.preventDefault();if(!jActive)return;const r=this.getBoundingClientRect();const t=e.touches[0];jX=(t.clientX-r.left-40)/40;jY=(t.clientY-r.top-40)/40;updateJoystick();});
+        joystick.addEventListener('touchend',function(e){e.preventDefault();jActive=false;jX=0;jY=0;updateJoystick();});
+        
+        function updateJoystick(){const max=1;let x=Math.max(-max,Math.min(max,jX));let y=Math.max(-max,Math.min(max,jY));const d=Math.hypot(x,y);if(d>max){x/=d;y/=d;}jX=x;jY=y;joystickInner.style.transform=`translate(${jX*20}px,${jY*20}px)`;}
+        
+        // Mechanic button
+        document.getElementById('mechanicBtn').addEventListener('touchstart',function(e){e.preventDefault();simulateKey(' ');});
+        document.getElementById('mechanicBtn').addEventListener('mousedown',function(e){simulateKey(' ');});
+        
+        function simulateKey(k){const ev=new KeyboardEvent('keydown',{key:k,code:k===' '?'Space':k});document.dispatchEvent(ev);setTimeout(()=>{const up=new KeyboardEvent('keyup',{key:k,code:k===' '?'Space':k});document.dispatchEvent(up);},200);}
+        
+        function spawn(){const x=Math.random()*880+10,y=Math.random()*580+10;state.e.push({x,y,size:25,hp:3,mh:3,speed:1.2});}
+        function useM(){if(state.cd>0)return;state.cd=state.maxCd;state.e.forEach(e=>{const dx=e.x-state.p.x,dy=e.y-state.p.y,d=Math.hypot(dx,dy);if(d<150){const a=Math.atan2(dy,dx);e.x+=Math.cos(a)*80;e.y+=Math.sin(a)*80;e.hp-=2;}});addP(state.p.x,state.p.y,C.p,20);}
+        function addP(x,y,color,c){for(let i=0;i<c;i++)state.parts.push({x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:30+Math.random()*20,maxLife:50,color,size:3+Math.random()*4});}
+        
+        function update(){if(state.go||!state.started)return;let dx=0,dy=0,s=4.5;
+        // Keyboard
+        if(keys['w']||keys['ArrowUp'])dy=-s;if(keys['s']||keys['ArrowDown'])dy=s;if(keys['a']||keys['ArrowLeft'])dx=-s;if(keys['d']||keys['ArrowRight'])dx=s;
+        // Touch
+        if(jActive){dx+=jX*s*0.7;dy+=jY*s*0.7;}
+        if(dx&&dy){dx*=0.707;dy*=0.707;}
+        state.p.x=Math.max(20,Math.min(880,state.p.x+dx));state.p.y=Math.max(20,Math.min(580,state.p.y+dy));
+        if(state.cd>0)state.cd--;if(Math.random()<0.02*4)spawn();
+        for(let i=0;i<state.e.length;i++){const e=state.e[i],dx2=state.p.x-e.x,dy2=state.p.y-e.y,d=Math.hypot(dx2,dy2);if(d>0){e.x+=(dx2/d)*e.speed;e.y+=(dy2/d)*e.speed;}e.x=Math.max(10,Math.min(890,e.x));e.y=Math.max(10,Math.min(590,e.y));const cd=Math.hypot(state.p.x-e.x,state.p.y-e.y);if(cd<state.p.size/2+e.size/2){state.p.h-=10;state.combo=0;if(state.p.h<=0){state.p.h=0;state.go=true;return;}}if(e.hp<=0){state.score+=10*(1+Math.floor(state.combo/10));state.combo++;addP(e.x,e.y,C.s,15);state.e.splice(i,1);i--;}}
+        for(let i=0;i<state.parts.length;i++){const p=state.parts[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.98;p.vy*=0.98;p.life--;if(p.life<=0){state.parts.splice(i,1);i--;}}}
+        
+        function draw(){const g=ctx.createRadialGradient(450,300,100,450,300,500);g.addColorStop(0,'#1a1a3e');g.addColorStop(1,'#0a0a2e');ctx.fillStyle=g;ctx.fillRect(0,0,900,600);ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;for(let i=0;i<900;i+=50){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();}
+        state.e.forEach(e=>{const g2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size);g2.addColorStop(0,C.s);g2.addColorStop(1,'#cc4444');ctx.fillStyle=g2;ctx.shadowColor=C.s;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;const w=e.size;ctx.fillStyle='#444';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4);ctx.fillStyle='#4ecdc4';ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w*(e.hp/e.mh),4);ctx.fillStyle='#fff';ctx.font='18px monospace';ctx.fillText('👾',e.x-12,e.y-8);});
+        const g3=ctx.createRadialGradient(state.p.x-8,state.p.y-8,5,state.p.x,state.p.y,state.p.size);g3.addColorStop(0,C.p);g3.addColorStop(1,'#2a7d8f');ctx.fillStyle=g3;ctx.shadowColor=C.p;ctx.shadowBlur=20;ctx.beginPath();ctx.arc(state.p.x,state.p.y,state.p.size/2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='24px monospace';ctx.fillText('🎮',state.p.x-15,state.p.y-12);
+        state.parts.forEach(p=>{const a=p.life/p.maxLife;ctx.globalAlpha=a;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;});
+        ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='bold 22px monospace';ctx.fillText('SCORE: '+state.score,20,45);ctx.fillStyle='#ff4444';ctx.fillRect(20,65,200,14);ctx.fillStyle=C.p;ctx.fillRect(20,65,(state.p.h/state.p.mh)*200,14);
+        if(state.combo>0){ctx.fillStyle=C.a;ctx.font='bold 18px monospace';ctx.fillText('⚡ '+state.combo+'x COMBO!',20,120);}
+        if(state.cd>0){ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(20,150,state.cd*2,6);}ctx.fillStyle='#888';ctx.font='12px monospace';ctx.fillText('⚡ Void Step (SPACE)',20,165);
+        if(state.go){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 48px monospace';ctx.textAlign='center';ctx.fillText('GAME OVER',450,250);ctx.font='24px monospace';ctx.fillStyle=C.a;ctx.fillText('Score: '+state.score,450,320);ctx.font='16px monospace';ctx.fillStyle='#aaa';ctx.fillText('Press R to restart',450,370);ctx.textAlign='left';}
+        if(!state.started&&!state.go){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,900,600);ctx.fillStyle='#fff';ctx.font='bold 36px monospace';ctx.textAlign='center';ctx.fillText('🎮 Neon Runner',450,230);ctx.font='18px monospace';ctx.fillStyle=C.p;ctx.fillText('Press SPACE to start',450,320);ctx.textAlign='left';}}
+        
+        function loop(){update();draw();requestAnimationFrame(loop);}
+        
+        document.addEventListener('keydown',function(e){const k=e.key.toLowerCase();keys[k]=true;if(e.key===' '){e.preventDefault();if(!state.started){state.started=true;for(let i=0;i<5;i++)spawn();}else{useM();}}if((e.key==='r'||e.key==='R')&&state.go){state.p={x:450,y:300,size:25,h:50,mh:50};state.e=[];state.parts=[];state.score=0;state.combo=0;state.go=false;state.cd=0;for(let i=0;i<5;i++)spawn();}});
+        document.addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
+        
+        // Click/tap to start
+        c.addEventListener('click',function(){if(!state.started&&!state.go){state.started=true;for(let i=0;i<5;i++)spawn();}});
+        c.addEventListener('touchstart',function(e){e.preventDefault();if(!state.started&&!state.go){state.started=true;for(let i=0;i<5;i++)spawn();}});
+        
+        loop();
+    </script>
+</body>
+</html>
