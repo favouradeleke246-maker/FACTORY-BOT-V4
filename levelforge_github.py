@@ -385,436 +385,6 @@ class LicenseSystem:
 
 
 # ============================================================================
-# HTML5 GAME ENGINE
-# ============================================================================
-
-class HTML5GameEngine:
-    """Generates HTML5 game files"""
-    
-    @staticmethod
-    def generate(game_data: Dict, visual_theme: Dict, game_mode: Dict, game_style: Dict) -> str:
-        """Generate complete HTML5 game"""
-        
-        theme = visual_theme
-        mode = game_mode
-        style = game_style
-        
-        return f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{game_data['name']} - DeathRoll Studio</title>
-    <style>
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{
-            background: linear-gradient(135deg, {theme['bg'][0]}, {theme['bg'][1]});
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }}
-        .game-wrapper {{ text-align: center; padding: 15px; }}
-        .game-title {{
-            font-size: 2rem;
-            color: {theme['primary']};
-            text-shadow: {'0 0 20px ' + theme['primary'] if theme['glow'] else 'none'};
-            font-weight: bold;
-        }}
-        .game-genre {{ color: {theme['secondary']}; font-size: 0.9rem; }}
-        .game-mechanic {{ color: {theme['accent']}; font-size: 0.85rem; margin-top: 5px; }}
-        canvas {{
-            border: 3px solid {theme['primary']};
-            border-radius: 15px;
-            box-shadow: {'0 0 40px ' + theme['primary'] if theme['glow'] else '0 0 20px rgba(0,0,0,0.5)'};
-            max-width: 100%;
-            background: {theme['bg'][0]};
-            display: block;
-            margin: 0 auto;
-        }}
-        .controls {{ margin-top: 15px; color: #aaa; font-size: 0.8rem; }}
-        .controls span {{
-            display: inline-block;
-            background: rgba(255,255,255,0.1);
-            padding: 4px 10px;
-            border-radius: 20px;
-            margin: 0 3px;
-        }}
-        @media (max-width: 768px) {{
-            .game-title {{ font-size: 1.3rem; }}
-            canvas {{ width: 100%; height: auto; }}
-        }}
-    </style>
-</head>
-<body>
-    <div class="game-wrapper">
-        <div class="game-title">{game_data['name']}</div>
-        <div class="game-genre">{game_data['genre']}</div>
-        <div class="game-mechanic">⚡ {game_data['mechanic']}</div>
-        <canvas id="gameCanvas" width="900" height="600"></canvas>
-        <div class="controls">
-            <span>WASD</span> or <span>← → ↑ ↓</span> move &nbsp;|&nbsp; <span>SPACE</span> {game_data['mechanic']}
-        </div>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Game configuration
-        const CONFIG = {{
-            style: '{game_style}',
-            mode: '{mode["name"]}',
-            theme: {{
-                primary: '{theme["primary"]}',
-                secondary: '{theme["secondary"]}',
-                accent: '{theme["accent"]}',
-                glow: {str(theme["glow"]).lower()}
-            }}
-        }};
-        
-        // Game state
-        let state = {{
-            player: {{ x: 450, y: 300, size: 25, health: {style["player_health"]}, maxHealth: {style["player_health"]} }},
-            enemies: [],
-            particles: [],
-            bullets: [],
-            collectibles: [],
-            score: 0,
-            combo: 0,
-            wave: 1,
-            timeLeft: {60 if mode["name"] == "Time Attack" else 0},
-            gameOver: false,
-            started: false,
-            mechanicCooldown: 0,
-            maxCooldown: 90,
-            hasShield: false,
-            shieldTimer: 0
-        }};
-        
-        let keys = {{}};
-        
-        function spawnEnemy() {{
-            const x = Math.random() * 900;
-            const y = Math.random() * 600;
-            state.enemies.push({{
-                x, y,
-                size: {25 if game_style != "shooter" else 20},
-                hp: {3 if game_style != "wave_defense" else 5},
-                maxHp: {3 if game_style != "wave_defense" else 5},
-                speed: {style["enemy_speed"]} * (1 + state.wave * 0.1)
-            }});
-        }}
-        
-        function useMechanic() {{
-            if (state.mechanicCooldown > 0) return;
-            state.mechanicCooldown = state.maxCooldown;
-            
-            // Push enemies away
-            state.enemies.forEach(e => {{
-                const dx = e.x - state.player.x;
-                const dy = e.y - state.player.y;
-                const dist = Math.hypot(dx, dy);
-                if(dist < 150) {{
-                    const angle = Math.atan2(dy, dx);
-                    e.x += Math.cos(angle) * 80;
-                    e.y += Math.sin(angle) * 80;
-                    e.hp -= 2;
-                }}
-            }});
-            addParticles(state.player.x, state.player.y, CONFIG.theme.primary, 20);
-        }}
-        
-        function addParticles(x, y, color, count = 8) {{
-            for(let i = 0; i < count; i++) {{
-                state.particles.push({{
-                    x: x + (Math.random() - 0.5) * 20,
-                    y: y + (Math.random() - 0.5) * 20,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.5) * 6,
-                    life: 30 + Math.random() * 20,
-                    maxLife: 50,
-                    color: color,
-                    size: 3 + Math.random() * 4
-                }});
-            }}
-        }}
-        
-        function update() {{
-            if (state.gameOver || !state.started) return;
-            
-            // Player movement
-            let dx = 0, dy = 0, speed = 4.5;
-            if(keys['w'] || keys['ArrowUp']) dy = -speed;
-            if(keys['s'] || keys['ArrowDown']) dy = speed;
-            if(keys['a'] || keys['ArrowLeft']) dx = -speed;
-            if(keys['d'] || keys['ArrowRight']) dx = speed;
-            if(dx && dy) {{ dx *= 0.707; dy *= 0.707; }}
-            state.player.x = Math.max(20, Math.min(880, state.player.x + dx));
-            state.player.y = Math.max(20, Math.min(580, state.player.y + dy));
-            
-            // Cooldowns
-            if(state.mechanicCooldown > 0) state.mechanicCooldown--;
-            if(state.hasShield) {{
-                state.shieldTimer--;
-                if(state.shieldTimer <= 0) state.hasShield = false;
-            }}
-            
-            // Spawn enemies
-            if(Math.random() < 0.02 * {style["spawn_rate"]}) spawnEnemy();
-            
-            // Update enemies
-            for(let i = 0; i < state.enemies.length; i++) {{
-                const e = state.enemies[i];
-                const dx2 = state.player.x - e.x;
-                const dy2 = state.player.y - e.y;
-                const dist = Math.hypot(dx2, dy2);
-                if(dist > 0) {{
-                    e.x += (dx2 / dist) * e.speed;
-                    e.y += (dy2 / dist) * e.speed;
-                }}
-                e.x = Math.max(10, Math.min(890, e.x));
-                e.y = Math.max(10, Math.min(590, e.y));
-                
-                // Collision
-                const cd = Math.hypot(state.player.x - e.x, state.player.y - e.y);
-                if(cd < state.player.size/2 + e.size/2) {{
-                    if(state.hasShield) {{
-                        const angle = Math.atan2(e.y - state.player.y, e.x - state.player.x);
-                        e.x += Math.cos(angle) * 50;
-                        e.y += Math.sin(angle) * 50;
-                        e.hp -= 3;
-                    }} else {{
-                        state.player.health -= 10;
-                        state.combo = 0;
-                        if(state.player.health <= 0) {{
-                            state.player.health = 0;
-                            state.gameOver = true;
-                            return;
-                        }}
-                    }}
-                }}
-                
-                // Enemy death
-                if(e.hp <= 0) {{
-                    state.score += 10 * (1 + Math.floor(state.combo / 10));
-                    state.combo++;
-                    addParticles(e.x, e.y, CONFIG.theme.secondary, 15);
-                    state.enemies.splice(i,1);
-                    i--;
-                    
-                    if(CONFIG.mode === "Wave Defense" && state.enemies.length === 0) {{
-                        state.wave++;
-                        for(let j = 0; j < 3 + state.wave; j++) spawnEnemy();
-                    }}
-                }}
-            }}
-            
-            // Update particles
-            for(let i = 0; i < state.particles.length; i++) {{
-                const p = state.particles[i];
-                p.x += p.vx; p.y += p.vy;
-                p.vx *= 0.98; p.vy *= 0.98;
-                p.life--;
-                if(p.life <= 0) {{
-                    state.particles.splice(i,1);
-                    i--;
-                }}
-            }}
-        }}
-        
-        function draw() {{
-            // Background
-            const grad = ctx.createRadialGradient(450, 300, 100, 450, 300, 500);
-            grad.addColorStop(0, '{theme['bg'][1]}');
-            grad.addColorStop(1, '{theme['bg'][0]}');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, 900, 600);
-            
-            // Grid
-            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-            ctx.lineWidth = 1;
-            for(let i = 0; i < 900; i += 50) {{
-                ctx.beginPath();
-                ctx.moveTo(i, 0); ctx.lineTo(i, 600);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(0, i); ctx.lineTo(900, i);
-                ctx.stroke();
-            }}
-            
-            // Draw enemies
-            state.enemies.forEach(e => {{
-                const grad2 = ctx.createRadialGradient(e.x-5, e.y-5, 5, e.x, e.y, e.size);
-                grad2.addColorStop(0, CONFIG.theme.secondary);
-                grad2.addColorStop(1, '#cc4444');
-                ctx.fillStyle = grad2;
-                ctx.shadowColor = CONFIG.theme.secondary;
-                ctx.shadowBlur = 10;
-                ctx.beginPath();
-                ctx.arc(e.x, e.y, e.size/2, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                
-                // Health bar
-                const hpWidth = e.size;
-                ctx.fillStyle = '#444';
-                ctx.fillRect(e.x - hpWidth/2, e.y - e.size/2 - 10, hpWidth, 4);
-                ctx.fillStyle = '#4ecdc4';
-                ctx.fillRect(e.x - hpWidth/2, e.y - e.size/2 - 10, hpWidth * (e.hp/e.maxHp), 4);
-                
-                ctx.fillStyle = '#fff';
-                ctx.font = '18px monospace';
-                ctx.fillText('👾', e.x-12, e.y-8);
-            }});
-            
-            // Draw player
-            const grad3 = ctx.createRadialGradient(state.player.x-8, state.player.y-8, 5, state.player.x, state.player.y, state.player.size);
-            grad3.addColorStop(0, CONFIG.theme.primary);
-            grad3.addColorStop(1, '#2a7d8f');
-            ctx.fillStyle = grad3;
-            ctx.shadowColor = CONFIG.theme.primary;
-            ctx.shadowBlur = 20;
-            ctx.beginPath();
-            ctx.arc(state.player.x, state.player.y, state.player.size/2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            
-            // Shield
-            if(state.hasShield) {{
-                ctx.strokeStyle = CONFIG.theme.primary;
-                ctx.lineWidth = 3;
-                ctx.shadowColor = CONFIG.theme.primary;
-                ctx.shadowBlur = 30;
-                ctx.beginPath();
-                ctx.arc(state.player.x, state.player.y, state.player.size/2 + 8, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.shadowBlur = 0;
-            }}
-            
-            ctx.fillStyle = '#fff';
-            ctx.font = '24px monospace';
-            ctx.fillText('🎮', state.player.x-15, state.player.y-12);
-            
-            // Particles
-            state.particles.forEach(p => {{
-                const alpha = p.life / p.maxLife;
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = p.color;
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.globalAlpha = 1;
-            }});
-            
-            // UI
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 22px monospace';
-            ctx.fillText(`SCORE: {state.score}`, 20, 45);
-            
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(20, 65, 200, 14);
-            ctx.fillStyle = CONFIG.theme.primary;
-            ctx.fillRect(20, 65, (state.player.health / state.player.maxHealth) * 200, 14);
-            
-            if(state.combo > 0) {{
-                ctx.fillStyle = CONFIG.theme.accent;
-                ctx.font = 'bold 18px monospace';
-                ctx.fillText(`⚡ {state.combo}x COMBO!`, 20, 120);
-            }}
-            
-            if(CONFIG.mode === "Wave Defense") {{
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 16px monospace';
-                ctx.fillText(`🌊 WAVE {state.wave}`, 20, 150);
-            }}
-            
-            if(state.mechanicCooldown > 0) {{
-                ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                ctx.fillRect(20, 190, state.mechanicCooldown * 2, 6);
-            }}
-            ctx.fillStyle = '#888';
-            ctx.font = '12px monospace';
-            ctx.fillText(`⚡ {game_data['mechanic']} (SPACE)`, 20, 205);
-            
-            // Game Over
-            if(state.gameOver) {{
-                ctx.fillStyle = 'rgba(0,0,0,0.7)';
-                ctx.fillRect(0, 0, 900, 600);
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 48px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText('GAME OVER', 450, 250);
-                ctx.font = '24px monospace';
-                ctx.fillStyle = CONFIG.theme.accent;
-                ctx.fillText(`Score: {state.score}`, 450, 320);
-                ctx.font = '16px monospace';
-                ctx.fillStyle = '#aaa';
-                ctx.fillText('Press R to restart', 450, 370);
-                ctx.textAlign = 'left';
-            }}
-            
-            // Start
-            if(!state.started && !state.gameOver) {{
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(0, 0, 900, 600);
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 36px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText('🎮 {game_data['name']}', 450, 230);
-                ctx.font = '18px monospace';
-                ctx.fillStyle = CONFIG.theme.primary;
-                ctx.fillText('Press SPACE to start', 450, 320);
-                ctx.textAlign = 'left';
-            }}
-        }}
-        
-        function gameLoop() {{
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }}
-        
-        // Controls
-        document.addEventListener('keydown', (e) => {{
-            keys[e.key.toLowerCase()] = true;
-            if(e.key === ' ') {{
-                e.preventDefault();
-                if(!state.started) {{ state.started = true; for(let i = 0; i < 5; i++) spawnEnemy(); }}
-                else useMechanic();
-            }}
-            if((e.key === 'r' || e.key === 'R') && state.gameOver) {{
-                state = {{
-                    ...state,
-                    player: {{ x: 450, y: 300, size: 25, health: {style["player_health"]}, maxHealth: {style["player_health"]} }},
-                    enemies: [],
-                    particles: [],
-                    bullets: [],
-                    collectibles: [],
-                    score: 0,
-                    combo: 0,
-                    wave: 1,
-                    gameOver: false,
-                    mechanicCooldown: 0,
-                    hasShield: false,
-                    shieldTimer: 0
-                }};
-                for(let i = 0; i < 5; i++) spawnEnemy();
-            }}
-        }});
-        document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
-        
-        gameLoop();
-    </script>
-</body>
-</html>'''
-
-# ============================================================================
 # PORTFOLIO SYSTEM
 # ============================================================================
 
@@ -1087,9 +657,7 @@ class DeathRollStudio:
             shutil.copy(sprite_path, project_dir / "icon.png")
         
         # Generate HTML5 game
-        html_content = HTML5GameEngine.generate(
-            game_data, visual_theme, game_mode, game_style
-        )
+        html_content = self._generate_html5_game(game_data, visual_theme, game_mode, game_style)
         (project_dir / "index.html").write_text(html_content)
         
         # Create license file
@@ -1111,9 +679,38 @@ class DeathRollStudio:
 ╚══════════════════════════════════════════════════════════╝
 """)
         
+        # Create README
+        (project_dir / "README.md").write_text(f"""
+# {game_data['name']}
+
+## Description
+{game_data['description']}
+
+## Genre
+{game_data['genre']}
+
+## Key Mechanic
+**{game_data['mechanic']}**: {game_data['mechanic_description']}
+
+## How to Play
+- **HTML5**: Open `index.html` in any browser
+- **Controls**: WASD or Arrow Keys to move, SPACE for {game_data['mechanic']}
+
+## License
+{license_key}
+
+## Price
+{game_data.get('price', 7)} SOL
+
+---
+Generated by DeathRoll Studio v{BOT_VERSION}
+""")
+        
         # Create ZIP
         zip_path = Path("workspace/latest_game.zip")
         try:
+            if zip_path.exists():
+                zip_path.unlink()
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for file in project_dir.rglob("*"):
                     if file.is_file():
@@ -1122,6 +719,404 @@ class DeathRollStudio:
             pass
         
         return f"https://{CONFIG['brand']['github']}.github.io/FACTORY-BOT-V4/workspace/{game_data['name'].replace(' ', '_')}/index.html"
+    
+    def _generate_html5_game(self, game_data: Dict, visual_theme: Dict, game_mode: Dict, game_style: Dict) -> str:
+        """Generate clean HTML5 game with proper variable handling"""
+        
+        theme = visual_theme
+        mode = game_mode
+        style = game_style
+        theme_primary = theme["primary"]
+        theme_secondary = theme["secondary"]
+        theme_accent = theme["accent"]
+        theme_glow = "true" if theme["glow"] else "false"
+        theme_bg0 = theme["bg"][0]
+        theme_bg1 = theme["bg"][1]
+        
+        player_health = style["player_health"]
+        enemy_speed = style["enemy_speed"]
+        spawn_rate = style["spawn_rate"]
+        game_style_id = style.get("id", "survival")
+        
+        mode_name = mode["name"]
+        time_limit = 60 if mode_name == "Time Attack" else 0
+        
+        game_name = game_data["name"]
+        game_genre = game_data["genre"]
+        game_mechanic = game_data["mechanic"]
+        game_hook = game_data.get("hook", "Master the unknown.")
+        
+        return f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{game_name} - DeathRoll Studio</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            background: linear-gradient(135deg, {theme_bg0}, {theme_bg1});
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }}
+        .game-wrapper {{ text-align: center; padding: 15px; }}
+        .game-title {{
+            font-size: 2rem;
+            color: {theme_primary};
+            text-shadow: {'0 0 20px ' + theme_primary if theme['glow'] else 'none'};
+            font-weight: bold;
+        }}
+        .game-genre {{ color: {theme_secondary}; font-size: 0.9rem; }}
+        .game-mechanic {{ color: {theme_accent}; font-size: 0.85rem; margin-top: 5px; }}
+        canvas {{
+            border: 3px solid {theme_primary};
+            border-radius: 15px;
+            box-shadow: {'0 0 40px ' + theme_primary if theme['glow'] else '0 0 20px rgba(0,0,0,0.5)'};
+            max-width: 100%;
+            background: {theme_bg0};
+            display: block;
+            margin: 0 auto;
+        }}
+        .controls {{ margin-top: 15px; color: #aaa; font-size: 0.8rem; }}
+        .controls span {{
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin: 0 3px;
+        }}
+        @media (max-width: 768px) {{
+            .game-title {{ font-size: 1.3rem; }}
+            canvas {{ width: 100%; height: auto; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div class="game-title">{game_name}</div>
+        <div class="game-genre">{game_genre}</div>
+        <div class="game-mechanic">⚡ {game_mechanic}</div>
+        <canvas id="gameCanvas" width="900" height="600"></canvas>
+        <div class="controls">
+            <span>WASD</span> or <span>← → ↑ ↓</span> move &nbsp;|&nbsp; <span>SPACE</span> {game_mechanic}
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Theme colors
+        const COLORS = {{
+            primary: '{theme_primary}',
+            secondary: '{theme_secondary}',
+            accent: '{theme_accent}',
+            glow: {theme_glow}
+        }};
+        
+        // Game state
+        const state = {{
+            player: {{ x: 450, y: 300, size: 25, health: {player_health}, maxHealth: {player_health} }},
+            enemies: [],
+            particles: [],
+            bullets: [],
+            score: 0,
+            combo: 0,
+            wave: 1,
+            gameOver: false,
+            started: false,
+            mechanicCooldown: 0,
+            maxCooldown: 90
+        }};
+        
+        let keys = {{}};
+        
+        function spawnEnemy() {{
+            const x = Math.random() * 880 + 10;
+            const y = Math.random() * 580 + 10;
+            state.enemies.push({{
+                x: x, y: y,
+                size: 25,
+                hp: 3,
+                maxHp: 3,
+                speed: {enemy_speed} * (1 + state.wave * 0.1)
+            }});
+        }}
+        
+        function useMechanic() {{
+            if (state.mechanicCooldown > 0) return;
+            state.mechanicCooldown = state.maxCooldown;
+            
+            state.enemies.forEach(e => {{
+                const dx = e.x - state.player.x;
+                const dy = e.y - state.player.y;
+                const dist = Math.hypot(dx, dy);
+                if(dist < 150) {{
+                    const angle = Math.atan2(dy, dx);
+                    e.x += Math.cos(angle) * 80;
+                    e.y += Math.sin(angle) * 80;
+                    e.hp -= 2;
+                }}
+            }});
+            addParticles(state.player.x, state.player.y, COLORS.primary, 20);
+        }}
+        
+        function addParticles(x, y, color, count) {{
+            for(let i = 0; i < count; i++) {{
+                state.particles.push({{
+                    x: x + (Math.random() - 0.5) * 20,
+                    y: y + (Math.random() - 0.5) * 20,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 30 + Math.random() * 20,
+                    maxLife: 50,
+                    color: color,
+                    size: 3 + Math.random() * 4
+                }});
+            }}
+        }}
+        
+        function update() {{
+            if (state.gameOver || !state.started) return;
+            
+            // Player movement
+            let dx = 0, dy = 0, speed = 4.5;
+            if(keys['w'] || keys['ArrowUp']) dy = -speed;
+            if(keys['s'] || keys['ArrowDown']) dy = speed;
+            if(keys['a'] || keys['ArrowLeft']) dx = -speed;
+            if(keys['d'] || keys['ArrowRight']) dx = speed;
+            if(dx && dy) {{ dx *= 0.707; dy *= 0.707; }}
+            state.player.x = Math.max(20, Math.min(880, state.player.x + dx));
+            state.player.y = Math.max(20, Math.min(580, state.player.y + dy));
+            
+            // Cooldowns
+            if(state.mechanicCooldown > 0) state.mechanicCooldown--;
+            
+            // Spawn enemies
+            if(Math.random() < 0.02 * {spawn_rate}) spawnEnemy();
+            
+            // Update enemies
+            for(let i = 0; i < state.enemies.length; i++) {{
+                const e = state.enemies[i];
+                const dx2 = state.player.x - e.x;
+                const dy2 = state.player.y - e.y;
+                const dist = Math.hypot(dx2, dy2);
+                if(dist > 0) {{
+                    e.x += (dx2 / dist) * e.speed;
+                    e.y += (dy2 / dist) * e.speed;
+                }}
+                e.x = Math.max(10, Math.min(890, e.x));
+                e.y = Math.max(10, Math.min(590, e.y));
+                
+                // Collision
+                const cd = Math.hypot(state.player.x - e.x, state.player.y - e.y);
+                if(cd < state.player.size/2 + e.size/2) {{
+                    state.player.health -= 10;
+                    state.combo = 0;
+                    if(state.player.health <= 0) {{
+                        state.player.health = 0;
+                        state.gameOver = true;
+                        return;
+                    }}
+                }}
+                
+                // Enemy death
+                if(e.hp <= 0) {{
+                    state.score += 10 * (1 + Math.floor(state.combo / 10));
+                    state.combo++;
+                    addParticles(e.x, e.y, COLORS.secondary, 15);
+                    state.enemies.splice(i,1);
+                    i--;
+                }}
+            }}
+            
+            // Update particles
+            for(let i = 0; i < state.particles.length; i++) {{
+                const p = state.particles[i];
+                p.x += p.vx; p.y += p.vy;
+                p.vx *= 0.98; p.vy *= 0.98;
+                p.life--;
+                if(p.life <= 0) {{
+                    state.particles.splice(i,1);
+                    i--;
+                }}
+            }}
+        }}
+        
+        function draw() {{
+            // Background
+            const grad = ctx.createRadialGradient(450, 300, 100, 450, 300, 500);
+            grad.addColorStop(0, '{theme_bg1}');
+            grad.addColorStop(1, '{theme_bg0}');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 900, 600);
+            
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+            ctx.lineWidth = 1;
+            for(let i = 0; i < 900; i += 50) {{
+                ctx.beginPath();
+                ctx.moveTo(i, 0); ctx.lineTo(i, 600);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i); ctx.lineTo(900, i);
+                ctx.stroke();
+            }}
+            
+            // Draw enemies
+            state.enemies.forEach(e => {{
+                const grad2 = ctx.createRadialGradient(e.x-5, e.y-5, 5, e.x, e.y, e.size);
+                grad2.addColorStop(0, COLORS.secondary);
+                grad2.addColorStop(1, '#cc4444');
+                ctx.fillStyle = grad2;
+                ctx.shadowColor = COLORS.secondary;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.size/2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // Health bar
+                const hpWidth = e.size;
+                ctx.fillStyle = '#444';
+                ctx.fillRect(e.x - hpWidth/2, e.y - e.size/2 - 10, hpWidth, 4);
+                ctx.fillStyle = '#4ecdc4';
+                ctx.fillRect(e.x - hpWidth/2, e.y - e.size/2 - 10, hpWidth * (e.hp/e.maxHp), 4);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '18px monospace';
+                ctx.fillText('👾', e.x-12, e.y-8);
+            }});
+            
+            // Draw player
+            const grad3 = ctx.createRadialGradient(state.player.x-8, state.player.y-8, 5, state.player.x, state.player.y, state.player.size);
+            grad3.addColorStop(0, COLORS.primary);
+            grad3.addColorStop(1, '#2a7d8f');
+            ctx.fillStyle = grad3;
+            ctx.shadowColor = COLORS.primary;
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(state.player.x, state.player.y, state.player.size/2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.font = '24px monospace';
+            ctx.fillText('🎮', state.player.x-15, state.player.y-12);
+            
+            // Particles
+            state.particles.forEach(p => {{
+                const alpha = p.life / p.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }});
+            
+            // UI
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 22px monospace';
+            ctx.fillText('SCORE: ' + state.score, 20, 45);
+            
+            ctx.fillStyle = '#ff4444';
+            ctx.fillRect(20, 65, 200, 14);
+            ctx.fillStyle = COLORS.primary;
+            ctx.fillRect(20, 65, (state.player.health / state.player.maxHealth) * 200, 14);
+            
+            if(state.combo > 0) {{
+                ctx.fillStyle = COLORS.accent;
+                ctx.font = 'bold 18px monospace';
+                ctx.fillText('⚡ ' + state.combo + 'x COMBO!', 20, 120);
+            }}
+            
+            if(state.mechanicCooldown > 0) {{
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.fillRect(20, 150, state.mechanicCooldown * 2, 6);
+            }}
+            ctx.fillStyle = '#888';
+            ctx.font = '12px monospace';
+            ctx.fillText('⚡ {game_mechanic} (SPACE)', 20, 165);
+            
+            // Game Over
+            if(state.gameOver) {{
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, 900, 600);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 48px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', 450, 250);
+                ctx.font = '24px monospace';
+                ctx.fillStyle = COLORS.accent;
+                ctx.fillText('Score: ' + state.score, 450, 320);
+                ctx.font = '16px monospace';
+                ctx.fillStyle = '#aaa';
+                ctx.fillText('Press R to restart', 450, 370);
+                ctx.textAlign = 'left';
+            }}
+            
+            // Start
+            if(!state.started && !state.gameOver) {{
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(0, 0, 900, 600);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 36px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('🎮 {game_name}', 450, 230);
+                ctx.font = '18px monospace';
+                ctx.fillStyle = COLORS.primary;
+                ctx.fillText('Press SPACE to start', 450, 320);
+                ctx.textAlign = 'left';
+            }}
+        }}
+        
+        function gameLoop() {{
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }}
+        
+        // Controls
+        document.addEventListener('keydown', function(e) {{
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+            if(e.key === ' ') {{
+                e.preventDefault();
+                if(!state.started) {{
+                    state.started = true;
+                    for(let i = 0; i < 5; i++) spawnEnemy();
+                }} else {{
+                    useMechanic();
+                }}
+            }}
+            if((e.key === 'r' || e.key === 'R') && state.gameOver) {{
+                state.player = {{ x: 450, y: 300, size: 25, health: {player_health}, maxHealth: {player_health} }};
+                state.enemies = [];
+                state.particles = [];
+                state.bullets = [];
+                state.score = 0;
+                state.combo = 0;
+                state.wave = 1;
+                state.gameOver = false;
+                state.mechanicCooldown = 0;
+                for(let i = 0; i < 5; i++) spawnEnemy();
+            }}
+        }});
+        document.addEventListener('keyup', function(e) {{
+            keys[e.key.toLowerCase()] = false;
+        }});
+        
+        gameLoop();
+    </script>
+</body>
+</html>'''
     
     def _create_portfolio_entry(self, game_data: Dict, license_key: str, art_url: Optional[str], html5_url: str) -> Dict:
         """Create portfolio entry"""
@@ -1168,7 +1163,8 @@ class DeathRollStudio:
             "mechanic": game_data["mechanic"],
             "visual_style": game_data.get("visual_style"),
             "game_mode": game_data.get("game_mode"),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "price": game_data.get("price", 7)
         })
         
         # Keep last 100
@@ -1183,6 +1179,11 @@ class DeathRollStudio:
         
         if genre_counts:
             sar_data["analysis"]["best_genre"] = max(genre_counts, key=genre_counts.get)
+        
+        # Update average price
+        total_price = sum(g.get("price", 0) for g in sar_data["study"]["games"])
+        if sar_data["study"]["games"]:
+            sar_data["analysis"]["avg_price"] = total_price / len(sar_data["study"]["games"])
         
         sar_path.write_text(json.dumps(sar_data, indent=2))
 
