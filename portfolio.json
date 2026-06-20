@@ -520,5 +520,19 @@
     "license_key": "DR-VP-20260619-025F6C20",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
     "version": "35.0.0"
+  },
+  {
+    "date": "2026-06-20T09:25:10.188975",
+    "game": "Cyber Runner",
+    "genre": "fighting game",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Runner, a fighting game where Phase Echo changes everything. summon a temporal duplicate. Can you survive the challenge?",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "neon",
+    "game_mode": "time_attack",
+    "price": 5,
+    "license_key": "DR-CR-20260620-C358F999",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
+    "version": "35.0.0"
   }
 ]
