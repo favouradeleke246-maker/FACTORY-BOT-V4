@@ -370,6 +370,14 @@
         "game_mode": "waves",
         "timestamp": "2026-06-19T10:46:51.928266",
         "price": 5
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "fighting game",
+        "mechanic": "Phase Echo",
+        "game_mode": "time_attack",
+        "timestamp": "2026-06-20T09:25:11.798641",
+        "price": 5
       }
     ],
     "successful_art": 25,
