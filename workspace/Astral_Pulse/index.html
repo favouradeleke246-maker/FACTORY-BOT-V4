@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Astral Pulse</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-family:'Segoe UI',sans-serif;
+            touch-action:none;
+            overflow:hidden;
+            user-select:none;
+            -webkit-user-select:none;
+        }
+        .wrapper { text-align:center; padding:5px; max-width:100%; }
+        .header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:0 5px;
+            margin-bottom:3px;
+        }
+        .title {
+            font-size:1.1rem;
+            color:#54565c;
+            text-shadow: none;
+            font-weight:bold;
+        }
+        .stats { display:flex; gap:8px; color:#aaa; font-size:0.65rem; }
+        .stats span { background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:10px; }
+        .canvas-wrapper { position:relative; display:inline-block; width:100%; max-width:700px; }
+        canvas {
+            border:3px solid #54565c;
+            border-radius:12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            width:100%;
+            height:auto;
+            background:#f5f5f5;
+            display:block;
+            touch-action:none;
+            cursor:pointer;
+        }
+        .touch-controls {
+            width:100%;
+            max-width:700px;
+            margin:3px auto 0;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:3px 8px;
+            touch-action:none;
+        }
+        .touch-joystick {
+            width:70px; height:70px;
+            border-radius:50%;
+            background:rgba(255,255,255,0.08);
+            border:2px solid #54565c44;
+            position:relative;
+            touch-action:none;
+        }
+        .touch-joystick-inner {
+            width:25px; height:25px;
+            border-radius:50%;
+            background:#54565c;
+            position:absolute;
+            top:22px; left:22px;
+            touch-action:none;
+            box-shadow: 0 0 15px #54565c44;
+        }
+        .touch-btn {
+            width:55px; height:55px;
+            border-radius:50%;
+            background:#54565c33;
+            border:2px solid #54565c;
+            color:#fff;
+            font-size:0.55rem;
+            font-weight:bold;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            touch-action:none;
+            text-align:center;
+            line-height:1.1;
+            padding:4px;
+            box-shadow: 0 0 15px #54565c44;
+        }
+        .touch-btn:active { background:#54565c66; transform:scale(0.9); }
+        .controls { color:#666; font-size:0.55rem; margin-top:2px; }
+        @media (max-width:500px) {
+            .title { font-size:0.9rem; }
+            .touch-joystick { width:55px; height:55px; }
+            .touch-joystick-inner { width:18px; height:18px; top:18px; left:18px; }
+            .touch-btn { width:40px; height:40px; font-size:0.45rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <div class="title">Astral Pulse</div>
+            <div class="stats">
+                <span id="waveDisplay">🌊 1</span>
+                <span id="enemyCount">👾 0</span>
+                <span id="modeDisplay">⚡ waves</span>
+            </div>
+        </div>
+        <div class="canvas-wrapper">
+            <canvas id="c" width="900" height="600"></canvas>
+        </div>
+        <div class="touch-controls">
+            <div class="touch-joystick" id="joystick">
+                <div class="touch-joystick-inner" id="joystickInner"></div>
+            </div>
+            <div class="touch-btn" id="mechanicBtn">⚡<br>Phase </div>
+        </div>
+        <div class="controls">WASD / Joystick • SPACE / Button for Phase Echo</div>
+    </div>
+    <script>
+        // Load player sprite
+        const playerImg = new Image();
+        playerImg.src = 'icon.png';
+        
+        // THEME COLORS
+        const C={p:'#54565c',s:'#3498db',a:'#2ecc71',g:false};
+        const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+        
+        // ========== GAME ENGINE ==========
+        
+        // ROGUELIKE (turn-based grid)
+        const G = {player:{x:1,y:1,hp:10,maxHp:10}, dungeon:[], visible:[], monsters:[], turn:0, gameOver:false, started:false};
+        function useMechanic(){ G.player.hp=Math.min(G.player.maxHp,G.player.hp+5); }
+        function update(){...}
+        function draw(){...}
+    
+        
+        // ========== COMMON FUNCTIONS ==========
+        let keys={}, jActive=false, jX=0, jY=0;
+        
+        // Joystick
+        const j=document.getElementById('joystick'), ji=document.getElementById('joystickInner');
+        j.addEventListener('touchstart',e=>{e.preventDefault();jActive=true;updateJoy(e);});
+        j.addEventListener('touchmove',e=>{e.preventDefault();if(jActive)updateJoy(e);});
+        j.addEventListener('touchend',e=>{e.preventDefault();jActive=false;jX=0;jY=0;ji.style.transform='translate(0,0)';});
+        function updateJoy(e){const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-22)/22,y=(t.clientY-r.top-22)/22;const d=Math.hypot(x,y);if(d>1){x/=d;y/=d;}jX=x;jY=y;ji.style.transform=`translate(${x*12}px,${y*12}px)`;}
+        document.getElementById('mechanicBtn').addEventListener('touchstart',e=>{e.preventDefault();simulateKey(' ');});
+        document.getElementById('mechanicBtn').addEventListener('mousedown',()=>simulateKey(' '));
+        function simulateKey(k){const ev=new KeyboardEvent('keydown',{key:k});document.dispatchEvent(ev);setTimeout(()=>{document.dispatchEvent(new KeyboardEvent('keyup',{key:k}));},150);}
+        
+        // Start / Restart
+        function restartGame() {
+            // Reset state
+            G.p = {x:450,y:300,size:22,h:50,mh:50};
+            G.enemies = []; G.particles = []; G.powerups = []; G.projectiles = [];
+            G.score = 0; G.combo = 0; G.maxCombo = 0; G.wave = 1; G.kills = 0;
+            G.gameOver = false; G.started = true; G.cd = 0;
+            G.bossActive = false; G.shieldActive = false; G.shieldTimer = 0;
+            G.spawnTimer = 30; G.difficulty = 1;
+            if (G.mode === 'time_attack') G.time = 0;
+            if (G.mode === 'boss_fight') G.bossActive = false;
+        }
+        
+        // Event listeners
+        document.addEventListener('keydown',function(e){
+            const k=e.key.toLowerCase(); keys[k]=true;
+            if(e.key===' '){e.preventDefault(); if(!G.started){G.started=true;G.spawnTimer=30;} else useMechanic(); }
+            if((e.key==='r'||e.key==='R')&&G.gameOver) restartGame();
+        });
+        document.addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
+        canvas.addEventListener('click',function(){if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
+        canvas.addEventListener('touchstart',function(e){e.preventDefault(); if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
+        
+        // Game loop
+        function loop(){update();draw();requestAnimationFrame(loop);}
+        loop();
+    </script>
+</body>
+</html>
