@@ -548,5 +548,19 @@
     "license_key": "DR-QP-20260621-E8DC94CC",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Pulse/index.html",
     "version": "35.0.0"
+  },
+  {
+    "date": "2026-06-22T12:13:09.865136",
+    "game": "Astral Vector",
+    "genre": "strategy game",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Astral Vector, a strategy game where Chrono Fracture changes everything. slow time. Can you survive the challenge?",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-AV-20260622-EE5FEFF5",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Vector/index.html",
+    "version": "35.0.0"
   }
 ]
