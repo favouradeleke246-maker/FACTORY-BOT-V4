@@ -562,5 +562,19 @@
     "license_key": "DR-AV-20260622-EE5FEFF5",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Vector/index.html",
     "version": "35.0.0"
+  },
+  {
+    "date": "2026-06-22T17:01:44.590452",
+    "game": "Astral Pulse",
+    "genre": "roguelite",
+    "mechanic": "Phase Echo",
+    "description": "Step into Astral Pulse, a roguelite where Phase Echo changes everything. summon a temporal duplicate. Can you survive the challenge?",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "minimalist",
+    "game_mode": "waves",
+    "price": 5,
+    "license_key": "DR-AP-20260622-C2BFC426",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Pulse/index.html",
+    "version": "37.1.0"
   }
 ]
