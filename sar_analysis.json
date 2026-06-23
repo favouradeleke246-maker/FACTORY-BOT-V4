@@ -466,6 +466,14 @@
         "game_mode": "survival",
         "timestamp": "2026-06-23T15:52:10.178548",
         "price": 6
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "top-down shooter",
+        "mechanic": "Void Step",
+        "game_mode": "waves",
+        "timestamp": "2026-06-23T18:18:27.250432",
+        "price": 5
       }
     ],
     "successful_art": 25,
