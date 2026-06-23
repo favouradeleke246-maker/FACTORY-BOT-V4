@@ -442,6 +442,14 @@
         "game_mode": "waves",
         "timestamp": "2026-06-23T13:10:39.797641",
         "price": 3
+      },
+      {
+        "name": "Void Breach",
+        "genre": "top-down shooter",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-06-23T13:18:01.161101",
+        "price": 5
       }
     ],
     "successful_art": 25,
