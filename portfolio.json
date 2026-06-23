@@ -660,5 +660,19 @@
     "license_key": "DR-VB-20260623-582F73EA",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Breach/index.html",
     "version": "42.0.0"
+  },
+  {
+    "date": "2026-06-23T13:29:43.234564",
+    "game": "Neon Vector",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Neon Vector, a survival horror where Chrono Fracture changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "minimalist",
+    "game_mode": "survival",
+    "price": 3,
+    "license_key": "DR-NV-20260623-C70033AD",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Vector/index.html",
+    "version": "43.0.0"
   }
 ]
