@@ -688,5 +688,19 @@
     "license_key": "DR-VD-20260623-22F9220B",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Drifter/index.html",
     "version": "44.0.0"
+  },
+  {
+    "date": "2026-06-23T18:18:22.658663",
+    "game": "Cyber Pulse",
+    "genre": "top-down shooter",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Pulse, a top-down shooter where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "waves",
+    "price": 5,
+    "license_key": "DR-CP-20260623-827B1479",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
+    "version": "45.0.0"
   }
 ]
