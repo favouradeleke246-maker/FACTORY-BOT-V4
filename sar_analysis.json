@@ -434,6 +434,14 @@
         "game_mode": "survival",
         "timestamp": "2026-06-23T09:51:29.831630",
         "price": 4
+      },
+      {
+        "name": "Neon Breach",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "waves",
+        "timestamp": "2026-06-23T13:10:39.797641",
+        "price": 3
       }
     ],
     "successful_art": 25,
