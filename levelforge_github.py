@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v44.0 – COMPLETE FINAL VERSION
+DEATHROLL STUDIO v45.0 – COMPLETE FINAL VERSION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ALL FEATURES: AI Game Design, SAR Learning, Dynamic Pricing,
 License Keys, Portfolio, Telegram Delivery, and 7 Fully Playable
-Phaser 3 Game Templates (Shooter, Platformer, Puzzle, Racer,
-Horror, Tower Defense, Roguelike) – Each with integrated mechanic
-and AI‑generated art as the player sprite.
+Phaser 3 Game Templates – each with integrated mechanic and
+fallback graphics to ensure player and background always render.
 """
 
 import os, json, random, requests, time, shutil, zipfile, uuid, math
@@ -18,7 +17,7 @@ from typing import Dict, List, Optional
 # ============================================================
 # CONFIG
 # ============================================================
-BOT_VERSION = "44.0.0"
+BOT_VERSION = "45.0.0"
 CONFIG = {
     "brand": {"name":"DeathRoll","email":"favouradeleke246@gmail.com","telegram":"@deathroll1",
               "tiktok":"@deathroll.co","website":"https://deathroll.co","github":"favouradeleke246-maker"},
@@ -32,7 +31,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
 
-print("═"*60); print("🔥 DEATHROLL STUDIO v44.0 – COMPLETE FINAL VERSION")
+print("═"*60); print("🔥 DEATHROLL STUDIO v45.0 – COMPLETE FINAL VERSION")
 print(f"🤖 Version: {BOT_VERSION}") ; print(f"✅ Telegram: {'✅' if TELEGRAM_TOKEN else '❌'}")
 print(f"✅ OpenAI: {'✅' if OPENAI_KEY else '❌'}") ; print(f"✅ GitHub: {'✅' if GITHUB_TOKEN else '❌'}")
 print("═"*60)
@@ -191,19 +190,20 @@ def _select_template(genre):
     return "shooter"
 
 # ============================================================
-# ART DIRECTOR – uses AI sprite as player
+# ART DIRECTOR – creates assets with fallback
 # ============================================================
 class ArtDirector:
     @staticmethod
     def generate_all_assets(game_name, genre, style, template, folder: Path):
         assets = folder / "assets"
         assets.mkdir(exist_ok=True)
-        # Copy AI-generated sprite as player
+        # Copy AI sprite or create fallback
         main_sprite = Path("sprite.png")
-        if main_sprite.exists():
+        if main_sprite.exists() and main_sprite.stat().st_size > 100:
             shutil.copy(main_sprite, assets / "player.png")
         else:
             ArtDirector._create_fallback_player(assets / "player.png", template)
+        # Enemy, coin, powerup, bg
         ArtDirector._generate_enemy_sprite(assets / "enemy.png", template)
         ArtDirector._generate_coin_sprite(assets / "coin.png")
         ArtDirector._generate_powerup_sprite(assets / "powerup.png", template)
@@ -216,6 +216,7 @@ class ArtDirector:
         img = Image.new('RGBA', (64, 64), (0,0,0,0))
         draw = ImageDraw.Draw(img)
         draw.ellipse([8, 8, 56, 56], fill=(78,205,196))
+        draw.text((18, 20), "P", fill=(255,255,255), font=None)
         img.save(path)
 
     @staticmethod
@@ -280,7 +281,7 @@ class ArtDirector:
         return bg
 
 # ============================================================
-# PHASER GAME GENERATOR
+# PHASER GAME GENERATOR – dispatcher with all templates
 # ============================================================
 def generate_phaser_game(game_data, theme, style, template, folder: Path):
     if template == "shooter":
@@ -321,13 +322,11 @@ def generate_phaser_game(game_data, theme, style, template, folder: Path):
     print(f"   🎮 Phaser game generated in {folder}")
 
 # ============================================================
-# PHASER TEMPLATES – FULL IMPLEMENTATIONS
+# PHASER TEMPLATE FUNCTIONS – FULL IMPLEMENTATIONS WITH FALLBACK
 # ============================================================
 
 def _phaser_shooter(game_data, theme, style):
     mechanic = game_data['mechanic']
-    mechanic_desc = game_data['mechanic_description']
-    hook = game_data['hook']
     return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -352,10 +351,26 @@ function preload() {{
 }}
 
 function create() {{
-    this.add.image(400, 300, 'bg');
-    player = this.physics.add.sprite(400, 500, 'player');
-    player.setCollideWorldBounds(true);
-    player.setScale(0.8);
+    // Background with fallback
+    if (this.textures.exists('bg')) {{
+        this.add.image(400, 300, 'bg');
+    }} else {{
+        const g = this.add.graphics();
+        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
+    }}
+
+    // Player with fallback
+    if (this.textures.exists('player')) {{
+        player = this.physics.add.sprite(400, 500, 'player');
+        player.setCollideWorldBounds(true);
+        player.setScale(0.8);
+    }} else {{
+        player = this.add.circle(400, 500, 20, 0x4ecdc4);
+        this.physics.add.existing(player);
+        player.body.setCircle(20);
+        player.setCollideWorldBounds(true);
+    }}
+
     cursors = this.input.keyboard.createCursorKeys();
     enemies = this.physics.add.group();
     bullets = this.physics.add.group();
@@ -485,41 +500,55 @@ let player, platforms, coins, enemies, cursors, scoreText, livesText, mechanicTe
 let score=0, lives=3, gameOver=false, mechanicCooldown=0;
 
 function preload() {{
-    this.load.image('player','assets/player.png');
-    this.load.image('enemy','assets/enemy.png');
-    this.load.image('coin','assets/coin.png');
-    this.load.image('bg','assets/bg.png');
+    this.load.image('player', 'assets/player.png');
+    this.load.image('enemy', 'assets/enemy.png');
+    this.load.image('coin', 'assets/coin.png');
+    this.load.image('bg', 'assets/bg.png');
 }}
 
 function create() {{
-    this.add.image(400,300,'bg');
-    platforms=this.physics.add.staticGroup();
-    platforms.create(400,580,'coin').setScale(10,0.5).refreshBody();
+    // Background fallback
+    if (this.textures.exists('bg')) {{
+        this.add.image(400, 300, 'bg');
+    }} else {{
+        const g = this.add.graphics();
+        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
+    }}
+
+    platforms = this.physics.add.staticGroup();
+    platforms.create(400, 580, 'coin').setScale(10, 0.5).refreshBody();
     for(let i=0;i<8;i++) platforms.create(80+i*100,400-50*Math.sin(i*0.7),'coin').setScale(2.5,0.3).refreshBody();
-    player=this.physics.add.sprite(100,450,'player');
+
+    if (this.textures.exists('player')) {{
+        player = this.physics.add.sprite(100, 450, 'player');
+    }} else {{
+        player = this.add.circle(100, 450, 20, 0x4ecdc4);
+        this.physics.add.existing(player);
+        player.body.setCircle(20);
+    }}
     player.setCollideWorldBounds(true);
     player.setBounce(0.1);
-    this.physics.add.collider(player,platforms);
+    this.physics.add.collider(player, platforms);
 
-    coins=this.physics.add.staticGroup();
+    coins = this.physics.add.staticGroup();
     for(let i=0;i<15;i++) coins.create(50+Math.random()*700,100+Math.random()*300,'coin');
-    this.physics.add.overlap(player,coins,(p,c)=>{{c.destroy();score+=10;scoreText.setText('Score: '+score);}});
+    this.physics.add.overlap(player, coins, (p,c)=>{{c.destroy();score+=10;scoreText.setText('Score: '+score);}});
 
-    enemies=this.physics.add.group();
+    enemies = this.physics.add.group();
     for(let i=0;i<3;i++){{
         const e=enemies.create(150+i*200,550,'enemy');
         e.setScale(0.6);
         e.body.allowGravity=false;
         e.setVelocityX(80*(i%2===0?1:-1));
     }}
-    this.physics.add.overlap(player,enemies,(p,e)=>{{lives--;livesText.setText('Lives: '+lives); if(lives<=0){{gameOver=true; showGameOver.call(this);}}}});
+    this.physics.add.overlap(player, enemies, (p,e)=>{{lives--;livesText.setText('Lives: '+lives); if(lives<=0){{gameOver=true; showGameOver.call(this);}}}});
 
-    cursors=this.input.keyboard.createCursorKeys();
-    this.input.keyboard.on('keydown-SPACE',useMechanic,this);
+    cursors = this.input.keyboard.createCursorKeys();
+    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
 
-    scoreText=this.add.text(16,16,'Score: 0',{{fontSize:'28px',fill:'#fff'}});
-    livesText=this.add.text(16,56,'Lives: 3',{{fontSize:'28px',fill:'#fff'}});
-    mechanicText=this.add.text(16,96,'⚡ {mechanic} (SPACE)',{{fontSize:'20px',fill:'#ffd93d'}});
+    scoreText = this.add.text(16, 16, 'Score: 0', {{fontSize:'28px',fill:'#fff'}});
+    livesText = this.add.text(16, 56, 'Lives: 3', {{fontSize:'28px',fill:'#fff'}});
+    mechanicText = this.add.text(16, 96, '⚡ {mechanic} (SPACE)', {{fontSize:'20px',fill:'#ffd93d'}});
 }}
 
 function update(){{
@@ -569,7 +598,12 @@ function preload() {{
 }}
 
 function create() {{
-    this.add.image(400, 300, 'bg');
+    if (this.textures.exists('bg')) {{
+        this.add.image(400, 300, 'bg');
+    }} else {{
+        const g = this.add.graphics();
+        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
+    }}
     const emojis = ['🍎','🍌','🍇','🍉','🍓','🍒','🍑','🍊'];
     let deck = [...emojis, ...emojis];
     shuffle(deck);
@@ -613,7 +647,6 @@ function update() {{
 function useMechanic() {{
     if (gameOver || mechanicCooldown > 0) return;
     mechanicCooldown = 180;
-    // Shuffle unmatched tiles
     let unmatch = tiles.filter(t => !t.matched);
     let values = unmatch.map(t => t.value);
     shuffle(values);
@@ -684,8 +717,19 @@ function preload() {{
 }}
 
 function create() {{
-    this.add.image(400, 300, 'bg');
-    player = this.physics.add.sprite(400, 520, 'player');
+    if (this.textures.exists('bg')) {{
+        this.add.image(400, 300, 'bg');
+    }} else {{
+        const g = this.add.graphics();
+        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
+    }}
+    if (this.textures.exists('player')) {{
+        player = this.physics.add.sprite(400, 520, 'player');
+    }} else {{
+        player = this.add.circle(400, 520, 20, 0x4ecdc4);
+        this.physics.add.existing(player);
+        player.body.setCircle(20);
+    }}
     player.setCollideWorldBounds(true);
     player.setScale(0.6);
     cursors = this.input.keyboard.createCursorKeys();
@@ -787,8 +831,19 @@ function preload() {{
 }}
 
 function create() {{
-    this.add.image(400, 300, 'bg');
-    player = this.physics.add.sprite(400, 300, 'player');
+    if (this.textures.exists('bg')) {{
+        this.add.image(400, 300, 'bg');
+    }} else {{
+        const g = this.add.graphics();
+        g.fillStyle(0x0a0a0a).fillRect(0, 0, 800, 600);
+    }}
+    if (this.textures.exists('player')) {{
+        player = this.physics.add.sprite(400, 300, 'player');
+    }} else {{
+        player = this.add.circle(400, 300, 20, 0x4ecdc4);
+        this.physics.add.existing(player);
+        player.body.setCircle(20);
+    }}
     player.setCollideWorldBounds(true);
     player.setScale(0.7);
     cursors = this.input.keyboard.createCursorKeys();
@@ -913,7 +968,12 @@ function preload() {{
 }}
 
 function create() {{
-    this.add.image(400, 300, 'bg');
+    if (this.textures.exists('bg')) {{
+        this.add.image(400, 300, 'bg');
+    }} else {{
+        const g = this.add.graphics();
+        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
+    }}
     base = this.add.rectangle(400, 550, 100, 50, 0x4ecdc4);
     this.physics.add.existing(base, true);
 
@@ -1023,7 +1083,12 @@ function preload() {{
 }}
 
 function create() {{
-    this.add.image(400, 300, 'bg');
+    if (this.textures.exists('bg')) {{
+        this.add.image(400, 300, 'bg');
+    }} else {{
+        const g = this.add.graphics();
+        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
+    }}
     graphics = this.add.graphics();
     generateDungeon();
     drawDungeon();
@@ -1181,7 +1246,7 @@ class DeathRollStudio:
         self.telegram = Telegram(TELEGRAM_TOKEN)
 
     def run(self):
-        print("\n"+"═"*60); print("🎮 GENERATING NEW GAME (Final Version)"); print("═"*60)
+        print("\n"+"═"*60); print("🎮 GENERATING NEW GAME (Complete Final)"); print("═"*60)
         game = self.design.generate()
         template = _select_template(game["genre"])
         print(f"   📝 Name: {game['name']}")
