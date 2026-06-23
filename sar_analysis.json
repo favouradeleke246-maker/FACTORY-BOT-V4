@@ -426,6 +426,14 @@
         "game_mode": "survival",
         "timestamp": "2026-06-23T02:05:19.925975",
         "price": 4
+      },
+      {
+        "name": "Quantum Drifter",
+        "genre": "top-down shooter",
+        "mechanic": "Void Step",
+        "game_mode": "survival",
+        "timestamp": "2026-06-23T09:51:29.831630",
+        "price": 4
       }
     ],
     "successful_art": 25,
