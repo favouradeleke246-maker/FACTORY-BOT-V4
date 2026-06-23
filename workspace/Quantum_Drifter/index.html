@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Quantum Drifter</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#1a1a2e,#16213e);min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI',sans-serif;touch-action:none;overflow:hidden;user-select:none}
+.wrapper{text-align:center;padding:5px;max-width:100%}.header{display:flex;justify-content:space-between;align-items:center;padding:0 5px;margin-bottom:3px}
+.title{font-size:1.1rem;color:#4e3248;text-shadow:0 0 15px #4e3248;font-weight:bold}
+.stats{display:flex;gap:8px;color:#aaa;font-size:0.65rem}.stats span{background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:10px}
+.canvas-wrapper{position:relative;display:inline-block;width:100%;max-width:700px}
+canvas{border:3px solid #4e3248;border-radius:12px;box-shadow:0 0 30px #4e3248;width:100%;height:auto;background:#1a1a2e;display:block;touch-action:none;cursor:pointer}
+.touch-controls{width:100%;max-width:700px;margin:3px auto 0;display:flex;justify-content:space-between;align-items:center;padding:3px 8px}
+.touch-joystick{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid #4e324844;position:relative}
+.touch-joystick-inner{width:25px;height:25px;border-radius:50%;background:#4e3248;position:absolute;top:22px;left:22px;box-shadow:0 0 15px #4e324844}
+.touch-btn{width:55px;height:55px;border-radius:50%;background:#4e324833;border:2px solid #4e3248;color:#fff;font-size:0.55rem;font-weight:bold;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:4px;box-shadow:0 0 15px #4e324844}
+.touch-btn:active{background:#4e324866;transform:scale(0.9)}
+.controls{color:#666;font-size:0.55rem;margin-top:2px}
+@media(max-width:500px){.title{font-size:0.9rem}.touch-joystick{width:55px;height:55px}.touch-joystick-inner{width:18px;height:18px;top:18px;left:18px}.touch-btn{width:40px;height:40px;font-size:0.45rem}}
+</style>
+</head><body>
+<div class="wrapper">
+<div class="header"><div class="title">Quantum Drifter</div><div class="stats"><span id="w">🌊 1</span><span id="e">👾 0</span><span id="mode">⚡ surviv</span></div></div>
+<div class="canvas-wrapper"><canvas id="c" width="900" height="600"></canvas></div>
+<div class="touch-controls">
+<div class="touch-joystick" id="joystick"><div class="touch-joystick-inner" id="ji"></div></div>
+<div class="touch-btn" id="mb">⚡<br>Void S</div>
+</div>
+<div class="controls">WASD / Joystick • SPACE / Button for Void Step</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script>
+const playerImg = new Image(); playerImg.src = 'icon.png';
+const C = {p:'#4e3248',s:'#ff0066',a:'#ffcc00',g:true};
+const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+
+// Precomputed physics data
+const PRECOMPUTED = {"bullet_paths": [[{"x": 0, "y": 300.0}, {"x": 10, "y": 304.9916708323414}, {"x": 20, "y": 309.93346653975306}, {"x": 30, "y": 314.776010333067}, {"x": 40, "y": 319.47091711543254}, {"x": 50, "y": 323.97127693021014}, {"x": 60, "y": 328.2321236697518}, {"x": 70, "y": 332.21088436188455}, {"x": 80, "y": 335.86780454497614}, {"x": 90, "y": 339.16634548137415}, {"x": 100, "y": 342.0735492403948}, {"x": 110, "y": 344.56036800307174}, {"x": 120, "y": 346.6019542983613}, {"x": 130, "y": 348.17790927085963}, {"x": 140, "y": 349.272486499423}, {"x": 150, "y": 349.87474933020275}, {"x": 160, "y": 349.97868015207524}, {"x": 170, "y": 349.58324052262344}, {"x": 180, "y": 348.69238154390973}, {"x": 190, "y": 347.3150043843707}]], "enemy_wave": [{"spawn_delay": 0.0, "count": 2}, {"spawn_delay": 0.5, "count": 3}, {"spawn_delay": 1.0, "count": 4}, {"spawn_delay": 1.5, "count": 5}, {"spawn_delay": 2.0, "count": 6}]};
+
+// ========== GAME ENGINE ==========
+
+// ---- MATTER.JS SETUP ----
+const { Engine, Render, Runner, Bodies, Body, World, Events } = Matter;
+const engine = Engine.create();
+const world = engine.world;
+// ---- GAME STATE ----
+const G = {
+    p: {x:450, y:300, size:22, h:50, mh:50},
+    enemies: [],
+    particles: [],
+    powerups: [],
+    projectiles: [],
+    score: 0,
+    combo: 0,
+    maxCombo: 0,
+    wave: 1,
+    kills: 0,
+    gameOver: false,
+    started: false,
+    cd: 0,
+    maxCd: 90,
+    bossActive: false,
+    bossHealth: 0,
+    bossMaxHealth: 0,
+    shieldActive: false,
+    shieldTimer: 0,
+    spawnTimer: 0,
+    difficulty: 1,
+    mode: 'survival',
+    time: 0,
+    maxTime: 0
+};
+const playerBody = Bodies.circle(G.p.x, G.p.y, G.p.size/2, { friction: 0.1, restitution: 0.2, label: 'player' });
+World.add(world, playerBody);
+function spawnEnemy() {
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
+    switch(side) {
+        case 0: x = Math.random() * 900; y = -20; break;
+        case 1: x = 920; y = Math.random() * 600; break;
+        case 2: x = Math.random() * 900; y = 620; break;
+        case 3: x = -20; y = Math.random() * 600; break;
+    }
+    const hp2 = 1 + Math.floor(G.wave/4);
+    const size = 18 + Math.min(G.wave, 5);
+    const body = Bodies.circle(x, y, size/2, { friction: 0.3, restitution: 0.1, label: 'enemy' });
+    World.add(world, body);
+    G.enemies.push({ body: body, size: size, hp: hp2, maxHp: hp2, speed: 1.2 + G.wave * 0.06, type: Math.random() > 0.75 ? 'fast' : 'normal', damage: 8 + Math.floor(G.wave/2) });
+}
+function useMechanic() {
+    if (G.cd > 0) return;
+    G.cd = G.maxCd;
+    G.enemies.forEach(e => {
+        const dx = e.body.position.x - playerBody.position.x;
+        const dy = e.body.position.y - playerBody.position.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 180) {
+            const force = 0.05;
+            Body.applyForce(e.body, e.body.position, { x: dx * force, y: dy * force });
+            e.hp -= 2;
+            addParticles(e.body.position.x, e.body.position.y, C.s, 5);
+        }
+    });
+    for (let i=0; i<8; i++) {
+        const angle = (i/8) * Math.PI * 2;
+        G.projectiles.push({ x: playerBody.position.x, y: playerBody.position.y, vx: Math.cos(angle) * 8, vy: Math.sin(angle) * 8, life: 60 });
+    }
+    addParticles(playerBody.position.x, playerBody.position.y, C.p, 30);
+    if (G.p.h < G.p.mh * 0.3) { G.shieldActive = true; G.shieldTimer = 90; }
+}
+function addParticles(x, y, color, count) {
+    for (let i=0; i<count; i++) {
+        G.particles.push({ x: x + (Math.random()-0.5)*20, y: y + (Math.random()-0.5)*20, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 20 + Math.random()*30, maxLife: 50, color: color, size: 2 + Math.random()*5 });
+    }
+}
+function update() {
+    if (G.gameOver || !G.started) return;
+    if (G.mode === 'time_attack' && G.maxTime > 0) {
+        G.time -= 1/60;
+        if (G.time <= 0) { G.gameOver = true; return; }
+    }
+    let dx = 0, dy = 0, speed = 4.5 + G.difficulty * 0.2;
+    if (keys['w'] || keys['ArrowUp']) dy = -speed;
+    if (keys['s'] || keys['ArrowDown']) dy = speed;
+    if (keys['a'] || keys['ArrowLeft']) dx = -speed;
+    if (keys['d'] || keys['ArrowRight']) dx = speed;
+    if (jActive) { dx += jX * speed * 0.6; dy += jY * speed * 0.6; }
+    if (dx && dy) { dx *= 0.707; dy *= 0.707; }
+    Body.setVelocity(playerBody, { x: dx, y: dy });
+    G.p.x = playerBody.position.x;
+    G.p.y = playerBody.position.y;
+    if (G.cd > 0) G.cd--;
+    if (G.shieldActive) { G.shieldTimer--; if (G.shieldTimer <= 0) G.shieldActive = false; }
+    G.spawnTimer--;
+    if (G.spawnTimer <= 0) {
+        const count = 1 + Math.floor(G.wave/4);
+        for (let i=0; i<count; i++) spawnEnemy();
+        G.spawnTimer = Math.max(20, 60 - G.wave*2);
+    }
+    if (G.mode === 'boss_fight' && G.wave % 3 === 0 && !G.bossActive && G.enemies.length === 0) {
+        G.bossActive = true;
+        G.bossMaxHealth = 30 + G.wave * 15;
+        G.bossHealth = G.bossMaxHealth;
+        const bossBody = Bodies.circle(450, 50, 55, { friction: 0.3, restitution: 0.1, label: 'boss' });
+        World.add(world, bossBody);
+        G.enemies.push({ body: bossBody, size: 55, hp: G.bossMaxHealth, maxHp: G.bossMaxHealth, speed: 1.0 + G.wave * 0.04, type: 'boss', damage: 15 });
+    }
+    for (let i=G.enemies.length-1; i>=0; i--) {
+        const e = G.enemies[i];
+        const dx = playerBody.position.x - e.body.position.x;
+        const dy = playerBody.position.y - e.body.position.y;
+        const d = Math.hypot(dx, dy);
+        if (d > 0) {
+            const force = e.speed * 0.01;
+            Body.applyForce(e.body, e.body.position, { x: dx * force, y: dy * force });
+        }
+        const cd = Math.hypot(playerBody.position.x - e.body.position.x, playerBody.position.y - e.body.position.y);
+        if (cd < G.p.size/2 + e.size/2) {
+            if (G.shieldActive) {
+                const ang = Math.atan2(e.body.position.y - playerBody.position.y, e.body.position.x - playerBody.position.x);
+                Body.applyForce(e.body, e.body.position, { x: Math.cos(ang)*0.1, y: Math.sin(ang)*0.1 });
+                e.hp -= 3;
+                addParticles(e.body.position.x, e.body.position.y, C.p, 10);
+            } else {
+                G.p.h -= e.damage;
+                G.combo = 0;
+                addParticles(playerBody.position.x, playerBody.position.y, C.s, 15);
+                if (G.p.h <= 0) { G.p.h = 0; G.gameOver = true; return; }
+            }
+        }
+        if (e.hp <= 0) {
+            G.score += 10 * (1 + Math.floor(G.combo/10));
+            G.combo++;
+            G.kills++;
+            if (G.combo > G.maxCombo) G.maxCombo = G.combo;
+            spawnPowerup(e.body.position.x, e.body.position.y);
+            addParticles(e.body.position.x, e.body.position.y, C.s, 20);
+            World.remove(world, e.body);
+            G.enemies.splice(i, 1);
+            if (G.enemies.length === 0 && !G.bossActive) {
+                G.wave++;
+                G.difficulty = 1 + G.wave * 0.1;
+                G.spawnTimer = 20;
+            }
+        }
+    }
+    for (let i=G.projectiles.length-1; i>=0; i--) {
+        const b = G.projectiles[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.life--;
+        if (b.life <= 0 || b.x < 0 || b.x > 900 || b.y < 0 || b.y > 600) {
+            G.projectiles.splice(i, 1);
+            continue;
+        }
+        for (let j=G.enemies.length-1; j>=0; j--) {
+            const e = G.enemies[j];
+            if (Math.hypot(b.x - e.body.position.x, b.y - e.body.position.y) < e.size/2 + 5) {
+                e.hp -= 2;
+                addParticles(b.x, b.y, C.a, 8);
+                G.projectiles.splice(i, 1);
+                break;
+            }
+        }
+    }
+    for (let i=G.powerups.length-1; i>=0; i--) {
+        const pw = G.powerups[i];
+        pw.life--;
+        if (pw.life <= 0) { G.powerups.splice(i, 1); continue; }
+        const d = Math.hypot(playerBody.position.x - pw.x, playerBody.position.y - pw.y);
+        if (d < G.p.size/2 + pw.size/2) {
+            if (pw.type === 'health') G.p.h = Math.min(G.p.mh, G.p.h + 30);
+            else if (pw.type === 'shield') { G.shieldActive = true; G.shieldTimer = 120; }
+            else if (pw.type === 'score') G.score += 50;
+            addParticles(pw.x, pw.y, C.a, 15);
+            G.powerups.splice(i, 1);
+        }
+    }
+    for (let i=G.particles.length-1; i>=0; i--) {
+        const p = G.particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vx *= 0.97; p.vy *= 0.97;
+        p.life--;
+        if (p.life <= 0) G.particles.splice(i, 1);
+    }
+    document.getElementById('w').textContent = '🌊 ' + G.wave;
+    document.getElementById('e').textContent = '👾 ' + G.enemies.length;
+}
+function draw() {
+    const grad = ctx.createRadialGradient(450, 300, 100, 450, 300, 500);
+    grad.addColorStop(0, '#16213e');
+    grad.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 900, 600);
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for (let i=0; i<900; i+=50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 600);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(900, i);
+        ctx.stroke();
+    }
+    G.powerups.forEach(pw => {
+        ctx.fillStyle = pw.type === 'health' ? '#ff4444' : pw.type === 'shield' ? '#4ecdc4' : '#ffd93d';
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(pw.x, pw.y, pw.size/2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px monospace';
+        ctx.fillText(pw.type === 'health' ? '❤️' : pw.type === 'shield' ? '🛡️' : '⭐', pw.x-8, pw.y-8);
+    });
+    G.projectiles.forEach(b => {
+        ctx.fillStyle = C.a;
+        ctx.shadowColor = C.a;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 4, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    });
+    G.enemies.forEach(e => {
+        const pos = e.body.position;
+        const grad2 = ctx.createRadialGradient(pos.x-5, pos.y-5, 5, pos.x, pos.y, e.size);
+        grad2.addColorStop(0, e.type === 'boss' ? '#ff0044' : C.s);
+        grad2.addColorStop(1, e.type === 'boss' ? '#cc0033' : '#cc4444');
+        ctx.fillStyle = grad2;
+        ctx.shadowColor = e.type === 'boss' ? '#ff0000' : C.s;
+        ctx.shadowBlur = e.type === 'boss' ? 30 : 10;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, e.size/2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        const w = e.type === 'boss' ? 80 : e.size;
+        ctx.fillStyle = '#444';
+        ctx.fillRect(pos.x - w/2, pos.y - e.size/2 - 10, w, 4);
+        ctx.fillStyle = e.type === 'boss' ? '#ff0044' : '#4ecdc4';
+        ctx.fillRect(pos.x - w/2, pos.y - e.size/2 - 10, w * (e.hp/e.maxHp), 4);
+        ctx.fillStyle = '#fff';
+        ctx.font = e.type === 'boss' ? '30px monospace' : '18px monospace';
+        ctx.fillText(e.type === 'boss' ? '👹' : '👾', pos.x-12, pos.y-8);
+        if (e.type === 'boss') {
+            ctx.fillStyle = '#ff0044';
+            ctx.font = 'bold 14px monospace';
+            ctx.fillText('BOSS', pos.x-20, pos.y - e.size/2 - 18);
+        }
+    });
+    if (playerImg.complete && playerImg.naturalWidth) {
+        const px = playerBody.position.x - 30;
+        const py = playerBody.position.y - 30;
+        ctx.drawImage(playerImg, px, py, 60, 60);
+        if (G.shieldActive) {
+            ctx.strokeStyle = C.p;
+            ctx.lineWidth = 3;
+            ctx.shadowColor = C.p;
+            ctx.shadowBlur = 30;
+            ctx.beginPath();
+            ctx.arc(playerBody.position.x, playerBody.position.y, G.p.size/2 + 8, 0, Math.PI*2);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+    } else {
+        ctx.fillStyle = G.shieldActive ? '#4ecdc4' : C.p;
+        ctx.shadowColor = G.shieldActive ? '#4ecdc4' : C.p;
+        ctx.shadowBlur = G.shieldActive ? 40 : 20;
+        ctx.beginPath();
+        ctx.arc(playerBody.position.x, playerBody.position.y, G.p.size/2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff';
+        ctx.font = '22px monospace';
+        ctx.fillText('🎮', playerBody.position.x-14, playerBody.position.y-10);
+    }
+    G.particles.forEach(p => {
+        const alpha = p.life / p.maxLife;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+    });
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 22px monospace';
+    ctx.fillText('SCORE: '+G.score, 20, 40);
+    ctx.fillStyle = '#ff4444';
+    ctx.fillRect(20, 55, 200, 12);
+    ctx.fillStyle = C.p;
+    ctx.fillRect(20, 55, (G.p.h/G.p.mh)*200, 12);
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px monospace';
+    ctx.fillText('HP: '+Math.round(G.p.h)+'/'+G.p.mh, 25, 67);
+    if (G.combo > 0) {
+        ctx.fillStyle = C.a;
+        ctx.font = 'bold 16px monospace';
+        ctx.fillText('⚡ '+G.combo+'x', 20, 110);
+    }
+    if (G.mode === 'time_attack' && G.maxTime > 0) {
+        ctx.fillStyle = G.time < 10 ? '#ff4444' : '#fff';
+        ctx.font = 'bold 18px monospace';
+        ctx.fillText('⏱️ '+Math.ceil(G.time)+'s', 20, 145);
+    }
+    if (G.cd > 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fillRect(20, 165, G.cd*2, 6);
+    }
+    ctx.fillStyle = '#888';
+    ctx.font = '10px monospace';
+    ctx.fillText('⚡ '+G.cd+'/'+G.maxCd, 20, 183);
+    if (G.gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(0, 0, 900, 600);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 48px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', 450, 230);
+        ctx.font = '24px monospace';
+        ctx.fillStyle = C.a;
+        ctx.fillText('Score: '+G.score, 450, 290);
+        ctx.font = '18px monospace';
+        ctx.fillStyle = '#aaa';
+        ctx.fillText('Wave: '+G.wave+' • Combo: '+G.maxCombo+' • Kills: '+G.kills, 450, 340);
+        ctx.font = '16px monospace';
+        ctx.fillStyle = '#888';
+        ctx.fillText('Press R to restart', 450, 400);
+        ctx.textAlign = 'left';
+    }
+    if (!G.started && !G.gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 0, 900, 600);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 36px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎮 Quantum Drifter', 450, 200);
+        ctx.font = '18px monospace';
+        ctx.fillStyle = C.p;
+        ctx.fillText('Genre: top-down shooter', 450, 255);
+        ctx.font = '16px monospace';
+        ctx.fillStyle = C.s;
+        ctx.fillText('Mechanic: Void Step', 450, 290);
+        ctx.font = '14px monospace';
+        ctx.fillStyle = C.a;
+        ctx.fillText('"One mechanic changes everything."', 450, 325);
+        ctx.font = '16px monospace';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('Press SPACE / Tap to Start', 450, 385);
+        ctx.textAlign = 'left';
+    }
+}
+function spawnPowerup(x, y) {
+    if (Math.random() > 0.12) return;
+    const types = ['health', 'shield', 'score'];
+    G.powerups.push({ x: x, y: y, size: 14, type: types[Math.floor(Math.random() * types.length)], life: 300 });
+}
+
+
+// ========== COMMON CONTROLS ==========
+let keys={}, jActive=false, jX=0, jY=0;
+const j=document.getElementById('joystick'), ji=document.getElementById('ji');
+j.addEventListener('touchstart',e=>{e.preventDefault();jActive=true;updateJoy(e);});
+j.addEventListener('touchmove',e=>{e.preventDefault();if(jActive)updateJoy(e);});
+j.addEventListener('touchend',e=>{e.preventDefault();jActive=false;jX=0;jY=0;ji.style.transform='translate(0,0)';});
+function updateJoy(e){const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-22)/22,y=(t.clientY-r.top-22)/22;const d=Math.hypot(x,y);if(d>1){x/=d;y/=d;}jX=x;jY=y;ji.style.transform=`translate(${x*12}px,${y*12}px)`;}
+document.getElementById('mb').addEventListener('touchstart',e=>{e.preventDefault();simulateKey(' ');});
+document.getElementById('mb').addEventListener('mousedown',()=>simulateKey(' '));
+function simulateKey(k){const ev=new KeyboardEvent('keydown',{key:k});document.dispatchEvent(ev);setTimeout(()=>{document.dispatchEvent(new KeyboardEvent('keyup',{key:k}));},150);}
+function restartGame(){ G.p = {x:450,y:300,size:22,h:100,mh:100}; G.enemies=[]; G.particles=[]; G.powerups=[]; G.projectiles=[]; G.score=0; G.combo=0; G.maxCombo=0; G.wave=1; G.kills=0; G.gameOver=false; G.started=true; G.cd=0; G.bossActive=false; G.shieldActive=false; G.shieldTimer=0; G.spawnTimer=30; G.difficulty=1; if(G.mode==='time_attack')G.time=0; if(G.mode==='boss_fight')G.bossActive=false; }
+document.addEventListener('keydown',function(e){const k=e.key.toLowerCase();keys[k]=true;if(e.key===' '){e.preventDefault();if(!G.started){G.started=true;G.spawnTimer=30;}else useMechanic();} if((e.key==='r'||e.key==='R')&&G.gameOver)restartGame();});
+document.addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
+canvas.addEventListener('click',function(){if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
+canvas.addEventListener('touchstart',function(e){e.preventDefault();if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body></html>
