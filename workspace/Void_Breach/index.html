@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Void Breach</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0a0a0a,#1a0a0a);min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI',sans-serif;touch-action:none;overflow:hidden;user-select:none}
+.wrapper{text-align:center;padding:5px;max-width:100%}.header{display:flex;justify-content:space-between;align-items:center;padding:0 5px;margin-bottom:3px}
+.title{font-size:1.1rem;color:#424b4f;text-shadow:none;font-weight:bold}
+.stats{display:flex;gap:8px;color:#aaa;font-size:0.65rem}.stats span{background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:10px}
+.canvas-wrapper{position:relative;display:inline-block;width:100%;max-width:700px}
+canvas{border:3px solid #424b4f;border-radius:12px;box-shadow:0 0 15px rgba(0,0,0,0.5);width:100%;height:auto;background:#0a0a0a;display:block;touch-action:none;cursor:pointer}
+.touch-controls{width:100%;max-width:700px;margin:3px auto 0;display:flex;justify-content:space-between;align-items:center;padding:3px 8px}
+.touch-joystick{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid #424b4f44;position:relative}
+.touch-joystick-inner{width:25px;height:25px;border-radius:50%;background:#424b4f;position:absolute;top:22px;left:22px;box-shadow:0 0 15px #424b4f44}
+.touch-btn{width:55px;height:55px;border-radius:50%;background:#424b4f33;border:2px solid #424b4f;color:#fff;font-size:0.55rem;font-weight:bold;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:4px;box-shadow:0 0 15px #424b4f44}
+.touch-btn:active{background:#424b4f66;transform:scale(0.9)}
+.controls{color:#666;font-size:0.55rem;margin-top:2px}
+@media(max-width:500px){.title{font-size:0.9rem}.touch-joystick{width:55px;height:55px}.touch-joystick-inner{width:18px;height:18px;top:18px;left:18px}.touch-btn{width:40px;height:40px;font-size:0.45rem}}
+</style>
+</head><body>
+<div class="wrapper">
+<div class="header"><div class="title">Void Breach</div><div class="stats"><span id="w">🌊 1</span><span id="e">👾 0</span><span id="mode">⚡ surviv</span></div></div>
+<div class="canvas-wrapper"><canvas id="c" width="900" height="600"></canvas></div>
+<div class="touch-controls">
+<div class="touch-joystick" id="joystick"><div class="touch-joystick-inner" id="ji"></div></div>
+<div class="touch-btn" id="mb">⚡<br>Void S</div>
+</div>
+<div class="controls">WASD / Joystick • SPACE / Button for Void Step</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<script>
+const playerImg = new Image(); playerImg.src = 'icon.png';
+const C = {p:'#424b4f',s:'#ff4444',a:'#ffd700',g:false};
+const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+
+// Precomputed physics data
+const PRECOMPUTED = {"monster_patrol": [[{"x": 100, "y": 200.0}, {"x": 130, "y": 203.97338661590123}, {"x": 160, "y": 207.788366846173}, {"x": 190, "y": 211.2928494679007}, {"x": 220, "y": 214.34712181799046}, {"x": 250, "y": 216.82941969615794}, {"x": 280, "y": 218.64078171934452}, {"x": 310, "y": 219.7089945997692}, {"x": 340, "y": 219.9914720608301}, {"x": 370, "y": 219.4769526175639}, {"x": 400, "y": 218.18594853651365}, {"x": 430, "y": 216.1699280763918}, {"x": 460, "y": 213.50926361102302}, {"x": 490, "y": 210.3100274364293}, {"x": 520, "y": 206.6997630031181}]]};
+
+// ========== GAME ENGINE ==========
+
+const G = {player:{x:450,y:300,size:20,stealth:100}, monsters:[], keys:[], foundKeys:0, totalKeys:5, gameOver:false, started:false, cd:0, maxCd:60};
+function useMechanic(){ if(G.cd>0)return; G.cd=G.maxCd; G.player.stealth=Math.min(100,G.player.stealth+20); }
+function update(){ if(G.gameOver||!G.started)return; let dx=0,dy=0,s=3; if(keys['w']||keys['ArrowUp'])dy=-s; if(keys['s']||keys['ArrowDown'])dy=s; if(keys['a']||keys['ArrowLeft'])dx=-s; if(keys['d']||keys['ArrowRight'])dx=s; if(jActive){dx+=jX*s*0.6;dy+=jY*s*0.6;} if(dx&&dy){dx*=0.707;dy*=0.707;} G.player.x=Math.max(20,Math.min(880,G.player.x+dx)); G.player.y=Math.max(20,Math.min(580,G.player.y+dy)); if(G.cd>0)G.cd--; G.player.stealth=Math.min(100,G.player.stealth+0.1); if(Math.random()<0.01){ G.monsters.push({x:Math.random()*880+10,y:Math.random()*580+10}); } G.monsters.forEach(m=>{ const d=Math.hypot(G.player.x-m.x,G.player.y-m.y); if(d<100){ const s2=(100-d)/100; G.player.stealth-=s2*0.5; if(G.player.stealth<=0){ G.gameOver=true; } } }); if(G.keys.length<G.totalKeys&&Math.random()<0.005){ G.keys.push({x:Math.random()*880+10,y:Math.random()*580+10}); } G.keys.forEach((k,i)=>{ if(Math.hypot(G.player.x-k.x,G.player.y-k.y)<20){ G.foundKeys++; G.keys.splice(i,1); } }); if(G.foundKeys>=G.totalKeys){ G.gameOver=true; } document.getElementById('w').textContent='🔑 '+G.foundKeys+'/'+G.totalKeys; document.getElementById('e').textContent='👻 '+G.monsters.length; }
+function draw(){ ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,900,600); const grad=ctx.createRadialGradient(G.player.x,G.player.y,50,G.player.x,G.player.y,250); grad.addColorStop(0,'rgba(255,255,255,0.05)'); grad.addColorStop(1,'rgba(0,0,0,0.9)'); ctx.fillStyle=grad; ctx.fillRect(0,0,900,600); G.keys.forEach(k=>{ ctx.fillStyle='#ffd93d'; ctx.shadowColor='#ffd93d'; ctx.shadowBlur=20; ctx.beginPath(); ctx.arc(k.x,k.y,12,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#000'; ctx.font='16px monospace'; ctx.fillText('🔑',k.x-8,k.y-8); }); G.monsters.forEach(m=>{ ctx.fillStyle='#ff4444'; ctx.shadowColor='#ff4444'; ctx.shadowBlur=20; ctx.beginPath(); ctx.arc(m.x,m.y,20,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='30px monospace'; ctx.fillText('👻',m.x-15,m.y-12); }); if(playerImg.complete&&playerImg.naturalWidth){ ctx.drawImage(playerImg,G.player.x-20,G.player.y-20,40,40); }else{ ctx.fillStyle='#4ecdc4'; ctx.beginPath(); ctx.arc(G.player.x,G.player.y,15,0,Math.PI*2); ctx.fill(); } ctx.fillStyle='#444'; ctx.fillRect(20,55,200,12); ctx.fillStyle=G.player.stealth>50?'#4ecdc4':'#ff4444'; ctx.fillRect(20,55,G.player.stealth*2,12); ctx.fillStyle='#fff'; ctx.font='10px monospace'; ctx.fillText('Stealth',25,67); ctx.fillStyle='#fff'; ctx.font='bold 20px monospace'; ctx.fillText('🔑 '+G.foundKeys+'/'+G.totalKeys,20,40); if(G.gameOver){ ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(0,0,900,600); ctx.fillStyle='#fff'; ctx.font='bold 48px monospace'; ctx.textAlign='center'; if(G.foundKeys>=G.totalKeys){ ctx.fillText('YOU ESCAPED!',450,230); ctx.fillStyle=C.a; ctx.fillText('All keys collected!',450,300); }else{ ctx.fillText('CAUGHT!',450,230); } ctx.font='18px monospace'; ctx.fillStyle='#aaa'; ctx.fillText('Press R to restart',450,370); ctx.textAlign='left'; } if(!G.started&&!G.gameOver){ ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(0,0,900,600); ctx.fillStyle='#fff'; ctx.font='bold 36px monospace'; ctx.textAlign='center'; ctx.fillText('👻 HORROR',450,220); ctx.font='18px monospace'; ctx.fillStyle=C.p; ctx.fillText('Find all keys without being caught',450,280); ctx.font='16px monospace'; ctx.fillStyle=C.s; ctx.fillText('Press SPACE / Tap to Start',450,340); ctx.textAlign='left'; } }}
+function restartGame(){ G.player={x:450,y:300,stealth:100}; G.monsters=[]; G.keys=[]; G.foundKeys=0; G.gameOver=false; G.started=true; G.cd=0; }
+
+
+// ========== COMMON CONTROLS ==========
+let keys={}, jActive=false, jX=0, jY=0;
+const j=document.getElementById('joystick'), ji=document.getElementById('ji');
+j.addEventListener('touchstart',e=>{e.preventDefault();jActive=true;updateJoy(e);});
+j.addEventListener('touchmove',e=>{e.preventDefault();if(jActive)updateJoy(e);});
+j.addEventListener('touchend',e=>{e.preventDefault();jActive=false;jX=0;jY=0;ji.style.transform='translate(0,0)';});
+function updateJoy(e){const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-22)/22,y=(t.clientY-r.top-22)/22;const d=Math.hypot(x,y);if(d>1){x/=d;y/=d;}jX=x;jY=y;ji.style.transform=`translate(${x*12}px,${y*12}px)`;}
+document.getElementById('mb').addEventListener('touchstart',e=>{e.preventDefault();simulateKey(' ');});
+document.getElementById('mb').addEventListener('mousedown',()=>simulateKey(' '));
+function simulateKey(k){const ev=new KeyboardEvent('keydown',{key:k});document.dispatchEvent(ev);setTimeout(()=>{document.dispatchEvent(new KeyboardEvent('keyup',{key:k}));},150);}
+function restartGame(){ G.p = {x:450,y:300,size:22,h:100,mh:100}; G.enemies=[]; G.particles=[]; G.powerups=[]; G.projectiles=[]; G.score=0; G.combo=0; G.maxCombo=0; G.wave=1; G.kills=0; G.gameOver=false; G.started=true; G.cd=0; G.bossActive=false; G.shieldActive=false; G.shieldTimer=0; G.spawnTimer=30; G.difficulty=1; if(G.mode==='time_attack')G.time=0; if(G.mode==='boss_fight')G.bossActive=false; }
+document.addEventListener('keydown',function(e){const k=e.key.toLowerCase();keys[k]=true;if(e.key===' '){e.preventDefault();if(!G.started){G.started=true;G.spawnTimer=30;}else useMechanic();} if((e.key==='r'||e.key==='R')&&G.gameOver)restartGame();});
+document.addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
+canvas.addEventListener('click',function(){if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
+canvas.addEventListener('touchstart',function(e){e.preventDefault();if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+</script>
+</body></html>
