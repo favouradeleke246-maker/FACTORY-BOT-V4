@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v42.0 – POLISHED PHASER GAME FACTORY
+DEATHROLL STUDIO v43.0 – GENRE-SPECIFIC GAME FACTORY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
-import os, json, random, requests, time, shutil, zipfile, uuid, math, base64
+import os, json, random, requests, time, shutil, zipfile, uuid, math
 from datetime import datetime
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
+from PIL import Image, ImageDraw
 from typing import Dict, List, Optional
 
 # ============================================================
 # CONFIG
 # ============================================================
-BOT_VERSION = "42.0.0"
+BOT_VERSION = "43.0.0"
 CONFIG = {
     "brand": {"name":"DeathRoll","email":"favouradeleke246@gmail.com","telegram":"@deathroll1",
               "tiktok":"@deathroll.co","website":"https://deathroll.co","github":"favouradeleke246-maker"},
@@ -27,46 +27,137 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
 
-print("═"*60); print("🔥 DEATHROLL STUDIO v42.0 – POLISHED PHASER GAMES")
+print("═"*60); print("🔥 DEATHROLL STUDIO v43.0 – GENRE-SPECIFIC GAMES")
 print(f"🤖 Version: {BOT_VERSION}") ; print(f"✅ Telegram: {'✅' if TELEGRAM_TOKEN else '❌'}")
 print(f"✅ OpenAI: {'✅' if OPENAI_KEY else '❌'}") ; print(f"✅ GitHub: {'✅' if GITHUB_TOKEN else '❌'}")
 print("═"*60)
 
 # ============================================================
-# ART DIRECTOR – generates all game assets
+# ART DIRECTOR – generates unique sprites per genre
 # ============================================================
 class ArtDirector:
     @staticmethod
     def generate_all_assets(name, genre, style, template, folder: Path):
         assets = folder / "assets"
         assets.mkdir(exist_ok=True)
-        main_sprite = Path("sprite.png")
-        if main_sprite.exists():
-            shutil.copy(main_sprite, assets / "player.png")
-        else:
-            ArtDirector._create_fallback_sprite(assets / "player.png", "🎮", name)
-        icons = {"shooter":"👾","platformer":"👾","puzzle":"🧩","racer":"🚗","horror":"👻","strategy":"👾","roguelike":"👾"}
-        ArtDirector._create_fallback_sprite(assets / "enemy.png", icons.get(template, "👾"), "Enemy")
-        ArtDirector._create_fallback_sprite(assets / "coin.png", "🪙", "Coin")
-        ArtDirector._create_fallback_sprite(assets / "powerup.png", "⚡", "Powerup")
-        # Background gradient
-        bg = Image.new('RGB', (800, 600), color=(20, 20, 40))
-        draw = ImageDraw.Draw(bg)
-        for i in range(256):
-            color = (int(20+20*i/256), int(20+30*i/256), int(40+20*i/256))
-            draw.ellipse((i, i, 800-i, 600-i), outline=color)
+        ArtDirector._generate_player_sprite(assets / "player.png", template, genre)
+        ArtDirector._generate_enemy_sprite(assets / "enemy.png", template)
+        ArtDirector._generate_coin_sprite(assets / "coin.png")
+        ArtDirector._generate_powerup_sprite(assets / "powerup.png", template)
+        bg = ArtDirector._generate_background(template)
         bg.save(assets / "bg.png")
-        print(f"   🎨 Assets generated in {assets}")
+        print(f"   🎨 Genre-specific assets generated in {assets}")
 
     @staticmethod
-    def _create_fallback_sprite(path, icon, label):
+    def _generate_player_sprite(path, template, genre):
         img = Image.new('RGBA', (64, 64), (0,0,0,0))
         draw = ImageDraw.Draw(img)
-        draw.text((8, 8), icon, fill=(255,255,255), font=None)
+        if template == "shooter":
+            draw.polygon([(32, 0), (64, 64), (32, 48), (0, 64)], fill=(78,205,196))
+            draw.polygon([(32, 8), (48, 56), (32, 44), (16, 56)], fill=(255,255,255))
+        elif template == "platformer":
+            draw.ellipse([12, 8, 52, 48], fill=(255,107,107))
+            draw.rectangle([20, 40, 44, 64], fill=(255,107,107))
+            draw.ellipse([20, 2, 44, 18], fill=(255,215,0))
+        elif template == "puzzle":
+            draw.rectangle([8, 8, 56, 56], fill=(78,205,196), outline=(255,255,255), width=3)
+            draw.line([8,32,56,32], fill=(255,255,255), width=2)
+            draw.line([32,8,32,56], fill=(255,255,255), width=2)
+        elif template == "racer":
+            draw.rectangle([8, 20, 56, 60], fill=(255,68,68))
+            draw.ellipse([12, 52, 28, 64], fill=(0,0,0))
+            draw.ellipse([36, 52, 52, 64], fill=(0,0,0))
+            draw.rectangle([20, 8, 44, 20], fill=(200,200,200))
+        elif template == "horror":
+            draw.ellipse([8, 8, 56, 56], fill=(139,0,0))
+            draw.ellipse([20, 20, 28, 30], fill=(255,255,255))
+            draw.ellipse([36, 20, 44, 30], fill=(255,255,255))
+            draw.ellipse([24, 24, 26, 26], fill=(0,0,0))
+            draw.ellipse([38, 24, 40, 26], fill=(0,0,0))
+            draw.polygon([(28, 34), (36, 34), (32, 42)], fill=(255,0,0))
+        elif template == "strategy":
+            draw.rectangle([16, 16, 48, 48], fill=(0,100,200))
+            draw.rectangle([24, 8, 40, 16], fill=(0,100,200))
+            draw.polygon([(16, 16), (48, 16), (32, 4)], fill=(255,215,0))
+        elif template == "roguelike":
+            draw.rectangle([12, 12, 52, 52], fill=(128,128,128))
+            draw.rectangle([16, 16, 48, 48], fill=(200,200,200))
+            draw.rectangle([24, 8, 40, 16], fill=(150,150,150))
+            draw.polygon([(24, 8), (40, 8), (32, 0)], fill=(255,215,0))
+        else:
+            draw.ellipse([8, 8, 56, 56], fill=(78,205,196))
         img.save(path)
 
+    @staticmethod
+    def _generate_enemy_sprite(path, template):
+        img = Image.new('RGBA', (64, 64), (0,0,0,0))
+        draw = ImageDraw.Draw(img)
+        if template == "shooter":
+            draw.polygon([(32, 0), (64, 48), (32, 32), (0, 48)], fill=(255,68,68))
+        elif template == "platformer":
+            draw.rectangle([12, 12, 52, 52], fill=(255,68,68))
+            draw.ellipse([16, 8, 24, 20], fill=(255,255,255))
+            draw.ellipse([40, 8, 48, 20], fill=(255,255,255))
+            draw.polygon([(24, 52), (40, 52), (32, 60)], fill=(255,68,68))
+        elif template == "horror":
+            draw.ellipse([8, 8, 56, 56], fill=(0,0,0))
+            draw.ellipse([16, 16, 24, 24], fill=(255,0,0))
+            draw.ellipse([40, 16, 48, 24], fill=(255,0,0))
+            draw.polygon([(24, 32), (40, 32), (32, 48)], fill=(255,0,0))
+        else:
+            draw.ellipse([8, 8, 56, 56], fill=(255,68,68))
+        img.save(path)
+
+    @staticmethod
+    def _generate_coin_sprite(path):
+        img = Image.new('RGBA', (32, 32), (0,0,0,0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([4, 4, 28, 28], fill=(255,215,0))
+        draw.ellipse([12, 12, 20, 20], fill=(255,255,0))
+        img.save(path)
+
+    @staticmethod
+    def _generate_powerup_sprite(path, template):
+        img = Image.new('RGBA', (32, 32), (0,0,0,0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([4, 4, 28, 28], fill=(0,255,136))
+        draw.text((8, 4), "⚡", fill=(255,255,255), font=None)
+        img.save(path)
+
+    @staticmethod
+    def _generate_background(template):
+        bg = Image.new('RGB', (800, 600), color=(20, 20, 40))
+        draw = ImageDraw.Draw(bg)
+        if template == "shooter":
+            for _ in range(100):
+                x = random.randint(0, 800)
+                y = random.randint(0, 600)
+                draw.point((x, y), fill=(255,255,255))
+        elif template == "platformer":
+            for i in range(0, 800, 100):
+                draw.arc((i-50, 500, i+50, 600), 0, 180, fill=(50,100,50))
+        elif template == "racer":
+            draw.rectangle([300, 0, 500, 600], fill=(80,80,80))
+            for y in range(0, 600, 60):
+                draw.rectangle([390, y, 410, y+30], fill=(255,255,255))
+        elif template == "horror":
+            for _ in range(20):
+                x = random.randint(0, 800)
+                y = random.randint(0, 600)
+                draw.polygon([(x, y), (x-20, y+40), (x+20, y+40)], fill=(30,30,30))
+        elif template == "strategy":
+            for x in range(0, 800, 40):
+                draw.line([(x, 0), (x, 600)], fill=(40,40,40))
+            for y in range(0, 600, 40):
+                draw.line([(0, y), (800, y)], fill=(40,40,40))
+        elif template == "roguelike":
+            for x in range(0, 800, 80):
+                for y in range(0, 600, 80):
+                    draw.rectangle([x, y, x+80, y+80], outline=(60,60,60))
+        return bg
+
 # ============================================================
-# AI SERVICE (unchanged)
+# AI SERVICE
 # ============================================================
 class AIService:
     def __init__(self, key): self.key=key; self.enabled=bool(key)
@@ -219,25 +310,25 @@ def _select_template(genre):
     return "shooter"
 
 # ============================================================
-# PHASER 3 GAME GENERATOR – FULLY UPGRADED
+# PHASER GAME GENERATOR – dispatches to template functions
 # ============================================================
 def generate_phaser_game(game_data, theme, style, template, folder: Path):
     if template == "shooter":
-        js_code = _phaser_shooter(game_data, theme, style)
+        js = _phaser_shooter(game_data, theme, style)
     elif template == "platformer":
-        js_code = _phaser_platformer(game_data, theme, style)
+        js = _phaser_platformer(game_data, theme, style)
     elif template == "puzzle":
-        js_code = _phaser_puzzle(game_data, theme, style)
+        js = _phaser_puzzle(game_data, theme, style)
     elif template == "racer":
-        js_code = _phaser_racer(game_data, theme, style)
+        js = _phaser_racer(game_data, theme, style)
     elif template == "horror":
-        js_code = _phaser_horror(game_data, theme, style)
+        js = _phaser_horror(game_data, theme, style)
     elif template == "strategy":
-        js_code = _phaser_strategy(game_data, theme, style)
+        js = _phaser_strategy(game_data, theme, style)
     elif template == "roguelike":
-        js_code = _phaser_roguelike(game_data, theme, style)
+        js = _phaser_roguelike(game_data, theme, style)
     else:
-        js_code = _phaser_shooter(game_data, theme, style)
+        js = _phaser_shooter(game_data, theme, style)
 
     index_html = f'''<!DOCTYPE html>
 <html>
@@ -256,10 +347,13 @@ def generate_phaser_game(game_data, theme, style, template, folder: Path):
 </body>
 </html>'''
     (folder / "index.html").write_text(index_html)
-    (folder / "game.js").write_text(js_code)
+    (folder / "game.js").write_text(js)
     print(f"   🎮 Phaser game generated in {folder}")
 
-# ------------------- SHOOTER (with waves, boss, powerups) -------------------
+# ============================================================
+# PHASER TEMPLATE FUNCTIONS – FULLY IMPLEMENTED
+# ============================================================
+
 def _phaser_shooter(game_data, theme, style):
     return f'''
 const config = {{
@@ -274,8 +368,6 @@ const config = {{
 let player, cursors, enemies, bullets, powerups, scoreText, healthText, waveText;
 let score = 0, health = 100, wave = 1, enemiesDefeated = 0;
 let gameOver = false, bossActive = false;
-let playerSpeed = 300;
-let shootTimer = 0;
 
 function preload() {{
     this.load.image('player', 'assets/player.png');
@@ -326,35 +418,26 @@ function create() {{
     this.input.keyboard.on('keydown-SPACE', shoot, this);
     this.input.on('pointerdown', shoot, this);
 
-    // Spawn enemies every second
     this.time.addEvent({{ delay: 1000, callback: spawnEnemy, callbackScope: this, loop: true }});
-    // Spawn powerups occasionally
     this.time.addEvent({{ delay: 5000, callback: spawnPowerup, callbackScope: this, loop: true }});
 }}
 
 function update(time) {{
     if (gameOver) return;
-    // Movement
     let vx = 0, vy = 0;
-    if (cursors.left.isDown) vx = -playerSpeed;
-    else if (cursors.right.isDown) vx = playerSpeed;
-    if (cursors.up.isDown) vy = -playerSpeed;
-    else if (cursors.down.isDown) vy = playerSpeed;
+    if (cursors.left.isDown) vx = -300;
+    else if (cursors.right.isDown) vx = 300;
+    if (cursors.up.isDown) vy = -300;
+    else if (cursors.down.isDown) vy = 300;
     player.setVelocity(vx, vy);
-    // Auto-shoot if holding space? We'll use keydown.
-    // Boss logic
     if (bossActive) {{
         const boss = enemies.getChildren().find(e => e.boss);
-        if (boss) {{
-            // Move boss left-right
-            boss.x += Math.sin(time/1000) * 2;
-        }}
+        if (boss) boss.x += Math.sin(time/1000) * 2;
     }}
 }}
 
 function spawnEnemy() {{
-    if (gameOver) return;
-    if (bossActive) return; // No regular enemies during boss
+    if (gameOver || bossActive) return;
     const x = Phaser.Math.Between(50, 750);
     const enemy = enemies.create(x, 0, 'enemy');
     enemy.setVelocityY(100 + wave * 20);
@@ -368,9 +451,7 @@ function spawnBoss() {{
     boss.boss = true;
     boss.hp = 20 + wave * 5;
     boss.setVelocityX(100);
-    // Move down slowly
     boss.setVelocityY(20);
-    // Boss health bar (we'll add later)
 }}
 
 function spawnPowerup() {{
@@ -403,7 +484,6 @@ function showGameOver() {{
 const game = new Phaser.Game(config);
 '''
 
-# ------------------- PLATFORMER (with moving platforms, enemies, coins) -------------------
 def _phaser_platformer(game_data, theme, style):
     return f'''
 const config = {{
@@ -437,7 +517,6 @@ function create() {{
     player.setBounce(0.1);
     this.physics.add.collider(player, platforms);
 
-    // Coins
     coins = this.physics.add.staticGroup();
     for (let i=0; i<15; i++) {{
         const x = 50 + Math.random() * 700;
@@ -448,7 +527,6 @@ function create() {{
         c.destroy(); score += 10; scoreText.setText('Score: ' + score);
     }});
 
-    // Enemies (patrol)
     enemies = this.physics.add.group();
     for (let i=0; i<3; i++) {{
         const e = enemies.create(150 + i*200, 550, 'enemy');
@@ -478,7 +556,6 @@ function update() {{
     else if (cursors.right.isDown) {{ player.setVelocityX(160); }}
     else {{ player.setVelocityX(0); }}
     if (cursors.up.isDown && player.body.touching.down) {{ player.setVelocityY(-400); }}
-    // Enemy patrol
     enemies.children.iterate(e => {{
         if (e.x < 50 || e.x > 750) e.setVelocityX(-e.body.velocity.x);
     }});
@@ -487,7 +564,6 @@ function update() {{
 const game = new Phaser.Game(config);
 '''
 
-# ------------------- PUZZLE (memory match with timer) -------------------
 def _phaser_puzzle(game_data, theme, style):
     return f'''
 const config = {{
@@ -581,7 +657,6 @@ function shuffle(arr) {{
 const game = new Phaser.Game(config);
 '''
 
-# ------------------- RACER (with traffic, speed boost, lives) -------------------
 def _phaser_racer(game_data, theme, style):
     return f'''
 const config = {{
@@ -630,7 +705,6 @@ function update() {{
     if (gameOver) return;
     if (cursors.left.isDown) {{ player.x -= 7; }}
     else if (cursors.right.isDown) {{ player.x += 7; }}
-    // Speed up gradually
     speed += 0.001;
     obstacles.children.iterate(ob => {{
         ob.y += speed;
@@ -675,7 +749,6 @@ function updateUI() {{
 const game = new Phaser.Game(config);
 '''
 
-# ------------------- HORROR (stealth, flashlight, AI patrol) -------------------
 def _phaser_horror(game_data, theme, style):
     return f'''
 const config = {{
@@ -687,8 +760,8 @@ const config = {{
     scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
 }};
 
-let player, monsters, keys, cursors, stealthBar, foundKeys = 0, totalKeys = 5;
-let gameOver = false, escaped = false, stealth = 100;
+let player, monsters, keys, cursors, foundKeys = 0, totalKeys = 5;
+let gameOver = false, stealth = 100;
 
 function preload() {{
     this.load.image('player', 'assets/player.png');
@@ -716,11 +789,11 @@ function create() {{
     this.physics.add.overlap(player, keys, collectKey, null, this);
     this.physics.add.overlap(player, monsters, hitMonster, null, this);
 
-    stealthBar = this.add.graphics();
-    updateStealthBar();
-
     this.add.text(20, 20, 'Stealth', {{ fontSize: '20px', fill: '#fff' }});
-    this.add.text(20, 100, 'Keys: 0/'+totalKeys, {{ fontSize: '20px', fill: '#fff' }});
+    this.add.text(20, 60, 'Keys: 0/'+totalKeys, {{ fontSize: '20px', fill: '#fff' }});
+    // Simple stealth bar (graphics)
+    this.stealthBar = this.add.graphics();
+    this.updateStealthBar();
 }}
 
 function update() {{
@@ -740,7 +813,7 @@ function update() {{
                 this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
                 this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
             }}
-            updateStealthBar();
+            this.updateStealthBar();
         }}
     }});
 }}
@@ -755,9 +828,10 @@ function spawnMonster() {{
 function collectKey(player, key) {{
     key.destroy();
     foundKeys++;
-    this.add.text(20, 130, 'Keys: '+foundKeys+'/'+totalKeys, {{ fontSize: '20px', fill: '#fff' }}).setDepth(1);
+    this.children.list.forEach(c => {{
+        if (c.text && c.text.startsWith('Keys:')) c.setText('Keys: '+foundKeys+'/'+totalKeys);
+    }});
     if (foundKeys === totalKeys) {{
-        escaped = true;
         gameOver = true;
         this.add.text(300, 250, 'YOU ESCAPED!', {{ fontSize: '64px', fill: '#00ff00' }});
         this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
@@ -766,7 +840,6 @@ function collectKey(player, key) {{
 }}
 
 function hitMonster(player, mon) {{
-    // Direct collision = caught
     gameOver = true;
     this.add.text(300, 250, 'CAUGHT!', {{ fontSize: '64px', fill: '#ff0000' }});
     this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
@@ -774,16 +847,15 @@ function hitMonster(player, mon) {{
 }}
 
 function updateStealthBar() {{
-    stealthBar.clear();
+    this.stealthBar.clear();
     const color = stealth > 50 ? 0x00ff00 : 0xff0000;
-    stealthBar.fillStyle(color, 1);
-    stealthBar.fillRect(20, 60, Math.max(0, stealth * 2), 20);
+    this.stealthBar.fillStyle(color, 1);
+    this.stealthBar.fillRect(20, 40, Math.max(0, stealth * 2), 20);
 }}
 
 const game = new Phaser.Game(config);
 '''
 
-# ------------------- STRATEGY (tower defense, multiple towers, upgrade) -------------------
 def _phaser_strategy(game_data, theme, style):
     return f'''
 const config = {{
@@ -815,7 +887,6 @@ function create() {{
     projectiles = this.physics.add.group();
 
     this.time.addEvent({{ delay: 1500, callback: spawnEnemy, callbackScope: this, loop: true }});
-    // Click to place tower
     this.input.on('pointerdown', placeTower, this);
 
     goldText = this.add.text(20, 20, 'Gold: '+gold, {{ fontSize: '24px', fill: '#fff' }});
@@ -839,28 +910,23 @@ function update() {{
             }}
         }}
     }});
-    // Tower auto-fire
+    // Towers auto-fire
     towers.children.iterate(tower => {{
         const closest = enemies.getChildren().reduce((a,b) => {{
             const da = Phaser.Math.Distance.Between(tower.x, tower.y, a.x, a.y);
             const db = Phaser.Math.Distance.Between(tower.x, tower.y, b.x, b.y);
             return da < db ? a : b;
         }});
-        if (closest) {{
-            const dist = Phaser.Math.Distance.Between(tower.x, tower.y, closest.x, closest.y);
-            if (dist < 200) {{
-                // Shoot projectile
-                const proj = projectiles.create(tower.x, tower.y, 'coin');
-                proj.setScale(0.2);
-                this.physics.moveToObject(proj, closest, 200);
-                // Destroy projectile on hit
-                this.physics.add.overlap(proj, closest, (p, e) => {{
-                    p.destroy();
-                    e.destroy();
-                    gold += 10;
-                    updateUI();
-                }});
-            }}
+        if (closest && Phaser.Math.Distance.Between(tower.x, tower.y, closest.x, closest.y) < 200) {{
+            const proj = projectiles.create(tower.x, tower.y, 'coin');
+            proj.setScale(0.2);
+            this.physics.moveToObject(proj, closest, 200);
+            this.physics.add.overlap(proj, closest, (p, e) => {{
+                p.destroy();
+                e.destroy();
+                gold += 10;
+                updateUI();
+            }});
         }}
     }});
 }}
@@ -889,7 +955,6 @@ function updateUI() {{
 const game = new Phaser.Game(config);
 '''
 
-# ------------------- ROGUELIKE (dungeon, combat, loot) -------------------
 def _phaser_roguelike(game_data, theme, style):
     return f'''
 const config = {{
@@ -900,8 +965,7 @@ const config = {{
     scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
 }};
 
-let player, enemies, dungeon = [], visible = [];
-let turn = 0, hp = 10, maxHp = 10, gold = 0;
+let player, enemies, dungeon = [], turn = 0, hp = 10, maxHp = 10, gold = 0;
 let gameOver = false;
 let graphics, uiText;
 
@@ -932,9 +996,7 @@ function generateDungeon() {{
     dungeon = [];
     for (let y=0; y<size; y++) {{
         const row = [];
-        for (let x=0; x<size; x++) {{
-            row.push(Math.random() < 0.25 ? 1 : 0);
-        }}
+        for (let x=0; x<size; x++) row.push(Math.random() < 0.25 ? 1 : 0);
         dungeon.push(row);
     }}
     dungeon[1][1] = 0;
@@ -943,31 +1005,24 @@ function generateDungeon() {{
     enemies = [];
     for (let i=0; i<4; i++) {{
         let ex, ey;
-        do {{
-            ex = Math.floor(Math.random()*size);
-            ey = Math.floor(Math.random()*size);
-        }} while (dungeon[ey][ex] !== 0 || (ex===1 && ey===1));
+        do {{ ex = Math.floor(Math.random()*size); ey = Math.floor(Math.random()*size); }}
+        while (dungeon[ey][ex] !== 0 || (ex===1 && ey===1));
         enemies.push({{x:ex, y:ey, hp:3, maxHp:3}});
     }}
-    // Place a gold chest
+    // Gold chest
     let gx, gy;
-    do {{
-        gx = Math.floor(Math.random()*size);
-        gy = Math.floor(Math.random()*size);
-    }} while (dungeon[gy][gx] !== 0 || (gx===1 && gy===1));
+    do {{ gx = Math.floor(Math.random()*size); gy = Math.floor(Math.random()*size); }}
+    while (dungeon[gy][gx] !== 0 || (gx===1 && gy===1));
     enemies.push({{x:gx, y:gy, hp:0, gold:10}});
 }}
 
 function drawDungeon() {{
     graphics.clear();
-    const size = 10;
-    const cellSize = 60;
-    const offsetX = (800 - size*cellSize)/2;
-    const offsetY = (600 - size*cellSize)/2;
+    const size = 10, cellSize = 60;
+    const offsetX = (800 - size*cellSize)/2, offsetY = (600 - size*cellSize)/2;
     for (let y=0; y<size; y++) {{
         for (let x=0; x<size; x++) {{
-            const px = offsetX + x*cellSize;
-            const py = offsetY + y*cellSize;
+            const px = offsetX + x*cellSize, py = offsetY + y*cellSize;
             if (dungeon[y][x] === 1) {{
                 graphics.fillStyle(0x444444, 1);
             }} else {{
@@ -999,11 +1054,9 @@ function drawDungeon() {{
 
 function movePlayer(dx, dy) {{
     if (gameOver) return;
-    const nx = player.x + dx;
-    const ny = player.y + dy;
+    const nx = player.x + dx, ny = player.y + dy;
     if (nx<0 || nx>=10 || ny<0 || ny>=10) return;
     if (dungeon[ny][nx] === 1) return;
-    // Check enemy collision
     let enemyHere = enemies.find(e => e.x === nx && e.y === ny);
     if (enemyHere) {{
         if (enemyHere.hp > 0) {{
@@ -1022,7 +1075,6 @@ function movePlayer(dx, dy) {{
                 }}
             }}
         }} else {{
-            // Gold chest
             gold += enemyHere.gold || 10;
             enemies = enemies.filter(e => e !== enemyHere);
         }}
@@ -1033,7 +1085,6 @@ function movePlayer(dx, dy) {{
     }}
     player.x = nx; player.y = ny;
     turn++;
-    // Enemies move randomly
     enemies.forEach(e => {{
         if (e.hp <= 0) return;
         const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
@@ -1076,7 +1127,7 @@ class DeathRollStudio:
         self.telegram = Telegram(TELEGRAM_TOKEN)
 
     def run(self):
-        print("\n"+"═"*60); print("🎮 GENERATING NEW GAME (Polished Phaser)"); print("═"*60)
+        print("\n"+"═"*60); print("🎮 GENERATING NEW GAME (Genre-Specific)"); print("═"*60)
         game = self.design.generate()
         template = _select_template(game["genre"])
         print(f"   📝 Name: {game['name']}")
