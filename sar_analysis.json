@@ -418,6 +418,14 @@
         "game_mode": "survival",
         "timestamp": "2026-06-23T01:39:34.210951",
         "price": 5
+      },
+      {
+        "name": "Void Breach",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "survival",
+        "timestamp": "2026-06-23T02:05:19.925975",
+        "price": 4
       }
     ],
     "successful_art": 25,
