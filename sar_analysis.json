@@ -458,6 +458,14 @@
         "game_mode": "survival",
         "timestamp": "2026-06-23T13:29:45.399072",
         "price": 3
+      },
+      {
+        "name": "Void Drifter",
+        "genre": "top-down shooter",
+        "mechanic": "Void Step",
+        "game_mode": "survival",
+        "timestamp": "2026-06-23T15:52:10.178548",
+        "price": 6
       }
     ],
     "successful_art": 25,
