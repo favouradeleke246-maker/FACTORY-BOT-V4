@@ -576,5 +576,19 @@
     "license_key": "DR-AP-20260622-C2BFC426",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Pulse/index.html",
     "version": "37.1.0"
+  },
+  {
+    "date": "2026-06-23T01:36:25.029672",
+    "game": "Quantum Runner",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Quantum Runner, a survival horror where Chrono Fracture changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "survival",
+    "price": 4,
+    "license_key": "DR-QR-20260623-DE0B462D",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Runner/index.html",
+    "version": "38.1.0"
   }
 ]

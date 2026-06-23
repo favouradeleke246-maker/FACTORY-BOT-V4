@@ -402,6 +402,14 @@
         "game_mode": "waves",
         "timestamp": "2026-06-22T17:01:46.506068",
         "price": 5
+      },
+      {
+        "name": "Quantum Runner",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "survival",
+        "timestamp": "2026-06-23T01:36:27.869780",
+        "price": 4
       }
     ],
     "successful_art": 25,
