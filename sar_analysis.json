@@ -410,6 +410,14 @@
         "game_mode": "survival",
         "timestamp": "2026-06-23T01:36:27.869780",
         "price": 4
+      },
+      {
+        "name": "Astral Vector",
+        "genre": "action RPG",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "survival",
+        "timestamp": "2026-06-23T01:39:34.210951",
+        "price": 5
       }
     ],
     "successful_art": 25,
