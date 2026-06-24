@@ -744,5 +744,19 @@
     "license_key": "DR-CP-20260624-A56CCC77",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
     "version": "48.0.0"
+  },
+  {
+    "date": "2026-06-24T21:56:18.852039",
+    "game": "Astral Breach",
+    "genre": "strategy game",
+    "mechanic": "Void Step",
+    "description": "Step into Astral Breach, a strategy game where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-AB-20260624-7600279D",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Breach/index.html",
+    "version": "50.0.0"
   }
 ]

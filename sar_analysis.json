@@ -498,6 +498,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-06-24T21:38:18.678084",
         "price": 4
+      },
+      {
+        "name": "Astral Breach",
+        "genre": "strategy game",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-06-24T21:56:21.653083",
+        "price": 3
       }
     ],
     "successful_art": 25,
