@@ -716,5 +716,19 @@
     "license_key": "DR-QV-20260624-ABA4F819",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
     "version": "45.0.0"
+  },
+  {
+    "date": "2026-06-24T21:30:37.629074",
+    "game": "Cyber Runner",
+    "genre": "racing game",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Runner, a racing game where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "endless",
+    "price": 5,
+    "license_key": "DR-CR-20260624-463B8204",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
+    "version": "47.0.0"
   }
 ]

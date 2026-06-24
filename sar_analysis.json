@@ -482,6 +482,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-06-24T09:39:04.291490",
         "price": 5
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "racing game",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-06-24T21:30:40.467614",
+        "price": 5
       }
     ],
     "successful_art": 25,

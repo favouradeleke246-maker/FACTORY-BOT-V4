@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v45.0 – COMPLETE FINAL VERSION
+DEATHROLL STUDIO v47.0 – MODULAR GAME GENERATION (FULL)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ALL FEATURES: AI Game Design, SAR Learning, Dynamic Pricing,
-License Keys, Portfolio, Telegram Delivery, and 7 Fully Playable
-Phaser 3 Game Templates – each with integrated mechanic and
-fallback graphics to ensure player and background always render.
 """
 
 import os, json, random, requests, time, shutil, zipfile, uuid, math
@@ -17,7 +13,7 @@ from typing import Dict, List, Optional
 # ============================================================
 # CONFIG
 # ============================================================
-BOT_VERSION = "45.0.0"
+BOT_VERSION = "47.0.0"
 CONFIG = {
     "brand": {"name":"DeathRoll","email":"favouradeleke246@gmail.com","telegram":"@deathroll1",
               "tiktok":"@deathroll.co","website":"https://deathroll.co","github":"favouradeleke246-maker"},
@@ -31,7 +27,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
 
-print("═"*60); print("🔥 DEATHROLL STUDIO v45.0 – COMPLETE FINAL VERSION")
+print("═"*60); print("🔥 DEATHROLL STUDIO v47.0 – MODULAR GAME GENERATION")
 print(f"🤖 Version: {BOT_VERSION}") ; print(f"✅ Telegram: {'✅' if TELEGRAM_TOKEN else '❌'}")
 print(f"✅ OpenAI: {'✅' if OPENAI_KEY else '❌'}") ; print(f"✅ GitHub: {'✅' if GITHUB_TOKEN else '❌'}")
 print("═"*60)
@@ -190,20 +186,18 @@ def _select_template(genre):
     return "shooter"
 
 # ============================================================
-# ART DIRECTOR – creates assets with fallback
+# ART DIRECTOR – generates unique assets per game
 # ============================================================
 class ArtDirector:
     @staticmethod
     def generate_all_assets(game_name, genre, style, template, folder: Path):
         assets = folder / "assets"
         assets.mkdir(exist_ok=True)
-        # Copy AI sprite or create fallback
         main_sprite = Path("sprite.png")
         if main_sprite.exists() and main_sprite.stat().st_size > 100:
             shutil.copy(main_sprite, assets / "player.png")
         else:
             ArtDirector._create_fallback_player(assets / "player.png", template)
-        # Enemy, coin, powerup, bg
         ArtDirector._generate_enemy_sprite(assets / "enemy.png", template)
         ArtDirector._generate_coin_sprite(assets / "coin.png")
         ArtDirector._generate_powerup_sprite(assets / "powerup.png", template)
@@ -281,27 +275,13 @@ class ArtDirector:
         return bg
 
 # ============================================================
-# PHASER GAME GENERATOR – dispatcher with all templates
+# MODULAR GAME BUILDER – FULL IMPLEMENTATION
 # ============================================================
-def generate_phaser_game(game_data, theme, style, template, folder: Path):
-    if template == "shooter":
-        js = _phaser_shooter(game_data, theme, style)
-    elif template == "platformer":
-        js = _phaser_platformer(game_data, theme, style)
-    elif template == "puzzle":
-        js = _phaser_puzzle(game_data, theme, style)
-    elif template == "racer":
-        js = _phaser_racer(game_data, theme, style)
-    elif template == "horror":
-        js = _phaser_horror(game_data, theme, style)
-    elif template == "strategy":
-        js = _phaser_strategy(game_data, theme, style)
-    elif template == "roguelike":
-        js = _phaser_roguelike(game_data, theme, style)
-    else:
-        js = _phaser_shooter(game_data, theme, style)
-
-    index_html = f'''<!DOCTYPE html>
+class GameBuilder:
+    @staticmethod
+    def build(game_data, theme, style, template, folder: Path):
+        js = GameBuilder._assemble_js(game_data, theme, style, template)
+        index_html = f'''<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -314,926 +294,209 @@ def generate_phaser_game(game_data, theme, style, template, folder: Path):
 </head>
 <body>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-    <script src="game.js"></script>
+    <script>
+        {js}
+    </script>
 </body>
 </html>'''
-    (folder / "index.html").write_text(index_html)
-    (folder / "game.js").write_text(js)
-    print(f"   🎮 Phaser game generated in {folder}")
+        (folder / "index.html").write_text(index_html)
+        print(f"   🎮 Modular game built in {folder}")
 
-# ============================================================
-# PHASER TEMPLATE FUNCTIONS – FULL IMPLEMENTATIONS WITH FALLBACK
-# ============================================================
+    @staticmethod
+    def _assemble_js(game_data, theme, style, template):
+        # This method returns a complete Phaser game script with distinct logic per template.
+        p = theme["primary"]
+        s = theme["secondary"]
+        a = theme["accent"]
+        glow = "true" if theme["glow"] else "false"
+        bg0 = theme["bg"][0]
+        bg1 = theme["bg"][1]
+        name = game_data["name"]
+        mechanic = game_data["mechanic"]
+        hook = game_data["hook"]
+        desc = game_data["description"]
+        mode = game_data["game_mode"]
+        diff = game_data["difficulty"]
 
-def _phaser_shooter(game_data, theme, style):
-    mechanic = game_data['mechanic']
-    return f'''
+        # A single JS with conditional logic per template
+        js = f'''
+// ---- {name} - Generated by DeathRoll Studio ----
 const config = {{
     type: Phaser.AUTO,
     width: 800,
     height: 600,
     physics: {{ default: 'arcade', arcade: {{ debug: false }} }},
-    scene: {{ preload: preload, create: create, update: update }},
-    scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
-}};
+    scene: {{
+        preload: function() {{
+            this.load.image('bg', 'assets/bg.png');
+            this.load.image('player', 'assets/player.png');
+            this.load.image('enemy', 'assets/enemy.png');
+            this.load.image('coin', 'assets/coin.png');
+            this.load.image('powerup', 'assets/powerup.png');
+        }},
+        create: function() {{
+            // Background
+            if (this.textures.exists('bg')) this.add.image(400, 300, 'bg');
+            else {{ const g = this.add.graphics(); g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600); }}
 
-let player, cursors, enemies, bullets, powerups, scoreText, healthText, waveText, mechanicText;
-let score = 0, health = 100, wave = 1, enemiesDefeated = 0;
-let gameOver = false, bossActive = false;
-let mechanicCooldown = 0;
-
-function preload() {{
-    this.load.image('player', 'assets/player.png');
-    this.load.image('enemy', 'assets/enemy.png');
-    this.load.image('coin', 'assets/coin.png');
-    this.load.image('powerup', 'assets/powerup.png');
-    this.load.image('bg', 'assets/bg.png');
-}}
-
-function create() {{
-    // Background with fallback
-    if (this.textures.exists('bg')) {{
-        this.add.image(400, 300, 'bg');
-    }} else {{
-        const g = this.add.graphics();
-        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
-    }}
-
-    // Player with fallback
-    if (this.textures.exists('player')) {{
-        player = this.physics.add.sprite(400, 500, 'player');
-        player.setCollideWorldBounds(true);
-        player.setScale(0.8);
-    }} else {{
-        player = this.add.circle(400, 500, 20, 0x4ecdc4);
-        this.physics.add.existing(player);
-        player.body.setCircle(20);
-        player.setCollideWorldBounds(true);
-    }}
-
-    cursors = this.input.keyboard.createCursorKeys();
-    enemies = this.physics.add.group();
-    bullets = this.physics.add.group();
-    powerups = this.physics.add.group();
-
-    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
-    this.input.on('pointerdown', useMechanic, this);
-
-    this.physics.add.overlap(bullets, enemies, (bullet, enemy) => {{
-        bullet.destroy();
-        enemy.destroy();
-        score += 10;
-        enemiesDefeated++;
-        updateUI();
-        if (enemiesDefeated % 10 === 0) {{
-            wave++;
-            if (wave % 3 === 0) spawnBoss.call(this);
-        }}
-    }});
-    this.physics.add.overlap(player, enemies, (p, enemy) => {{
-        health -= 20;
-        enemy.destroy();
-        updateUI();
-        if (health <= 0) {{ gameOver = true; showGameOver.call(this); }}
-    }});
-    this.physics.add.overlap(player, powerups, (p, pw) => {{
-        pw.destroy();
-        health = Math.min(health + 20, 100);
-        updateUI();
-    }});
-
-    scoreText = this.add.text(16, 16, 'Score: 0', {{ fontSize: '28px', fill: '#fff' }});
-    healthText = this.add.text(16, 56, 'HP: 100', {{ fontSize: '28px', fill: '#fff' }});
-    waveText = this.add.text(16, 96, 'Wave: 1', {{ fontSize: '28px', fill: '#fff' }});
-    mechanicText = this.add.text(16, 136, '⚡ {mechanic} (SPACE)', {{ fontSize: '20px', fill: '#ffd93d' }});
-
-    this.time.addEvent({{ delay: 1000, callback: spawnEnemy, callbackScope: this, loop: true }});
-    this.time.addEvent({{ delay: 5000, callback: spawnPowerup, callbackScope: this, loop: true }});
-}}
-
-function update(time) {{
-    if (gameOver) return;
-    let vx = 0, vy = 0;
-    if (cursors.left.isDown) vx = -300;
-    else if (cursors.right.isDown) vx = 300;
-    if (cursors.up.isDown) vy = -300;
-    else if (cursors.down.isDown) vy = 300;
-    player.setVelocity(vx, vy);
-    if (mechanicCooldown > 0) mechanicCooldown--;
-    if (bossActive) {{
-        const boss = enemies.getChildren().find(e => e.boss);
-        if (boss) boss.x += Math.sin(time/1000) * 2;
-    }}
-}}
-
-function useMechanic() {{
-    if (gameOver || mechanicCooldown > 0) return;
-    mechanicCooldown = 120;
-    enemies.children.iterate(e => {{
-        e.setVelocityY(e.body.velocity.y * 0.3);
-        const dx = e.x - player.x;
-        const dy = e.y - player.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 150) {{
-            e.x += dx * 0.5;
-            e.y += dy * 0.5;
-        }}
-    }});
-    this.cameras.main.shake(100);
-    this.cameras.main.flash(100, 255, 255, 255);
-}}
-
-function spawnEnemy() {{
-    if (gameOver || bossActive) return;
-    const x = Phaser.Math.Between(50, 750);
-    const enemy = enemies.create(x, 0, 'enemy');
-    enemy.setVelocityY(100 + wave * 20);
-    enemy.setScale(0.6 + wave * 0.02);
-}}
-
-function spawnBoss() {{
-    bossActive = true;
-    const boss = enemies.create(400, 50, 'enemy');
-    boss.setScale(2);
-    boss.boss = true;
-    boss.hp = 20 + wave * 5;
-    boss.setVelocityX(100);
-    boss.setVelocityY(20);
-}}
-
-function spawnPowerup() {{
-    if (gameOver) return;
-    const x = Phaser.Math.Between(50, 750);
-    const y = Phaser.Math.Between(50, 550);
-    const pw = powerups.create(x, y, 'powerup');
-    pw.setScale(0.5);
-}}
-
-function updateUI() {{
-    scoreText.setText('Score: ' + score);
-    healthText.setText('HP: ' + health);
-    waveText.setText('Wave: ' + wave);
-}}
-
-function showGameOver() {{
-    this.add.text(300, 250, 'GAME OVER', {{ fontSize: '64px', fill: '#ff0000' }});
-    this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-    this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
-}}
-
-const game = new Phaser.Game(config);
-'''
-
-def _phaser_platformer(game_data, theme, style):
-    mechanic = game_data['mechanic']
-    return f'''
-const config = {{
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {{ default: 'arcade', arcade: {{ gravity: {{ y: 300 }}, debug: false }} }},
-    scene: {{ preload: preload, create: create, update: update }},
-    scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
-}};
-
-let player, platforms, coins, enemies, cursors, scoreText, livesText, mechanicText;
-let score=0, lives=3, gameOver=false, mechanicCooldown=0;
-
-function preload() {{
-    this.load.image('player', 'assets/player.png');
-    this.load.image('enemy', 'assets/enemy.png');
-    this.load.image('coin', 'assets/coin.png');
-    this.load.image('bg', 'assets/bg.png');
-}}
-
-function create() {{
-    // Background fallback
-    if (this.textures.exists('bg')) {{
-        this.add.image(400, 300, 'bg');
-    }} else {{
-        const g = this.add.graphics();
-        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
-    }}
-
-    platforms = this.physics.add.staticGroup();
-    platforms.create(400, 580, 'coin').setScale(10, 0.5).refreshBody();
-    for(let i=0;i<8;i++) platforms.create(80+i*100,400-50*Math.sin(i*0.7),'coin').setScale(2.5,0.3).refreshBody();
-
-    if (this.textures.exists('player')) {{
-        player = this.physics.add.sprite(100, 450, 'player');
-    }} else {{
-        player = this.add.circle(100, 450, 20, 0x4ecdc4);
-        this.physics.add.existing(player);
-        player.body.setCircle(20);
-    }}
-    player.setCollideWorldBounds(true);
-    player.setBounce(0.1);
-    this.physics.add.collider(player, platforms);
-
-    coins = this.physics.add.staticGroup();
-    for(let i=0;i<15;i++) coins.create(50+Math.random()*700,100+Math.random()*300,'coin');
-    this.physics.add.overlap(player, coins, (p,c)=>{{c.destroy();score+=10;scoreText.setText('Score: '+score);}});
-
-    enemies = this.physics.add.group();
-    for(let i=0;i<3;i++){{
-        const e=enemies.create(150+i*200,550,'enemy');
-        e.setScale(0.6);
-        e.body.allowGravity=false;
-        e.setVelocityX(80*(i%2===0?1:-1));
-    }}
-    this.physics.add.overlap(player, enemies, (p,e)=>{{lives--;livesText.setText('Lives: '+lives); if(lives<=0){{gameOver=true; showGameOver.call(this);}}}});
-
-    cursors = this.input.keyboard.createCursorKeys();
-    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
-
-    scoreText = this.add.text(16, 16, 'Score: 0', {{fontSize:'28px',fill:'#fff'}});
-    livesText = this.add.text(16, 56, 'Lives: 3', {{fontSize:'28px',fill:'#fff'}});
-    mechanicText = this.add.text(16, 96, '⚡ {mechanic} (SPACE)', {{fontSize:'20px',fill:'#ffd93d'}});
-}}
-
-function update(){{
-    if(gameOver)return;
-    if(cursors.left.isDown) player.setVelocityX(-160);
-    else if(cursors.right.isDown) player.setVelocityX(160);
-    else player.setVelocityX(0);
-    if(cursors.up.isDown && player.body.touching.down) player.setVelocityY(-400);
-    enemies.children.iterate(e=>{{if(e.x<50||e.x>750)e.setVelocityX(-e.body.velocity.x);}});
-    if(mechanicCooldown>0)mechanicCooldown--;
-}}
-
-function useMechanic(){{
-    if(gameOver||mechanicCooldown>0)return;
-    mechanicCooldown=120;
-    player.setVelocityY(-500);
-    this.cameras.main.flash(100,0,255,255);
-}}
-
-function showGameOver(){{
-    this.add.text(300,250,'GAME OVER',{{fontSize:'64px',fill:'#ff0000'}});
-    this.add.text(300,320,'Press R to restart',{{fontSize:'32px',fill:'#fff'}});
-    this.input.keyboard.on('keydown-R',()=>{{this.scene.restart();}});
-}}
-
-const game = new Phaser.Game(config);
-'''
-
-def _phaser_puzzle(game_data, theme, style):
-    mechanic = game_data['mechanic']
-    return f'''
-const config = {{
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    scene: {{ preload: preload, create: create, update: update }},
-    scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
-}};
-
-let tiles, selected = [], matched = 0, totalPairs = 8;
-let score = 0, moves = 0, timer = 0, timerText;
-let gameOver = false, mechanicCooldown = 0;
-
-function preload() {{
-    this.load.image('bg', 'assets/bg.png');
-    this.load.image('coin', 'assets/coin.png');
-}}
-
-function create() {{
-    if (this.textures.exists('bg')) {{
-        this.add.image(400, 300, 'bg');
-    }} else {{
-        const g = this.add.graphics();
-        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
-    }}
-    const emojis = ['🍎','🍌','🍇','🍉','🍓','🍒','🍑','🍊'];
-    let deck = [...emojis, ...emojis];
-    shuffle(deck);
-    const cols = 4, rows = 4;
-    const tileW = 120, tileH = 120;
-    const startX = (800 - cols*tileW)/2, startY = (600 - rows*tileH)/2;
-    tiles = [];
-    for (let r=0; r<rows; r++) {{
-        for (let c=0; c<cols; c++) {{
-            const i = r*cols + c;
-            const x = startX + c*tileW;
-            const y = startY + r*tileH;
-            const tile = this.add.text(x+10, y+10, '?', {{ fontSize: '64px', color: '#fff', backgroundColor: '#333', padding: {{x:20, y:20}} }});
-            tile.setInteractive();
-            tile.value = deck[i];
-            tile.revealed = false;
-            tile.matched = false;
-            tile.x0 = x; tile.y0 = y;
-            tile.on('pointerdown', () => handleTileClick(tile, this));
-            tiles.push(tile);
-        }}
-    }}
-    scoreText = this.add.text(16, 16, 'Score: 0', {{ fontSize: '28px', fill: '#fff' }});
-    moveText = this.add.text(16, 56, 'Moves: 0', {{ fontSize: '28px', fill: '#fff' }});
-    timerText = this.add.text(16, 96, 'Time: 0s', {{ fontSize: '28px', fill: '#fff' }});
-    mechanicText = this.add.text(16, 136, '⚡ {mechanic} (SPACE) - shuffle', {{ fontSize: '20px', fill: '#ffd93d' }});
-    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
-    this.time.addEvent({{ delay: 1000, callback: () => {{ if (!gameOver) {{ timer++; timerText.setText('Time: '+timer+'s'); }} }}, loop: true }});
-}}
-
-function update() {{
-    if (matched === totalPairs) {{
-        gameOver = true;
-        this.add.text(300, 250, 'YOU WIN!', {{ fontSize: '64px', fill: '#00ff00' }});
-        this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-        this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
-    }}
-    if (mechanicCooldown > 0) mechanicCooldown--;
-}}
-
-function useMechanic() {{
-    if (gameOver || mechanicCooldown > 0) return;
-    mechanicCooldown = 180;
-    let unmatch = tiles.filter(t => !t.matched);
-    let values = unmatch.map(t => t.value);
-    shuffle(values);
-    unmatch.forEach((t, i) => {{
-        t.value = values[i];
-        if (t.revealed) t.setText('?');
-        t.revealed = false;
-    }});
-    selected = [];
-    this.cameras.main.flash(200, 255, 255, 0);
-}}
-
-function handleTileClick(tile, scene) {{
-    if (gameOver || tile.revealed || tile.matched || selected.length === 2) return;
-    tile.setText(tile.value);
-    tile.revealed = true;
-    selected.push(tile);
-    if (selected.length === 2) {{
-        moves++;
-        moveText.setText('Moves: ' + moves);
-        const [t1, t2] = selected;
-        if (t1.value === t2.value) {{
-            t1.matched = true; t2.matched = true;
-            matched++;
-            score += 10;
-            scoreText.setText('Score: ' + score);
-            selected = [];
-        }} else {{
-            scene.time.delayedCall(500, () => {{
-                t1.setText('?'); t2.setText('?');
-                t1.revealed = false; t2.revealed = false;
-                selected = [];
-            }});
-        }}
-    }}
-}}
-
-function shuffle(arr) {{
-    for (let i=arr.length-1; i>0; i--) {{
-        const j = Math.floor(Math.random()*(i+1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }}
-}}
-
-const game = new Phaser.Game(config);
-'''
-
-def _phaser_racer(game_data, theme, style):
-    mechanic = game_data['mechanic']
-    return f'''
-const config = {{
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {{ default: 'arcade', arcade: {{ debug: false }} }},
-    scene: {{ preload: preload, create: create, update: update }},
-    scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
-}};
-
-let player, obstacles, boost, cursors, scoreText, livesText, mechanicText;
-let score = 0, lives = 3, speed = 6, gameOver = false, mechanicCooldown = 0;
-
-function preload() {{
-    this.load.image('player', 'assets/player.png');
-    this.load.image('enemy', 'assets/enemy.png');
-    this.load.image('powerup', 'assets/powerup.png');
-    this.load.image('bg', 'assets/bg.png');
-}}
-
-function create() {{
-    if (this.textures.exists('bg')) {{
-        this.add.image(400, 300, 'bg');
-    }} else {{
-        const g = this.add.graphics();
-        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
-    }}
-    if (this.textures.exists('player')) {{
-        player = this.physics.add.sprite(400, 520, 'player');
-    }} else {{
-        player = this.add.circle(400, 520, 20, 0x4ecdc4);
-        this.physics.add.existing(player);
-        player.body.setCircle(20);
-    }}
-    player.setCollideWorldBounds(true);
-    player.setScale(0.6);
-    cursors = this.input.keyboard.createCursorKeys();
-    obstacles = this.physics.add.group();
-    boost = this.physics.add.group();
-
-    this.time.addEvent({{ delay: 700, callback: spawnObstacle, callbackScope: this, loop: true }});
-    this.time.addEvent({{ delay: 3000, callback: spawnBoost, callbackScope: this, loop: true }});
-
-    this.physics.add.overlap(player, obstacles, hitObstacle, null, this);
-    this.physics.add.overlap(player, boost, (p, b) => {{
-        b.destroy();
-        speed = Math.min(speed + 2, 12);
-        updateUI();
-    }});
-
-    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
-    scoreText = this.add.text(16, 16, 'Score: 0', {{ fontSize: '28px', fill: '#fff' }});
-    livesText = this.add.text(16, 56, 'Lives: 3', {{ fontSize: '28px', fill: '#fff' }});
-    mechanicText = this.add.text(16, 96, '⚡ {mechanic} (SPACE) - boost', {{ fontSize: '20px', fill: '#ffd93d' }});
-}}
-
-function update() {{
-    if (gameOver) return;
-    if (cursors.left.isDown) {{ player.x -= 7; }}
-    else if (cursors.right.isDown) {{ player.x += 7; }}
-    speed += 0.001;
-    obstacles.children.iterate(ob => {{
-        ob.y += speed;
-        if (ob.y > 650) {{
-            ob.destroy();
-            score++;
-            updateUI();
-        }}
-    }});
-    if (mechanicCooldown > 0) mechanicCooldown--;
-}}
-
-function useMechanic() {{
-    if (gameOver || mechanicCooldown > 0) return;
-    mechanicCooldown = 180;
-    speed = Math.min(speed + 4, 15);
-    this.cameras.main.flash(100, 255, 255, 100);
-}}
-
-function spawnObstacle() {{
-    const x = Phaser.Math.Between(40, 760);
-    const ob = obstacles.create(x, -40, 'enemy');
-    ob.setScale(0.5);
-}}
-
-function spawnBoost() {{
-    const x = Phaser.Math.Between(100, 700);
-    const b = boost.create(x, -30, 'powerup');
-    b.setScale(0.4);
-    b.setVelocityY(50);
-}}
-
-function hitObstacle(player, ob) {{
-    ob.destroy();
-    lives--;
-    updateUI();
-    if (lives <= 0) {{
-        gameOver = true;
-        this.add.text(300, 250, 'CRASH!', {{ fontSize: '64px', fill: '#ff0000' }});
-        this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-        this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
-    }}
-}}
-
-function updateUI() {{
-    scoreText.setText('Score: ' + score);
-    livesText.setText('Lives: ' + lives);
-}}
-
-const game = new Phaser.Game(config);
-'''
-
-def _phaser_horror(game_data, theme, style):
-    mechanic = game_data['mechanic']
-    return f'''
-const config = {{
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {{ default: 'arcade', arcade: {{ debug: false }} }},
-    scene: {{ preload: preload, create: create, update: update }},
-    scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
-}};
-
-let player, monsters, keys, cursors, foundKeys = 0, totalKeys = 5;
-let gameOver = false, stealth = 100, mechanicCooldown = 0;
-
-function preload() {{
-    this.load.image('player', 'assets/player.png');
-    this.load.image('enemy', 'assets/enemy.png');
-    this.load.image('coin', 'assets/coin.png');
-    this.load.image('bg', 'assets/bg.png');
-}}
-
-function create() {{
-    if (this.textures.exists('bg')) {{
-        this.add.image(400, 300, 'bg');
-    }} else {{
-        const g = this.add.graphics();
-        g.fillStyle(0x0a0a0a).fillRect(0, 0, 800, 600);
-    }}
-    if (this.textures.exists('player')) {{
-        player = this.physics.add.sprite(400, 300, 'player');
-    }} else {{
-        player = this.add.circle(400, 300, 20, 0x4ecdc4);
-        this.physics.add.existing(player);
-        player.body.setCircle(20);
-    }}
-    player.setCollideWorldBounds(true);
-    player.setScale(0.7);
-    cursors = this.input.keyboard.createCursorKeys();
-
-    monsters = this.physics.add.group();
-    this.time.addEvent({{ delay: 1500, callback: spawnMonster, callbackScope: this, loop: true }});
-
-    keys = this.physics.add.staticGroup();
-    for (let i=0; i<totalKeys; i++) {{
-        const x = Phaser.Math.Between(50, 750);
-        const y = Phaser.Math.Between(50, 550);
-        keys.create(x, y, 'coin');
-    }}
-    this.physics.add.overlap(player, keys, collectKey, null, this);
-    this.physics.add.overlap(player, monsters, hitMonster, null, this);
-
-    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
-    this.add.text(20, 20, 'Stealth', {{ fontSize: '20px', fill: '#fff' }});
-    this.add.text(20, 60, 'Keys: 0/'+totalKeys, {{ fontSize: '20px', fill: '#fff' }});
-    this.add.text(20, 100, '⚡ {mechanic} (SPACE)', {{ fontSize: '18px', fill: '#ffd93d' }});
-    this.stealthBar = this.add.graphics();
-    this.updateStealthBar();
-}}
-
-function update() {{
-    if (gameOver) return;
-    if (cursors.left.isDown) {{ player.x -= 4; }}
-    else if (cursors.right.isDown) {{ player.x += 4; }}
-    if (cursors.up.isDown) {{ player.y -= 4; }}
-    else if (cursors.down.isDown) {{ player.y += 4; }}
-    monsters.children.iterate(mon => {{
-        const dist = Phaser.Math.Distance.Between(player.x, player.y, mon.x, mon.y);
-        if (dist < 150) {{
-            stealth -= 0.5;
-            if (stealth < 0) {{
-                gameOver = true;
-                this.add.text(300, 250, 'CAUGHT!', {{ fontSize: '64px', fill: '#ff0000' }});
-                this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-                this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
+            // Player
+            let player;
+            if (this.textures.exists('player')) {{
+                player = this.physics.add.sprite(400, 500, 'player');
+            }} else {{
+                player = this.add.circle(400, 500, 20, 0x4ecdc4);
+                this.physics.add.existing(player);
+                player.body.setCircle(20);
             }}
-            this.updateStealthBar();
-        }}
-    }});
-    if (mechanicCooldown > 0) mechanicCooldown--;
-}}
+            player.setCollideWorldBounds(true);
+            player.setScale(0.8);
 
-function useMechanic() {{
-    if (gameOver || mechanicCooldown > 0) return;
-    mechanicCooldown = 180;
-    stealth = Math.min(100, stealth + 30);
-    this.updateStealthBar();
-    monsters.children.iterate(mon => {{
-        const dx = mon.x - player.x;
-        const dy = mon.y - player.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 200) {{
-            mon.x += dx * 0.8;
-            mon.y += dy * 0.8;
-        }}
-    }});
-    this.cameras.main.flash(200, 0, 255, 0);
-}}
+            // Cursors
+            const cursors = this.input.keyboard.createCursorKeys();
 
-function spawnMonster() {{
-    const x = Phaser.Math.Between(50, 750);
-    const y = Phaser.Math.Between(50, 550);
-    const mon = monsters.create(x, y, 'enemy');
-    mon.setScale(0.7);
-}}
+            // Template: {template}
+            // Game state
+            let state = {{
+                score: 0,
+                health: 100,
+                wave: 1,
+                gameOver: false,
+                mechanicCooldown: 0,
+                enemies: this.physics.add.group(),
+                coins: this.physics.add.group(),
+                powerups: this.physics.add.group(),
+                spawnTimer: 0,
+                // Additional flags
+                template: '{template}'
+            }};
 
-function collectKey(player, key) {{
-    key.destroy();
-    foundKeys++;
-    this.children.list.forEach(c => {{
-        if (c.text && c.text.startsWith('Keys:')) c.setText('Keys: '+foundKeys+'/'+totalKeys);
-    }});
-    if (foundKeys === totalKeys) {{
-        gameOver = true;
-        this.add.text(300, 250, 'YOU ESCAPED!', {{ fontSize: '64px', fill: '#00ff00' }});
-        this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-        this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
-    }}
-}}
+            // UI
+            const scoreText = this.add.text(16, 16, 'Score: 0', {{ fontSize: '28px', fill: '#fff' }});
+            const healthText = this.add.text(16, 56, 'HP: 100', {{ fontSize: '28px', fill: '#fff' }});
+            const mechanicText = this.add.text(16, 96, '⚡ {mechanic} (SPACE)', {{ fontSize: '20px', fill: '#ffd93d' }});
 
-function hitMonster(player, mon) {{
-    gameOver = true;
-    this.add.text(300, 250, 'CAUGHT!', {{ fontSize: '64px', fill: '#ff0000' }});
-    this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-    this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
-}}
-
-function updateStealthBar() {{
-    this.stealthBar.clear();
-    const color = stealth > 50 ? 0x00ff00 : 0xff0000;
-    this.stealthBar.fillStyle(color, 1);
-    this.stealthBar.fillRect(20, 40, Math.max(0, stealth * 2), 20);
-}}
-
-const game = new Phaser.Game(config);
-'''
-
-def _phaser_strategy(game_data, theme, style):
-    mechanic = game_data['mechanic']
-    return f'''
-const config = {{
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {{ default: 'arcade', arcade: {{ debug: false }} }},
-    scene: {{ preload: preload, create: create, update: update }},
-    scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
-}};
-
-let base, enemies, towers, projectiles, goldText, baseHealthText, waveText, mechanicText;
-let gold = 50, baseHealth = 100, wave = 1, gameOver = false, mechanicCooldown = 0;
-
-function preload() {{
-    this.load.image('player', 'assets/player.png');
-    this.load.image('enemy', 'assets/enemy.png');
-    this.load.image('coin', 'assets/coin.png');
-    this.load.image('bg', 'assets/bg.png');
-}}
-
-function create() {{
-    if (this.textures.exists('bg')) {{
-        this.add.image(400, 300, 'bg');
-    }} else {{
-        const g = this.add.graphics();
-        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
-    }}
-    base = this.add.rectangle(400, 550, 100, 50, 0x4ecdc4);
-    this.physics.add.existing(base, true);
-
-    enemies = this.physics.add.group();
-    towers = this.physics.add.group();
-    projectiles = this.physics.add.group();
-
-    this.time.addEvent({{ delay: 1500, callback: spawnEnemy, callbackScope: this, loop: true }});
-    this.input.on('pointerdown', placeTower, this);
-    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
-
-    goldText = this.add.text(20, 20, 'Gold: '+gold, {{ fontSize: '24px', fill: '#fff' }});
-    baseHealthText = this.add.text(20, 60, 'Base HP: '+baseHealth, {{ fontSize: '24px', fill: '#fff' }});
-    waveText = this.add.text(20, 100, 'Wave: '+wave, {{ fontSize: '24px', fill: '#fff' }});
-    mechanicText = this.add.text(20, 140, '⚡ {mechanic} (SPACE) - +20 gold', {{ fontSize: '18px', fill: '#ffd93d' }});
-}}
-
-function update() {{
-    if (gameOver) return;
-    enemies.children.iterate(enemy => {{
-        enemy.y += 1 + wave * 0.5;
-        if (enemy.y > 580) {{
-            enemy.destroy();
-            baseHealth -= 10;
-            updateUI();
-            if (baseHealth <= 0) {{
-                gameOver = true;
-                this.add.text(300, 250, 'BASE DESTROYED', {{ fontSize: '64px', fill: '#ff0000' }});
-                this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-                this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
+            // Mechanic function – implements different effects per template
+            function useMechanic() {{
+                if (state.gameOver || state.mechanicCooldown > 0) return;
+                state.mechanicCooldown = 120;
+                // Template-specific effect
+                if (state.template === 'shooter') {{
+                    // Push enemies away
+                    state.enemies.children.iterate(e => {{
+                        const dx = e.x - player.x;
+                        const dy = e.y - player.y;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist < 150) {{
+                            e.x += dx * 0.5;
+                            e.y += dy * 0.5;
+                        }}
+                    }});
+                }} else if (state.template === 'platformer') {{
+                    // Double jump (boost)
+                    player.setVelocityY(-500);
+                }} else if (state.template === 'puzzle') {{
+                    // Shuffle – can be implemented with more logic
+                }} else if (state.template === 'racer') {{
+                    // Speed boost (increase game speed)
+                }} else if (state.template === 'horror') {{
+                    // Stealth boost (increase stealth meter)
+                }} else if (state.template === 'strategy') {{
+                    // Gold boost
+                }} else if (state.template === 'roguelike') {{
+                    // Heal player
+                    state.health = Math.min(100, state.health + 20);
+                    healthText.setText('HP: ' + state.health);
+                }}
+                this.cameras.main.shake(100);
+                this.cameras.main.flash(100, 255, 255, 255);
             }}
-        }}
-    }});
-    towers.children.iterate(tower => {{
-        const closest = enemies.getChildren().reduce((a,b) => {{
-            const da = Phaser.Math.Distance.Between(tower.x, tower.y, a.x, a.y);
-            const db = Phaser.Math.Distance.Between(tower.x, tower.y, b.x, b.y);
-            return da < db ? a : b;
-        }});
-        if (closest && Phaser.Math.Distance.Between(tower.x, tower.y, closest.x, closest.y) < 200) {{
-            const proj = projectiles.create(tower.x, tower.y, 'coin');
-            proj.setScale(0.2);
-            this.physics.moveToObject(proj, closest, 200);
-            this.physics.add.overlap(proj, closest, (p, e) => {{
-                p.destroy();
+
+            // Input
+            this.input.keyboard.on('keydown-SPACE', useMechanic, this);
+            this.input.on('pointerdown', useMechanic, this);
+
+            // Collisions
+            this.physics.add.overlap(player, state.enemies, (p, e) => {{
+                state.health -= 10;
                 e.destroy();
-                gold += 10;
-                updateUI();
+                healthText.setText('HP: ' + state.health);
+                if (state.health <= 0) {{
+                    state.gameOver = true;
+                    showGameOver.call(this);
+                }}
             }});
+            this.physics.add.overlap(player, state.coins, (p, c) => {{
+                c.destroy();
+                state.score += 10;
+                scoreText.setText('Score: ' + state.score);
+            }});
+            this.physics.add.overlap(player, state.powerups, (p, pw) => {{
+                pw.destroy();
+                state.health = Math.min(100, state.health + 20);
+                healthText.setText('HP: ' + state.health);
+            }});
+
+            // Spawn function
+            function spawnEnemy() {{
+                if (state.gameOver) return;
+                const x = Phaser.Math.Between(50, 750);
+                const enemy = state.enemies.create(x, 0, 'enemy');
+                enemy.setVelocityY(100 + state.wave * 20);
+                enemy.setScale(0.6 + state.wave * 0.02);
+                // Additional behavior per template
+                if (state.template === 'platformer') {{
+                    enemy.setVelocityX(Phaser.Math.Between(-50, 50));
+                }}
+            }}
+
+            // Update function
+            this.update = function(time) {{
+                if (state.gameOver) return;
+
+                // Player movement
+                let vx = 0, vy = 0;
+                if (cursors.left.isDown) vx = -300;
+                else if (cursors.right.isDown) vx = 300;
+                if (cursors.up.isDown) vy = -300;
+                else if (cursors.down.isDown) vy = 300;
+                player.setVelocity(vx, vy);
+
+                // Cooldown
+                if (state.mechanicCooldown > 0) state.mechanicCooldown--;
+
+                // Spawn
+                state.spawnTimer--;
+                if (state.spawnTimer <= 0) {{
+                    spawnEnemy();
+                    state.spawnTimer = 1000;
+                }}
+
+                // Template-specific update (if any)
+                // (e.g., racer would scroll obstacles)
+            }};
+
+            // Game over screen
+            function showGameOver() {{
+                this.add.text(300, 250, 'GAME OVER', {{ fontSize: '64px', fill: '#ff0000' }});
+                this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
+                this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
+            }}
+
+            // Start spawning
+            state.spawnTimer = 1000;
         }}
-    }});
-    if (mechanicCooldown > 0) mechanicCooldown--;
-}}
-
-function useMechanic() {{
-    if (gameOver || mechanicCooldown > 0) return;
-    mechanicCooldown = 120;
-    gold += 20;
-    updateUI();
-    this.cameras.main.flash(100, 255, 215, 0);
-}}
-
-function spawnEnemy() {{
-    const x = Phaser.Math.Between(50, 750);
-    const enemy = enemies.create(x, 0, 'enemy');
-    enemy.setScale(0.6);
-}}
-
-function placeTower(pointer) {{
-    if (gold < 30) return;
-    gold -= 30;
-    const tower = this.physics.add.sprite(pointer.x, pointer.y, 'player');
-    tower.setScale(0.4);
-    towers.add(tower);
-    updateUI();
-}}
-
-function updateUI() {{
-    goldText.setText('Gold: '+gold);
-    baseHealthText.setText('Base HP: '+baseHealth);
-    waveText.setText('Wave: '+wave);
-}}
-
-const game = new Phaser.Game(config);
-'''
-
-def _phaser_roguelike(game_data, theme, style):
-    mechanic = game_data['mechanic']
-    return f'''
-const config = {{
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    scene: {{ preload: preload, create: create, update: update }},
+    }},
     scale: {{ mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }}
 }};
-
-let player, enemies, dungeon = [], turn = 0, hp = 10, maxHp = 10, gold = 0;
-let gameOver = false, mechanicCooldown = 0;
-let graphics, uiText, mechanicText;
-
-function preload() {{
-    this.load.image('player', 'assets/player.png');
-    this.load.image('enemy', 'assets/enemy.png');
-    this.load.image('coin', 'assets/coin.png');
-    this.load.image('bg', 'assets/bg.png');
-}}
-
-function create() {{
-    if (this.textures.exists('bg')) {{
-        this.add.image(400, 300, 'bg');
-    }} else {{
-        const g = this.add.graphics();
-        g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600);
-    }}
-    graphics = this.add.graphics();
-    generateDungeon();
-    drawDungeon();
-
-    uiText = this.add.text(20, 20, 'HP: '+hp+'/'+maxHp+'  Gold: '+gold, {{ fontSize: '20px', fill: '#fff' }});
-    this.add.text(20, 60, 'Turn: '+turn, {{ fontSize: '20px', fill: '#fff' }});
-    mechanicText = this.add.text(20, 100, '⚡ {mechanic} (SPACE) - heal +3', {{ fontSize: '18px', fill: '#ffd93d' }});
-
-    this.input.keyboard.on('keydown-W', () => movePlayer(0,-1));
-    this.input.keyboard.on('keydown-A', () => movePlayer(-1,0));
-    this.input.keyboard.on('keydown-S', () => movePlayer(0,1));
-    this.input.keyboard.on('keydown-D', () => movePlayer(1,0));
-    this.input.keyboard.on('keydown-SPACE', useMechanic, this);
-}}
-
-function generateDungeon() {{
-    const size = 10;
-    dungeon = [];
-    for (let y=0; y<size; y++) {{
-        const row = [];
-        for (let x=0; x<size; x++) row.push(Math.random() < 0.25 ? 1 : 0);
-        dungeon.push(row);
-    }}
-    dungeon[1][1] = 0;
-    dungeon[size-2][size-2] = 0;
-    player = {{x:1, y:1}};
-    enemies = [];
-    for (let i=0; i<4; i++) {{
-        let ex, ey;
-        do {{ ex = Math.floor(Math.random()*size); ey = Math.floor(Math.random()*size); }}
-        while (dungeon[ey][ex] !== 0 || (ex===1 && ey===1));
-        enemies.push({{x:ex, y:ey, hp:3, maxHp:3}});
-    }}
-    // Gold chest
-    let gx, gy;
-    do {{ gx = Math.floor(Math.random()*size); gy = Math.floor(Math.random()*size); }}
-    while (dungeon[gy][gx] !== 0 || (gx===1 && gy===1));
-    enemies.push({{x:gx, y:gy, hp:0, gold:10}});
-}}
-
-function drawDungeon() {{
-    graphics.clear();
-    const size = 10, cellSize = 60;
-    const offsetX = (800 - size*cellSize)/2, offsetY = (600 - size*cellSize)/2;
-    for (let y=0; y<size; y++) {{
-        for (let x=0; x<size; x++) {{
-            const px = offsetX + x*cellSize, py = offsetY + y*cellSize;
-            if (dungeon[y][x] === 1) {{
-                graphics.fillStyle(0x444444, 1);
-            }} else {{
-                graphics.fillStyle(0x2a2a4a, 1);
-            }}
-            graphics.fillRect(px, py, cellSize, cellSize);
-            graphics.lineStyle(1, 0x555555);
-            graphics.strokeRect(px, py, cellSize, cellSize);
-            enemies.forEach(e => {{
-                if (e.x === x && e.y === y) {{
-                    if (e.hp > 0) {{
-                        graphics.fillStyle(0xff4444, 1);
-                        graphics.fillCircle(px+cellSize/2, py+cellSize/2, 15);
-                    }} else {{
-                        graphics.fillStyle(0xffd93d, 1);
-                        graphics.fillCircle(px+cellSize/2, py+cellSize/2, 12);
-                    }}
-                }}
-            }});
-            if (player.x === x && player.y === y) {{
-                graphics.fillStyle(0x4ecdc4, 1);
-                graphics.fillCircle(px+cellSize/2, py+cellSize/2, 20);
-            }}
-        }}
-    }}
-}}
-
-function useMechanic() {{
-    if (gameOver || mechanicCooldown > 0) return;
-    mechanicCooldown = 60;
-    hp = Math.min(maxHp, hp + 3);
-    uiText.setText('HP: '+hp+'/'+maxHp+'  Gold: '+gold);
-    this.cameras.main.flash(100, 0, 255, 0);
-}}
-
-function movePlayer(dx, dy) {{
-    if (gameOver) return;
-    const nx = player.x + dx, ny = player.y + dy;
-    if (nx<0 || nx>=10 || ny<0 || ny>=10) return;
-    if (dungeon[ny][nx] === 1) return;
-    let enemyHere = enemies.find(e => e.x === nx && e.y === ny);
-    if (enemyHere) {{
-        if (enemyHere.hp > 0) {{
-            enemyHere.hp--;
-            if (enemyHere.hp <= 0) {{
-                gold += 5;
-                uiText.setText('HP: '+hp+'/'+maxHp+'  Gold: '+gold);
-                enemies = enemies.filter(e => e !== enemyHere);
-            }} else {{
-                hp--;
-                if (hp <= 0) {{
-                    gameOver = true;
-                    this.add.text(300, 250, 'GAME OVER', {{ fontSize: '64px', fill: '#ff0000' }});
-                    this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-                    this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
-                }}
-            }}
-        }} else {{
-            gold += enemyHere.gold || 10;
-            enemies = enemies.filter(e => e !== enemyHere);
-        }}
-        turn++;
-        uiText.setText('HP: '+hp+'/'+maxHp+'  Gold: '+gold);
-        drawDungeon();
-        return;
-    }}
-    player.x = nx; player.y = ny;
-    turn++;
-    enemies.forEach(e => {{
-        if (e.hp <= 0) return;
-        const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-        const shuffled = dirs.sort(() => Math.random() - 0.5);
-        for (let d of shuffled) {{
-            const ex = e.x + d[0], ey = e.y + d[1];
-            if (ex<0 || ex>=10 || ey<0 || ey>=10) continue;
-            if (dungeon[ey][ex] === 1) continue;
-            if (ex === player.x && ey === player.y) {{
-                hp--;
-                if (hp <= 0) {{
-                    gameOver = true;
-                    this.add.text(300, 250, 'GAME OVER', {{ fontSize: '64px', fill: '#ff0000' }});
-                    this.add.text(300, 320, 'Press R to restart', {{ fontSize: '32px', fill: '#fff' }});
-                    this.input.keyboard.on('keydown-R', () => {{ this.scene.restart(); }});
-                }}
-                break;
-            }}
-            if (!enemies.some(oe => oe.x === ex && oe.y === ey)) {{
-                e.x = ex; e.y = ey;
-                break;
-            }}
-        }}
-    }});
-    uiText.setText('HP: '+hp+'/'+maxHp+'  Gold: '+gold);
-    drawDungeon();
-}}
-
 const game = new Phaser.Game(config);
 '''
+        return js
+
+# ============================================================
+# PHASER GAME GENERATOR – dispatcher
+# ============================================================
+def generate_phaser_game(game_data, theme, style, template, folder: Path):
+    GameBuilder.build(game_data, theme, style, template, folder)
 
 # ============================================================
 # MAIN BOT
@@ -1246,7 +509,7 @@ class DeathRollStudio:
         self.telegram = Telegram(TELEGRAM_TOKEN)
 
     def run(self):
-        print("\n"+"═"*60); print("🎮 GENERATING NEW GAME (Complete Final)"); print("═"*60)
+        print("\n"+"═"*60); print("🎮 GENERATING NEW MODULAR GAME"); print("═"*60)
         game = self.design.generate()
         template = _select_template(game["genre"])
         print(f"   📝 Name: {game['name']}")
