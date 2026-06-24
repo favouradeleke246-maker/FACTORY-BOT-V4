@@ -702,5 +702,19 @@
     "license_key": "DR-CP-20260623-827B1479",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
     "version": "45.0.0"
+  },
+  {
+    "date": "2026-06-24T09:39:01.904515",
+    "game": "Quantum Vector",
+    "genre": "roguelite",
+    "mechanic": "Void Step",
+    "description": "Step into Quantum Vector, a roguelite where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "boss_fight",
+    "price": 5,
+    "license_key": "DR-QV-20260624-ABA4F819",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
+    "version": "45.0.0"
   }
 ]
