@@ -490,6 +490,14 @@
         "game_mode": "endless",
         "timestamp": "2026-06-24T21:30:40.467614",
         "price": 5
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "strategy game",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-06-24T21:38:18.678084",
+        "price": 4
       }
     ],
     "successful_art": 25,

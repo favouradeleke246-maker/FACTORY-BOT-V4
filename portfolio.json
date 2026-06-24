@@ -730,5 +730,19 @@
     "license_key": "DR-CR-20260624-463B8204",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
     "version": "47.0.0"
+  },
+  {
+    "date": "2026-06-24T21:38:16.056582",
+    "game": "Cyber Pulse",
+    "genre": "strategy game",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Pulse, a strategy game where Void Step changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "cartoon",
+    "game_mode": "time_attack",
+    "price": 4,
+    "license_key": "DR-CP-20260624-A56CCC77",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
+    "version": "48.0.0"
   }
 ]
