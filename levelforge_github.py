@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DEATHROLL STUDIO v48.0 – FULLY DISTINCT GAME TEMPLATES
+DEATHROLL STUDIO v50.0 – COMPLETE PRODUCTION GAME ENGINE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 # ============================================================
 # CONFIG
 # ============================================================
-BOT_VERSION = "48.0.0"
+BOT_VERSION = "50.0.0"
 CONFIG = {
     "brand": {"name":"DeathRoll","email":"favouradeleke246@gmail.com","telegram":"@deathroll1",
               "tiktok":"@deathroll.co","website":"https://deathroll.co","github":"favouradeleke246-maker"},
@@ -27,13 +27,13 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
 
-print("═"*60); print("🔥 DEATHROLL STUDIO v48.0 – DISTINCT TEMPLATES")
+print("═"*60); print("🔥 DEATHROLL STUDIO v50.0 – COMPLETE PRODUCTION ENGINE")
 print(f"🤖 Version: {BOT_VERSION}") ; print(f"✅ Telegram: {'✅' if TELEGRAM_TOKEN else '❌'}")
 print(f"✅ OpenAI: {'✅' if OPENAI_KEY else '❌'}") ; print(f"✅ GitHub: {'✅' if GITHUB_TOKEN else '❌'}")
 print("═"*60)
 
 # ============================================================
-# AI SERVICE (unchanged – kept compact)
+# AI SERVICE
 # ============================================================
 class AIService:
     def __init__(self, key): self.key=key; self.enabled=bool(key)
@@ -47,13 +47,14 @@ class AIService:
             if r.status_code==200: return r.json()["choices"][0]["message"]["content"].strip().strip('"')
         except: pass
         return None
+
     def generate_game_design(self, genre, previous):
         if not self.enabled: return self._fallback(genre)
         recent_m = [g.get("mechanic","") for g in previous[-5:] if g.get("mechanic")]
         recent_n = [g.get("name","") for g in previous[-5:] if g.get("name")]
         prompt = f"""Design a unique game:
 Genre: {genre}
-Avoid: {', '.join(recent_m[:3]) if recent_m else 'none'}
+Avoid mechanics: {', '.join(recent_m[:3]) if recent_m else 'none'}
 Avoid names: {', '.join(recent_n[:3]) if recent_n else 'none'}
 Return JSON: {{"name":"...","mechanic":"...","mechanic_description":"...","hook":"...","visual_style":"neon/dark_fantasy/cartoon/pixel/minimalist","game_mode":"endless/waves/time_attack/boss_fight/survival","difficulty":"easy/medium/hard"}}"""
         result = self.generate(prompt, max_tokens=300, temp=1.0)
@@ -64,6 +65,7 @@ Return JSON: {{"name":"...","mechanic":"...","mechanic_description":"...","hook"
                 try: return json.loads(m.group())
                 except: pass
         return self._fallback(genre)
+
     def _fallback(self, genre):
         names = [("Neon","Runner"),("Cyber","Drifter"),("Quantum","Breach"),("Astral","Vector"),("Void","Pulse")]
         mechanics = [("Phase Echo","summon a temporal duplicate"),("Chrono Fracture","slow time"),("Void Step","teleport")]
@@ -75,6 +77,7 @@ Return JSON: {{"name":"...","mechanic":"...","mechanic_description":"...","hook"
         return {"name":name,"mechanic":mech[0],"mechanic_description":mech[1],"hook":random.choice(hooks),
                 "visual_style":random.choice(styles),"game_mode":random.choice(modes),
                 "difficulty":random.choice(["easy","medium","hard"])}
+
     def generate_description(self, game):
         if not self.enabled:
             return f"Step into {game['name']}, a {game['genre']} where {game['mechanic']} changes everything."
@@ -83,7 +86,7 @@ Return JSON: {{"name":"...","mechanic":"...","mechanic_description":"...","hook"
         return result if (result and len(result)>30) else f"Step into {game['name']}, a {game['genre']} where {game['mechanic']} changes everything."
 
 # ============================================================
-# GAME DESIGN SYSTEM (unchanged)
+# GAME DESIGN SYSTEM
 # ============================================================
 class GameDesignSystem:
     GENRES = ["top-down shooter","action RPG","racing game","puzzle game","survival horror","fighting game","strategy game","platformer","tower defense","roguelite"]
@@ -99,6 +102,7 @@ class GameDesignSystem:
               "survival":{"enemy_speed":1.5,"spawn_rate":3,"player_health":100},
               "collector":{"enemy_speed":0.8,"spawn_rate":2,"player_health":75},
               "wave_defense":{"enemy_speed":1.8,"spawn_rate":5,"player_health":80}}
+
     def __init__(self, ai): self.ai=ai; self.sar=self._load_sar()
     def _load_sar(self):
         p=Path("sar_analysis.json")
@@ -186,35 +190,61 @@ def _select_template(genre):
     return "shooter"
 
 # ============================================================
-# ART DIRECTOR – generates unique assets per game
+# ART DIRECTOR – creates genre-appropriate sprites
 # ============================================================
 class ArtDirector:
     @staticmethod
     def generate_all_assets(game_name, genre, style, template, folder: Path):
         assets = folder / "assets"
         assets.mkdir(exist_ok=True)
+
+        # Try to use AI-generated sprite, otherwise create one
         main_sprite = Path("sprite.png")
         if main_sprite.exists() and main_sprite.stat().st_size > 100:
             shutil.copy(main_sprite, assets / "player.png")
         else:
-            ArtDirector._create_fallback_player(assets / "player.png", template)
-        ArtDirector._generate_enemy_sprite(assets / "enemy.png", template)
-        ArtDirector._generate_coin_sprite(assets / "coin.png")
-        ArtDirector._generate_powerup_sprite(assets / "powerup.png", template)
-        bg = ArtDirector._generate_background(template)
+            ArtDirector._create_player_sprite(assets / "player.png", template)
+
+        ArtDirector._create_enemy_sprite(assets / "enemy.png", template)
+        ArtDirector._create_coin_sprite(assets / "coin.png")
+        ArtDirector._create_powerup_sprite(assets / "powerup.png", template)
+        bg = ArtDirector._create_background(template)
         bg.save(assets / "bg.png")
         print(f"   🎨 Assets generated in {assets}")
 
     @staticmethod
-    def _create_fallback_player(path, template):
+    def _create_player_sprite(path, template):
         img = Image.new('RGBA', (64, 64), (0,0,0,0))
         draw = ImageDraw.Draw(img)
-        draw.ellipse([8, 8, 56, 56], fill=(78,205,196))
-        draw.text((18, 20), "P", fill=(255,255,255), font=None)
+        if template == "shooter":
+            draw.polygon([(32, 2), (60, 62), (32, 48), (4, 62)], fill=(78,205,196))
+            draw.polygon([(32, 8), (48, 56), (32, 44), (16, 56)], fill=(255,255,255))
+        elif template == "platformer":
+            draw.ellipse([12, 8, 52, 48], fill=(255,107,107))
+            draw.rectangle([20, 40, 44, 64], fill=(255,107,107))
+            draw.ellipse([20, 2, 44, 18], fill=(255,215,0))
+        elif template == "racer":
+            draw.rectangle([8, 20, 56, 60], fill=(255,68,68))
+            draw.ellipse([12, 52, 28, 64], fill=(0,0,0))
+            draw.ellipse([36, 52, 52, 64], fill=(0,0,0))
+            draw.rectangle([20, 8, 44, 20], fill=(200,200,200))
+        elif template == "horror":
+            draw.ellipse([8, 8, 56, 56], fill=(139,0,0))
+            draw.ellipse([20, 20, 28, 30], fill=(255,255,255))
+            draw.ellipse([36, 20, 44, 30], fill=(255,255,255))
+            draw.ellipse([24, 24, 26, 26], fill=(0,0,0))
+            draw.ellipse([38, 24, 40, 26], fill=(0,0,0))
+        elif template == "roguelike":
+            draw.rectangle([12, 12, 52, 52], fill=(128,128,128))
+            draw.rectangle([16, 16, 48, 48], fill=(200,200,200))
+            draw.rectangle([24, 8, 40, 16], fill=(150,150,150))
+            draw.polygon([(24, 8), (40, 8), (32, 0)], fill=(255,215,0))
+        else:
+            draw.ellipse([8, 8, 56, 56], fill=(78,205,196))
         img.save(path)
 
     @staticmethod
-    def _generate_enemy_sprite(path, template):
+    def _create_enemy_sprite(path, template):
         img = Image.new('RGBA', (64, 64), (0,0,0,0))
         draw = ImageDraw.Draw(img)
         if template == "shooter":
@@ -223,13 +253,12 @@ class ArtDirector:
             draw.ellipse([8, 8, 56, 56], fill=(0,0,0))
             draw.ellipse([16, 16, 24, 24], fill=(255,0,0))
             draw.ellipse([40, 16, 48, 24], fill=(255,0,0))
-            draw.polygon([(24, 32), (40, 32), (32, 48)], fill=(255,0,0))
         else:
             draw.ellipse([8, 8, 56, 56], fill=(255,68,68))
         img.save(path)
 
     @staticmethod
-    def _generate_coin_sprite(path):
+    def _create_coin_sprite(path):
         img = Image.new('RGBA', (32, 32), (0,0,0,0))
         draw = ImageDraw.Draw(img)
         draw.ellipse([4, 4, 28, 28], fill=(255,215,0))
@@ -237,7 +266,7 @@ class ArtDirector:
         img.save(path)
 
     @staticmethod
-    def _generate_powerup_sprite(path, template):
+    def _create_powerup_sprite(path, template):
         img = Image.new('RGBA', (32, 32), (0,0,0,0))
         draw = ImageDraw.Draw(img)
         draw.ellipse([4, 4, 28, 28], fill=(0,255,136))
@@ -245,11 +274,11 @@ class ArtDirector:
         img.save(path)
 
     @staticmethod
-    def _generate_background(template):
+    def _create_background(template):
         bg = Image.new('RGB', (800, 600), color=(20, 20, 40))
         draw = ImageDraw.Draw(bg)
         if template == "shooter":
-            for _ in range(100):
+            for _ in range(150):
                 x = random.randint(0, 800); y = random.randint(0, 600)
                 draw.point((x, y), fill=(255,255,255))
         elif template == "platformer":
@@ -260,7 +289,7 @@ class ArtDirector:
             for y in range(0, 600, 60):
                 draw.rectangle([390, y, 410, y+30], fill=(255,255,255))
         elif template == "horror":
-            for _ in range(20):
+            for _ in range(30):
                 x = random.randint(0, 800); y = random.randint(0, 600)
                 draw.polygon([(x, y), (x-20, y+40), (x+20, y+40)], fill=(30,30,30))
         elif template == "strategy":
@@ -275,27 +304,27 @@ class ArtDirector:
         return bg
 
 # ============================================================
-# GAME BUILDER – selects and assembles the appropriate template
+# GAME ENGINE – Complete Phaser 3 Games
 # ============================================================
-class GameBuilder:
+class GameEngine:
     @staticmethod
     def build(game_data, theme, style, template, folder: Path):
         if template == "shooter":
-            js = GameBuilder._shooter_js(game_data, theme, style)
+            js = GameEngine._shooter(game_data, theme, style)
         elif template == "platformer":
-            js = GameBuilder._platformer_js(game_data, theme, style)
+            js = GameEngine._platformer(game_data, theme, style)
         elif template == "puzzle":
-            js = GameBuilder._puzzle_js(game_data, theme, style)
+            js = GameEngine._puzzle(game_data, theme, style)
         elif template == "racer":
-            js = GameBuilder._racer_js(game_data, theme, style)
+            js = GameEngine._racer(game_data, theme, style)
         elif template == "horror":
-            js = GameBuilder._horror_js(game_data, theme, style)
+            js = GameEngine._horror(game_data, theme, style)
         elif template == "strategy":
-            js = GameBuilder._strategy_js(game_data, theme, style)
+            js = GameEngine._strategy(game_data, theme, style)
         elif template == "roguelike":
-            js = GameBuilder._roguelike_js(game_data, theme, style)
+            js = GameEngine._roguelike(game_data, theme, style)
         else:
-            js = GameBuilder._shooter_js(game_data, theme, style)
+            js = GameEngine._shooter(game_data, theme, style)
 
         index_html = f'''<!DOCTYPE html>
 <html>
@@ -304,7 +333,8 @@ class GameBuilder:
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>{game_data['name']}</title>
     <style>
-        body {{ margin:0; padding:0; background:#000; overflow:hidden; touch-action:none; }}
+        * {{ margin:0; padding:0; box-sizing:border-box; }}
+        body {{ background:#000; overflow:hidden; touch-action:none; }}
         canvas {{ display:block; margin:0 auto; }}
     </style>
 </head>
@@ -318,11 +348,11 @@ class GameBuilder:
         (folder / "index.html").write_text(index_html)
         print(f"   🎮 {template.capitalize()} game built in {folder}")
 
-    # ---- SHOOTER ----
+    # ==================== SHOOTER ====================
     @staticmethod
-    def _shooter_js(game_data, theme, style):
+    def _shooter(game_data, theme, style):
         p, s, a, bg0, bg1 = theme["primary"], theme["secondary"], theme["accent"], theme["bg"][0], theme["bg"][1]
-        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["hook"], game_data["description"]
+        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["mechanic_description"], game_data["description"]
         return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -384,7 +414,6 @@ const config = {{
                     state.wave++;
                     waveText.setText('Wave: ' + state.wave);
                     if (state.wave % 3 === 0) {{
-                        // Boss spawn
                         state.bossActive = true;
                         const boss = state.enemies.create(400, 50, 'enemy');
                         boss.setScale(2);
@@ -451,11 +480,11 @@ const config = {{
 const game = new Phaser.Game(config);
 '''
 
-    # ---- PLATFORMER ----
+    # ==================== PLATFORMER ====================
     @staticmethod
-    def _platformer_js(game_data, theme, style):
+    def _platformer(game_data, theme, style):
         p, s, a, bg0, bg1 = theme["primary"], theme["secondary"], theme["accent"], theme["bg"][0], theme["bg"][1]
-        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["hook"], game_data["description"]
+        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["mechanic_description"], game_data["description"]
         return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -467,7 +496,6 @@ const config = {{
             this.load.image('player', 'assets/player.png');
             this.load.image('enemy', 'assets/enemy.png');
             this.load.image('coin', 'assets/coin.png');
-            this.load.image('powerup', 'assets/powerup.png');
         }},
         create: function() {{
             if (this.textures.exists('bg')) this.add.image(400, 300, 'bg');
@@ -534,11 +562,11 @@ const config = {{
 const game = new Phaser.Game(config);
 '''
 
-    # ---- PUZZLE ----
+    # ==================== PUZZLE ====================
     @staticmethod
-    def _puzzle_js(game_data, theme, style):
+    def _puzzle(game_data, theme, style):
         p, s, a, bg0, bg1 = theme["primary"], theme["secondary"], theme["accent"], theme["bg"][0], theme["bg"][1]
-        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["hook"], game_data["description"]
+        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["mechanic_description"], game_data["description"]
         return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -633,11 +661,11 @@ const config = {{
 const game = new Phaser.Game(config);
 '''
 
-    # ---- RACER ----
+    # ==================== RACER ====================
     @staticmethod
-    def _racer_js(game_data, theme, style):
+    def _racer(game_data, theme, style):
         p, s, a, bg0, bg1 = theme["primary"], theme["secondary"], theme["accent"], theme["bg"][0], theme["bg"][1]
-        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["hook"], game_data["description"]
+        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["mechanic_description"], game_data["description"]
         return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -731,11 +759,11 @@ const config = {{
 const game = new Phaser.Game(config);
 '''
 
-    # ---- HORROR ----
+    # ==================== HORROR ====================
     @staticmethod
-    def _horror_js(game_data, theme, style):
+    def _horror(game_data, theme, style):
         p, s, a, bg0, bg1 = theme["primary"], theme["secondary"], theme["accent"], theme["bg"][0], theme["bg"][1]
-        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["hook"], game_data["description"]
+        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["mechanic_description"], game_data["description"]
         return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -849,11 +877,11 @@ const config = {{
 const game = new Phaser.Game(config);
 '''
 
-    # ---- STRATEGY (Tower Defense) ----
+    # ==================== STRATEGY ====================
     @staticmethod
-    def _strategy_js(game_data, theme, style):
+    def _strategy(game_data, theme, style):
         p, s, a, bg0, bg1 = theme["primary"], theme["secondary"], theme["accent"], theme["bg"][0], theme["bg"][1]
-        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["hook"], game_data["description"]
+        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["mechanic_description"], game_data["description"]
         return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -946,11 +974,11 @@ const config = {{
 const game = new Phaser.Game(config);
 '''
 
-    # ---- ROGUELIKE ----
+    # ==================== ROGUELIKE ====================
     @staticmethod
-    def _roguelike_js(game_data, theme, style):
+    def _roguelike(game_data, theme, style):
         p, s, a, bg0, bg1 = theme["primary"], theme["secondary"], theme["accent"], theme["bg"][0], theme["bg"][1]
-        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["hook"], game_data["description"]
+        name, mechanic, hook, desc = game_data["name"], game_data["mechanic"], game_data["mechanic_description"], game_data["description"]
         return f'''
 const config = {{
     type: Phaser.AUTO,
@@ -1121,7 +1149,7 @@ class DeathRollStudio:
         self.telegram = Telegram(TELEGRAM_TOKEN)
 
     def run(self):
-        print("\n"+"═"*60); print("🎮 GENERATING NEW GAME (Distinct Templates)"); print("═"*60)
+        print("\n"+"═"*60); print("🎮 GENERATING NEW GAME (Production Engine)"); print("═"*60)
         game = self.design.generate()
         template = _select_template(game["genre"])
         print(f"   📝 Name: {game['name']}")
@@ -1140,7 +1168,7 @@ class DeathRollStudio:
         folder = Path(f"workspace/{game['name'].replace(' ','_')}")
         folder.mkdir(parents=True, exist_ok=True)
         ArtDirector.generate_all_assets(game["name"], game["genre"], game["visual_style"], template, folder)
-        GameBuilder.build(game, self.design.THEMES[game["visual_style"]], self.design.STYLES[game["game_style"]], template, folder)
+        GameEngine.build(game, self.design.THEMES[game["visual_style"]], self.design.STYLES[game["game_style"]], template, folder)
 
         zip_path = Path("workspace/latest_game.zip")
         try:
