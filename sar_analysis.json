@@ -474,6 +474,14 @@
         "game_mode": "waves",
         "timestamp": "2026-06-23T18:18:27.250432",
         "price": 5
+      },
+      {
+        "name": "Quantum Vector",
+        "genre": "roguelite",
+        "mechanic": "Void Step",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-06-24T09:39:04.291490",
+        "price": 5
       }
     ],
     "successful_art": 25,
