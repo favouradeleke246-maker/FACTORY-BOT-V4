@@ -758,5 +758,19 @@
     "license_key": "DR-AB-20260624-7600279D",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-06-25T09:31:26.180130",
+    "game": "Void Pulse",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Void Pulse, a survival horror where Chrono Fracture changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "neon",
+    "game_mode": "endless",
+    "price": 6,
+    "license_key": "DR-VP-20260625-5C320879",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]

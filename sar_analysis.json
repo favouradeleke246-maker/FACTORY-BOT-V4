@@ -506,6 +506,14 @@
         "game_mode": "endless",
         "timestamp": "2026-06-24T21:56:21.653083",
         "price": 3
+      },
+      {
+        "name": "Void Pulse",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "endless",
+        "timestamp": "2026-06-25T09:31:28.826012",
+        "price": 6
       }
     ],
     "successful_art": 25,
