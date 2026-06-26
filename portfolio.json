@@ -772,5 +772,19 @@
     "license_key": "DR-VP-20260625-5C320879",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-06-26T09:35:56.655702",
+    "game": "Quantum Vector",
+    "genre": "roguelite",
+    "mechanic": "Phase Echo",
+    "description": "Step into Quantum Vector, a roguelite where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "pixel",
+    "game_mode": "waves",
+    "price": 5,
+    "license_key": "DR-QV-20260626-CD4D91EE",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
