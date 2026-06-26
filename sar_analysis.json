@@ -514,6 +514,14 @@
         "game_mode": "endless",
         "timestamp": "2026-06-25T09:31:28.826012",
         "price": 6
+      },
+      {
+        "name": "Quantum Vector",
+        "genre": "roguelite",
+        "mechanic": "Phase Echo",
+        "game_mode": "waves",
+        "timestamp": "2026-06-26T09:35:58.968295",
+        "price": 5
       }
     ],
     "successful_art": 25,
