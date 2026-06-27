@@ -522,6 +522,14 @@
         "game_mode": "waves",
         "timestamp": "2026-06-26T09:35:58.968295",
         "price": 5
+      },
+      {
+        "name": "Cyber Vector",
+        "genre": "tower defense",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-06-27T08:42:15.064878",
+        "price": 6
       }
     ],
     "successful_art": 25,
