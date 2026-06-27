@@ -786,5 +786,19 @@
     "license_key": "DR-QV-20260626-CD4D91EE",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-06-27T08:42:12.786422",
+    "game": "Cyber Vector",
+    "genre": "tower defense",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Cyber Vector, a tower defense where Chrono Fracture changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "boss_fight",
+    "price": 6,
+    "license_key": "DR-CV-20260627-FA1DA1A8",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
