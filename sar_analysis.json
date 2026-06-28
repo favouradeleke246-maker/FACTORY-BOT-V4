@@ -530,6 +530,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-06-27T08:42:15.064878",
         "price": 6
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "puzzle game",
+        "mechanic": "Phase Echo",
+        "game_mode": "survival",
+        "timestamp": "2026-06-28T09:17:40.085708",
+        "price": 4
       }
     ],
     "successful_art": 25,
