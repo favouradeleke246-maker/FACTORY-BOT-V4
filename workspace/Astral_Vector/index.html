@@ -1,76 +1,130 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Astral Vector</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}body{background:linear-gradient(135deg,#0a0a0a,#1a0a0a);min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI',sans-serif;touch-action:none;overflow:hidden;user-select:none}
-.wrapper{text-align:center;padding:5px;max-width:100%}.header{display:flex;justify-content:space-between;align-items:center;padding:0 5px;margin-bottom:3px}
-.title{font-size:1.1rem;color:#564c5c;text-shadow:none;font-weight:bold}
-.stats{display:flex;gap:8px;color:#aaa;font-size:0.65rem}.stats span{background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:10px}
-.canvas-wrapper{position:relative;display:inline-block;width:100%;max-width:700px}
-canvas{border:3px solid #564c5c;border-radius:12px;box-shadow:0 0 15px rgba(0,0,0,0.5);width:100%;height:auto;background:#0a0a0a;display:block;touch-action:none;cursor:pointer}
-.touch-controls{width:100%;max-width:700px;margin:3px auto 0;display:flex;justify-content:space-between;align-items:center;padding:3px 8px}
-.touch-joystick{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid #564c5c44;position:relative}
-.touch-joystick-inner{width:25px;height:25px;border-radius:50%;background:#564c5c;position:absolute;top:22px;left:22px;box-shadow:0 0 15px #564c5c44}
-.touch-btn{width:55px;height:55px;border-radius:50%;background:#564c5c33;border:2px solid #564c5c;color:#fff;font-size:0.55rem;font-weight:bold;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:4px;box-shadow:0 0 15px #564c5c44}
-.touch-btn:active{background:#564c5c66;transform:scale(0.9)}
-.controls{color:#666;font-size:0.55rem;margin-top:2px}
-@media(max-width:500px){.title{font-size:0.9rem}.touch-joystick{width:55px;height:55px}.touch-joystick-inner{width:18px;height:18px;top:18px;left:18px}.touch-btn{width:40px;height:40px;font-size:0.45rem}}
-</style>
-</head><body>
-<div class="wrapper">
-<div class="header"><div class="title">Astral Vector</div><div class="stats"><span id="w">🌊 1</span><span id="e">👾 0</span><span id="mode">⚡ surviv</span></div></div>
-<div class="canvas-wrapper"><canvas id="c" width="900" height="600"></canvas></div>
-<div class="touch-controls">
-<div class="touch-joystick" id="joystick"><div class="touch-joystick-inner" id="ji"></div></div>
-<div class="touch-btn" id="mb">⚡<br>Chrono</div>
-</div>
-<div class="controls">WASD / Joystick • SPACE / Button for Chrono Fracture</div>
-</div>
-<script>
-const playerImg = new Image(); playerImg.src = 'icon.png';
-const C = {p:'#564c5c',s:'#ff4444',a:'#ffd700',g:false};
-const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
-
-// ========== GAME ENGINE ==========
-
-const G = {
-    p:{x:450,y:300,size:22,h:100,mh:100},
-    enemies:[], particles:[], powerups:[], projectiles:[],
-    score:0, combo:0, maxCombo:0, wave:1, kills:0,
-    gameOver:false, started:false, cd:0, maxCd:90,
-    bossActive:false, bossHealth:0, bossMaxHealth:0,
-    shieldActive:false, shieldTimer:0, spawnTimer:0, difficulty:1,
-    mode:'survival', time:0, maxTime:0
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Astral Vector</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#000; overflow:hidden; touch-action:none; }
+        canvas { display:block; margin:0 auto; }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script>
+        
+const config = {
+    type: Phaser.AUTO,
+    width: 800, height: 600,
+    physics: { default: 'arcade', arcade: { debug: false } },
+    scene: {
+        preload: function() {
+            this.load.image('bg', 'assets/bg.png');
+            this.load.image('player', 'assets/player.png');
+            this.load.image('enemy', 'assets/enemy.png');
+            this.load.image('coin', 'assets/coin.png');
+        },
+        create: function() {
+            if (this.textures.exists('bg')) this.add.image(400, 300, 'bg');
+            else { const g = this.add.graphics(); g.fillStyle(0x0a0a0a).fillRect(0, 0, 800, 600); }
+            let player;
+            if (this.textures.exists('player')) {
+                player = this.physics.add.sprite(400, 300, 'player');
+            } else {
+                player = this.add.circle(400, 300, 20, 0x4ecdc4);
+                this.physics.add.existing(player);
+                player.body.setCircle(20);
+            }
+            player.setCollideWorldBounds(true);
+            player.setScale(0.7);
+            const cursors = this.input.keyboard.createCursorKeys();
+            let monsters = this.physics.add.group();
+            let keys = this.physics.add.staticGroup();
+            let foundKeys = 0, totalKeys = 5;
+            let stealth = 100;
+            let gameOver = false, mechanicCooldown = 0;
+            for (let i=0; i<totalKeys; i++) {
+                const x = Phaser.Math.Between(50, 750);
+                const y = Phaser.Math.Between(50, 550);
+                keys.create(x, y, 'coin');
+            }
+            this.time.addEvent({ delay: 1500, callback: spawnMonster, callbackScope: this, loop: true });
+            function spawnMonster() {
+                const x = Phaser.Math.Between(50, 750);
+                const y = Phaser.Math.Between(50, 550);
+                const mon = monsters.create(x, y, 'enemy');
+                mon.setScale(0.7);
+            }
+            this.physics.add.overlap(player, keys, (p, k) => {
+                k.destroy(); foundKeys++;
+                this.children.list.forEach(c => { if (c.text && c.text.startsWith('Keys:')) c.setText('Keys: '+foundKeys+'/'+totalKeys); });
+                if (foundKeys === totalKeys) {
+                    gameOver = true;
+                    this.add.text(300, 250, 'YOU ESCAPED!', { fontSize: '64px', fill: '#00ff00' });
+                    this.add.text(300, 320, 'Press R to restart', { fontSize: '32px', fill: '#fff' });
+                    this.input.keyboard.on('keydown-R', () => { this.scene.restart(); });
+                }
+            });
+            this.physics.add.overlap(player, monsters, (p, m) => {
+                gameOver = true;
+                this.add.text(300, 250, 'CAUGHT!', { fontSize: '64px', fill: '#ff0000' });
+                this.add.text(300, 320, 'Press R to restart', { fontSize: '32px', fill: '#fff' });
+                this.input.keyboard.on('keydown-R', () => { this.scene.restart(); });
+            });
+            const stealthBar = this.add.graphics();
+            function updateStealthBar() {
+                stealthBar.clear();
+                const color = stealth > 50 ? 0x00ff00 : 0xff0000;
+                stealthBar.fillStyle(color, 1);
+                stealthBar.fillRect(20, 40, Math.max(0, stealth * 2), 20);
+            }
+            this.add.text(20, 20, 'Stealth', { fontSize: '20px', fill: '#fff' });
+            this.add.text(20, 60, 'Keys: 0/'+totalKeys, { fontSize: '20px', fill: '#fff' });
+            this.add.text(20, 100, '⚡ Chrono Fracture (SPACE)', { fontSize: '18px', fill: '#ffd93d' });
+            function useMechanic() {
+                if(gameOver||mechanicCooldown>0)return;
+                mechanicCooldown=180;
+                stealth = Math.min(100, stealth + 30);
+                updateStealthBar();
+                monsters.children.iterate(mon => {
+                    const dx = mon.x - player.x, dy = mon.y - player.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 200) {
+                        mon.x += dx * 0.8; mon.y += dy * 0.8;
+                    }
+                });
+                this.cameras.main.flash(200, 0, 255, 0);
+            }
+            this.input.keyboard.on('keydown-SPACE', useMechanic, this);
+            this.input.on('pointerdown', useMechanic, this);
+            this.update = function() {
+                if(gameOver)return;
+                if(cursors.left.isDown) player.x -= 4;
+                else if(cursors.right.isDown) player.x += 4;
+                if(cursors.up.isDown) player.y -= 4;
+                else if(cursors.down.isDown) player.y += 4;
+                monsters.children.iterate(mon => {
+                    const dist = Phaser.Math.Distance.Between(player.x, player.y, mon.x, mon.y);
+                    if (dist < 150) {
+                        stealth -= 0.5;
+                        if (stealth < 0) {
+                            gameOver = true;
+                            this.add.text(300, 250, 'CAUGHT!', { fontSize: '64px', fill: '#ff0000' });
+                            this.add.text(300, 320, 'Press R to restart', { fontSize: '32px', fill: '#fff' });
+                            this.input.keyboard.on('keydown-R', () => { this.scene.restart(); });
+                        }
+                        updateStealthBar();
+                    }
+                });
+                if(mechanicCooldown>0)mechanicCooldown--;
+            };
+        }
+    },
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
 };
-function spawnEnemy(){const side=Math.floor(Math.random()*4); let x,y; switch(side){case 0:x=Math.random()*900;y=-20;break;case 1:x=920;y=Math.random()*600;break;case 2:x=Math.random()*900;y=620;break;case 3:x=-20;y=Math.random()*600;break;} const hp2=1+Math.floor(G.wave/4); const size=18+Math.min(G.wave,5); G.enemies.push({x,y,size,hp:hp2,maxHp:hp2,speed:1.2+G.wave*0.06,type:Math.random()>0.75?'fast':'normal',damage:8+Math.floor(G.wave/2)});}
-function useMechanic(){if(G.cd>0)return;G.cd=G.maxCd; G.enemies.forEach(e=>{const dx=e.x-G.p.x,dy=e.y-G.p.y,d=Math.hypot(dx,dy);if(d<180){const ang=Math.atan2(dy,dx);e.x+=Math.cos(ang)*100;e.y+=Math.sin(ang)*100;e.hp-=2;addParticles(e.x,e.y,C.s,5);}}); for(let i=0;i<8;i++){const ang=(i/8)*Math.PI*2; G.projectiles.push({x:G.p.x,y:G.p.y,vx:Math.cos(ang)*8,vy:Math.sin(ang)*8,life:60});} addParticles(G.p.x,G.p.y,C.p,30); if(G.p.h<G.p.mh*0.3){G.shieldActive=true;G.shieldTimer=90;}}
-function addParticles(x,y,color,c){for(let i=0;i<c;i++)G.particles.push({x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*8,vy:(Math.random()-0.5)*8,life:20+Math.random()*30,maxLife:50,color,size:2+Math.random()*5});}
-function update(){if(G.gameOver||!G.started)return; if(G.mode==='time_attack'&&G.maxTime>0){G.time-=1/60; if(G.time<=0){G.gameOver=true;return;}} let dx=0,dy=0,speed=4.5+G.difficulty*0.2; if(keys['w']||keys['ArrowUp'])dy=-speed; if(keys['s']||keys['ArrowDown'])dy=speed; if(keys['a']||keys['ArrowLeft'])dx=-speed; if(keys['d']||keys['ArrowRight'])dx=speed; if(jActive){dx+=jX*speed*0.6;dy+=jY*speed*0.6;} if(dx&&dy){dx*=0.707;dy*=0.707;} G.p.x=Math.max(20,Math.min(880,G.p.x+dx)); G.p.y=Math.max(20,Math.min(580,G.p.y+dy)); if(G.cd>0)G.cd--; if(G.shieldActive){G.shieldTimer--; if(G.shieldTimer<=0)G.shieldActive=false;} G.spawnTimer--; if(G.spawnTimer<=0){const count=1+Math.floor(G.wave/4); for(let i=0;i<count;i++)spawnEnemy(); G.spawnTimer=Math.max(20,60-G.wave*2);} if(G.mode==='boss_fight'&&G.wave%3===0&&!G.bossActive&&G.enemies.length===0){G.bossActive=true;G.bossMaxHealth=30+G.wave*15;G.bossHealth=G.bossMaxHealth; G.enemies.push({x:450,y:50,size:55,hp:G.bossMaxHealth,maxHp:G.bossMaxHealth,speed:1.0+G.wave*0.04,type:'boss',damage:15});} for(let i=G.enemies.length-1;i>=0;i--){const e=G.enemies[i]; const dx2=G.p.x-e.x,dy2=G.p.y-e.y,d=Math.hypot(dx2,dy2); if(d>0){const spd=e.type==='fast'?e.speed*1.6:e.speed; e.x+=(dx2/d)*spd; e.y+=(dy2/d)*spd;} e.x=Math.max(10,Math.min(890,e.x)); e.y=Math.max(10,Math.min(590,e.y)); const cd=Math.hypot(G.p.x-e.x,G.p.y-e.y); if(cd<G.p.size/2+e.size/2){if(G.shieldActive){const ang=Math.atan2(e.y-G.p.y,e.x-G.p.x); e.x+=Math.cos(ang)*60;e.y+=Math.sin(ang)*60;e.hp-=3;addParticles(e.x,e.y,C.p,10);}else{G.p.h-=e.damage; G.combo=0; addParticles(G.p.x,G.p.y,C.s,15); if(G.p.h<=0){G.p.h=0;G.gameOver=true;return;}}} if(e.hp<=0){G.score+=10*(1+Math.floor(G.combo/10)); G.combo++; G.kills++; if(G.combo>G.maxCombo)G.maxCombo=G.combo; spawnPowerup(e.x,e.y); addParticles(e.x,e.y,C.s,20); G.enemies.splice(i,1); if(G.enemies.length===0&&!G.bossActive){G.wave++; G.difficulty=1+G.wave*0.1; G.spawnTimer=20;}}}
-for(let i=G.projectiles.length-1;i>=0;i--){const b=G.projectiles[i]; b.x+=b.vx;b.y+=b.vy;b.life--; if(b.life<=0||b.x<0||b.x>900||b.y<0||b.y>600){G.projectiles.splice(i,1);continue;} for(let j=G.enemies.length-1;j>=0;j--){const e=G.enemies[j]; if(Math.hypot(b.x-e.x,b.y-e.y)<e.size/2+5){e.hp-=2; addParticles(b.x,b.y,C.a,8); G.projectiles.splice(i,1); break;}}}
-for(let i=G.powerups.length-1;i>=0;i--){const pw=G.powerups[i]; pw.life--; if(pw.life<=0){G.powerups.splice(i,1);continue;} const d=Math.hypot(G.p.x-pw.x,G.p.y-pw.y); if(d<G.p.size/2+pw.size/2){if(pw.type==='health')G.p.h=Math.min(G.p.mh,G.p.h+30); else if(pw.type==='shield'){G.shieldActive=true;G.shieldTimer=120;} else if(pw.type==='score')G.score+=50; addParticles(pw.x,pw.y,C.a,15); G.powerups.splice(i,1);}}
-for(let i=G.particles.length-1;i>=0;i--){const p=G.particles[i]; p.x+=p.vx;p.y+=p.vy; p.vx*=0.97;p.vy*=0.97; p.life--; if(p.life<=0)G.particles.splice(i,1);}
-document.getElementById('w').textContent='🌊 '+G.wave; document.getElementById('e').textContent='👾 '+G.enemies.length;
-}
-function draw(){const grad=ctx.createRadialGradient(450,300,100,450,300,500); grad.addColorStop(0,'#1a0a0a'); grad.addColorStop(1,'#0a0a0a'); ctx.fillStyle=grad; ctx.fillRect(0,0,900,600); ctx.strokeStyle='rgba(255,255,255,0.03)'; ctx.lineWidth=1; for(let i=0;i<900;i+=50){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();} G.powerups.forEach(pw=>{ctx.fillStyle=pw.type==='health'?'#ff4444':pw.type==='shield'?'#4ecdc4':'#ffd93d'; ctx.shadowColor=ctx.fillStyle; ctx.shadowBlur=15; ctx.beginPath(); ctx.arc(pw.x,pw.y,pw.size/2,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='12px monospace'; ctx.fillText(pw.type==='health'?'❤️':pw.type==='shield'?'🛡️':'⭐',pw.x-8,pw.y-8);}); G.projectiles.forEach(b=>{ctx.fillStyle=C.a; ctx.shadowColor=C.a; ctx.shadowBlur=10; ctx.beginPath(); ctx.arc(b.x,b.y,4,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;}); G.enemies.forEach(e=>{const grad2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size); grad2.addColorStop(0,e.type==='boss'?'#ff0044':C.s); grad2.addColorStop(1,e.type==='boss'?'#cc0033':'#cc4444'); ctx.fillStyle=grad2; ctx.shadowColor=e.type==='boss'?'#ff0000':C.s; ctx.shadowBlur=e.type==='boss'?30:10; ctx.beginPath(); ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; const w=e.type==='boss'?80:e.size; ctx.fillStyle='#444'; ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4); ctx.fillStyle=e.type==='boss'?'#ff0044':'#4ecdc4'; ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w*(e.hp/e.maxHp),4); ctx.fillStyle='#fff'; ctx.font=e.type==='boss'?'30px monospace':'18px monospace'; ctx.fillText(e.type==='boss'?'👹':'👾',e.x-12,e.y-8); if(e.type==='boss'){ctx.fillStyle='#ff0044'; ctx.font='bold 14px monospace'; ctx.fillText('BOSS',e.x-20,e.y-e.size/2-18);}}); if(playerImg.complete&&playerImg.naturalWidth){const px=G.p.x-30,py=G.p.y-30; ctx.drawImage(playerImg,px,py,60,60);}else{const grad3=ctx.createRadialGradient(G.p.x-8,G.p.y-8,5,G.p.x,G.p.y,G.p.size); grad3.addColorStop(0,G.shieldActive?'#4ecdc4':C.p); grad3.addColorStop(1,G.shieldActive?'#2a9d8f':'#2a7d8f'); ctx.fillStyle=grad3; ctx.shadowColor=G.shieldActive?'#4ecdc4':C.p; ctx.shadowBlur=G.shieldActive?40:20; ctx.beginPath(); ctx.arc(G.p.x,G.p.y,G.p.size/2,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; if(G.shieldActive){ctx.strokeStyle=C.p; ctx.lineWidth=3; ctx.shadowColor=C.p; ctx.shadowBlur=30; ctx.beginPath(); ctx.arc(G.p.x,G.p.y,G.p.size/2+8,0,Math.PI*2); ctx.stroke(); ctx.shadowBlur=0;} ctx.fillStyle='#fff'; ctx.font='22px monospace'; ctx.fillText('🎮',G.p.x-14,G.p.y-10);} G.particles.forEach(p=>{const a=p.life/p.maxLife; ctx.globalAlpha=a; ctx.fillStyle=p.color; ctx.shadowColor=p.color; ctx.shadowBlur=8; ctx.beginPath(); ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0; ctx.globalAlpha=1;}); ctx.shadowBlur=0; ctx.fillStyle='#fff'; ctx.font='bold 22px monospace'; ctx.fillText('SCORE: '+G.score,20,40); ctx.fillStyle='#ff4444'; ctx.fillRect(20,55,200,12); ctx.fillStyle=C.p; ctx.fillRect(20,55,(G.p.h/G.p.mh)*200,12); ctx.fillStyle='#fff'; ctx.font='10px monospace'; ctx.fillText('HP: '+Math.round(G.p.h)+'/'+G.p.mh,25,67); if(G.combo>0){ctx.fillStyle=C.a; ctx.font='bold 16px monospace'; ctx.fillText('⚡ '+G.combo+'x',20,110);} if(G.mode==='time_attack'&&G.maxTime>0){ctx.fillStyle=G.time<10?'#ff4444':'#fff'; ctx.font='bold 18px monospace'; ctx.fillText('⏱️ '+Math.ceil(G.time)+'s',20,145);} if(G.cd>0){ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(20,165,G.cd*2,6);} ctx.fillStyle='#888'; ctx.font='10px monospace'; ctx.fillText('⚡ '+G.cd+'/'+G.maxCd,20,183); if(G.gameOver){ctx.fillStyle='rgba(0,0,0,0.8)'; ctx.fillRect(0,0,900,600); ctx.fillStyle='#fff'; ctx.font='bold 48px monospace'; ctx.textAlign='center'; ctx.fillText('GAME OVER',450,230); ctx.font='24px monospace'; ctx.fillStyle=C.a; ctx.fillText('Score: '+G.score,450,290); ctx.font='18px monospace'; ctx.fillStyle='#aaa'; ctx.fillText('Wave: '+G.wave+' • Combo: '+G.maxCombo+' • Kills: '+G.kills,450,340); ctx.font='16px monospace'; ctx.fillStyle='#888'; ctx.fillText('Press R to restart',450,400); ctx.textAlign='left');} if(!G.started&&!G.gameOver){ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,900,600); ctx.fillStyle='#fff'; ctx.font='bold 36px monospace'; ctx.textAlign='center'; ctx.fillText('🎮 Astral Vector',450,200); ctx.font='18px monospace'; ctx.fillStyle=C.p; ctx.fillText('Genre: action RPG',450,255); ctx.font='16px monospace'; ctx.fillStyle=C.s; ctx.fillText('Mechanic: Chrono Fracture',450,290); ctx.font='14px monospace'; ctx.fillStyle=C.a; ctx.fillText('"One mechanic changes everything."',450,325); ctx.font='16px monospace'; ctx.fillStyle='#fff'; ctx.fillText('Press SPACE / Tap to Start',450,385); ctx.textAlign='left');}}
-function spawnPowerup(x,y){if(Math.random()>0.12)return; const types=['health','shield','score']; G.powerups.push({x:x,y:y,size:14,type:types[Math.floor(Math.random()*types.length)],life:300});}
+const game = new Phaser.Game(config);
 
-
-// ========== COMMON CONTROLS ==========
-let keys={}, jActive=false, jX=0, jY=0;
-const j=document.getElementById('joystick'), ji=document.getElementById('ji');
-j.addEventListener('touchstart',e=>{e.preventDefault();jActive=true;updateJoy(e);});
-j.addEventListener('touchmove',e=>{e.preventDefault();if(jActive)updateJoy(e);});
-j.addEventListener('touchend',e=>{e.preventDefault();jActive=false;jX=0;jY=0;ji.style.transform='translate(0,0)';});
-function updateJoy(e){const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-22)/22,y=(t.clientY-r.top-22)/22;const d=Math.hypot(x,y);if(d>1){x/=d;y/=d;}jX=x;jY=y;ji.style.transform=`translate(${x*12}px,${y*12}px)`;}
-document.getElementById('mb').addEventListener('touchstart',e=>{e.preventDefault();simulateKey(' ');});
-document.getElementById('mb').addEventListener('mousedown',()=>simulateKey(' '));
-function simulateKey(k){const ev=new KeyboardEvent('keydown',{key:k});document.dispatchEvent(ev);setTimeout(()=>{document.dispatchEvent(new KeyboardEvent('keyup',{key:k}));},150);}
-function restartGame(){ G.p = {x:450,y:300,size:22,h:100,mh:100}; G.enemies=[]; G.particles=[]; G.powerups=[]; G.projectiles=[]; G.score=0; G.combo=0; G.maxCombo=0; G.wave=1; G.kills=0; G.gameOver=false; G.started=true; G.cd=0; G.bossActive=false; G.shieldActive=false; G.shieldTimer=0; G.spawnTimer=30; G.difficulty=1; if(G.mode==='time_attack')G.time=0; if(G.mode==='boss_fight')G.bossActive=false; }
-document.addEventListener('keydown',function(e){const k=e.key.toLowerCase();keys[k]=true;if(e.key===' '){e.preventDefault();if(!G.started){G.started=true;G.spawnTimer=30;}else useMechanic();} if((e.key==='r'||e.key==='R')&&G.gameOver)restartGame();});
-document.addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
-canvas.addEventListener('click',function(){if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
-canvas.addEventListener('touchstart',function(e){e.preventDefault();if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}});
-function loop(){update();draw();requestAnimationFrame(loop);}
-loop();
-</script>
-</body></html>
+    </script>
+</body>
+</html>

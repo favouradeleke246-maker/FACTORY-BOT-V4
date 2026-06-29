@@ -814,5 +814,19 @@
     "license_key": "DR-CR-20260628-E401DD21",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-06-29T11:08:56.097154",
+    "game": "Astral Vector",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Astral Vector, a survival horror where Chrono Fracture changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "pixel",
+    "game_mode": "endless",
+    "price": 5,
+    "license_key": "DR-AV-20260629-AF5DDB07",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
