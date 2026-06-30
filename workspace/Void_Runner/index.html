@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Void Runner</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#000; overflow:hidden; touch-action:none; }
+        canvas { display:block; margin:0 auto; }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script>
+        
+const config = {
+    type: Phaser.AUTO,
+    width: 800, height: 600,
+    physics: { default: 'arcade', arcade: { debug: false } },
+    scene: {
+        preload: function() {
+            this.load.image('bg', 'assets/bg.png');
+            this.load.image('player', 'assets/player.png');
+            this.load.image('enemy', 'assets/enemy.png');
+            this.load.image('coin', 'assets/coin.png');
+        },
+        create: function() {
+            if (this.textures.exists('bg')) this.add.image(400, 300, 'bg');
+            else { const g = this.add.graphics(); g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600); }
+            const base = this.add.rectangle(400, 550, 100, 50, 0x4ecdc4);
+            this.physics.add.existing(base, true);
+            let enemies = this.physics.add.group();
+            let towers = this.physics.add.group();
+            let projectiles = this.physics.add.group();
+            let state = { gold:50, baseHealth:100, wave:1, gameOver:false, mechanicCooldown:0 };
+            const goldText = this.add.text(20, 20, 'Gold: '+state.gold, { fontSize: '24px', fill: '#fff' });
+            const baseHealthText = this.add.text(20, 60, 'Base HP: '+state.baseHealth, { fontSize: '24px', fill: '#fff' });
+            const waveText = this.add.text(20, 100, 'Wave: '+state.wave, { fontSize: '24px', fill: '#fff' });
+            const mechanicText = this.add.text(20, 140, '⚡ Chrono Fracture (SPACE) - +20 gold', { fontSize: '18px', fill: '#ffd93d' });
+
+            this.time.addEvent({ delay: 1500, callback: spawnEnemy, callbackScope: this, loop: true });
+            function spawnEnemy() {
+                const x = Phaser.Math.Between(50, 750);
+                const enemy = enemies.create(x, 0, 'enemy');
+                enemy.setScale(0.6);
+            }
+            this.input.on('pointerdown', placeTower, this);
+            function placeTower(pointer) {
+                if (state.gold < 30) return;
+                state.gold -= 30;
+                const tower = this.physics.add.sprite(pointer.x, pointer.y, 'player');
+                tower.setScale(0.4);
+                towers.add(tower);
+                goldText.setText('Gold: '+state.gold);
+            }
+            function useMechanic() {
+                if(state.gameOver||state.mechanicCooldown>0)return;
+                state.mechanicCooldown=120;
+                state.gold += 20;
+                goldText.setText('Gold: '+state.gold);
+                this.cameras.main.flash(100,255,215,0);
+            }
+            this.input.keyboard.on('keydown-SPACE', useMechanic, this);
+            this.input.on('pointerdown', useMechanic, this);
+            this.update = function() {
+                if(state.gameOver)return;
+                enemies.children.iterate(enemy => {
+                    enemy.y += 1 + state.wave * 0.5;
+                    if (enemy.y > 580) {
+                        enemy.destroy();
+                        state.baseHealth -= 10;
+                        baseHealthText.setText('Base HP: '+state.baseHealth);
+                        if (state.baseHealth <= 0) {
+                            state.gameOver = true;
+                            this.add.text(300, 250, 'BASE DESTROYED', { fontSize: '64px', fill: '#ff0000' });
+                            this.add.text(300, 320, 'Press R to restart', { fontSize: '32px', fill: '#fff' });
+                            this.input.keyboard.on('keydown-R', () => { this.scene.restart(); });
+                        }
+                    }
+                });
+                towers.children.iterate(tower => {
+                    const closest = enemies.getChildren().reduce((a,b) => {
+                        const da = Phaser.Math.Distance.Between(tower.x, tower.y, a.x, a.y);
+                        const db = Phaser.Math.Distance.Between(tower.x, tower.y, b.x, b.y);
+                        return da < db ? a : b;
+                    });
+                    if (closest && Phaser.Math.Distance.Between(tower.x, tower.y, closest.x, closest.y) < 200) {
+                        const proj = projectiles.create(tower.x, tower.y, 'coin');
+                        proj.setScale(0.2);
+                        this.physics.moveToObject(proj, closest, 200);
+                        this.physics.add.overlap(proj, closest, (p, e) => {
+                            p.destroy(); e.destroy();
+                            state.gold += 10;
+                            goldText.setText('Gold: '+state.gold);
+                        });
+                    }
+                });
+                if(state.mechanicCooldown>0)state.mechanicCooldown--;
+            };
+        }
+    },
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
+};
+const game = new Phaser.Game(config);
+
+    </script>
+</body>
+</html>
