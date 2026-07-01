@@ -842,5 +842,19 @@
     "license_key": "DR-VR-20260630-66CAFAC3",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-01T09:57:35.314590",
+    "game": "Neon Breach",
+    "genre": "fighting game",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Neon Breach, a fighting game where Chrono Fracture changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "cartoon",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-NB-20260701-2CFC0336",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
