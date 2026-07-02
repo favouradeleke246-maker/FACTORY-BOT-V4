@@ -562,6 +562,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-01T09:57:37.091959",
         "price": 3
+      },
+      {
+        "name": "Quantum Breach",
+        "genre": "puzzle game",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "time_attack",
+        "timestamp": "2026-07-02T09:20:18.085468",
+        "price": 5
       }
     ],
     "successful_art": 25,
