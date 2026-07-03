@@ -570,6 +570,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-07-02T09:20:18.085468",
         "price": 5
+      },
+      {
+        "name": "Quantum Vector",
+        "genre": "tower defense",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-07-03T09:26:05.223335",
+        "price": 5
       }
     ],
     "successful_art": 25,
