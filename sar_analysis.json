@@ -578,6 +578,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-03T09:26:05.223335",
         "price": 5
+      },
+      {
+        "name": "Void Pulse",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-07-04T08:43:37.694474",
+        "price": 4
       }
     ],
     "successful_art": 25,
