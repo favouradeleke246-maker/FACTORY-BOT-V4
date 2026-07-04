@@ -884,5 +884,19 @@
     "license_key": "DR-QV-20260703-2B14A43D",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-04T08:43:33.525614",
+    "game": "Void Pulse",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Void Pulse, a survival horror where Phase Echo changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "pixel",
+    "game_mode": "endless",
+    "price": 4,
+    "license_key": "DR-VP-20260704-2886F4E6",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
