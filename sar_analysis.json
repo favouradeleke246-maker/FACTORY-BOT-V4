@@ -586,6 +586,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-04T08:43:37.694474",
         "price": 4
+      },
+      {
+        "name": "Void Vector",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "waves",
+        "timestamp": "2026-07-05T09:12:12.717393",
+        "price": 5
       }
     ],
     "successful_art": 25,

@@ -898,5 +898,19 @@
     "license_key": "DR-VP-20260704-2886F4E6",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-05T09:12:10.257561",
+    "game": "Void Vector",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Void Vector, a survival horror where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "waves",
+    "price": 5,
+    "license_key": "DR-VV-20260705-3DA39351",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
