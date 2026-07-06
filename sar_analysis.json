@@ -594,6 +594,14 @@
         "game_mode": "waves",
         "timestamp": "2026-07-05T09:12:12.717393",
         "price": 5
+      },
+      {
+        "name": "Void Drifter",
+        "genre": "platformer",
+        "mechanic": "Phase Echo",
+        "game_mode": "waves",
+        "timestamp": "2026-07-06T10:46:36.103128",
+        "price": 6
       }
     ],
     "successful_art": 25,
