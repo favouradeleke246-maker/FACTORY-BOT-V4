@@ -5,12 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Void Drifter</title>
     <style>
-        body { margin:0; padding:0; background:#000; overflow:hidden; touch-action:none; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#000; overflow:hidden; touch-action:none; }
         canvas { display:block; margin:0 auto; }
     </style>
 </head>
 <body>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-    <script src="game.js"></script>
+    <script>
+        
+const config = {
+    type: Phaser.AUTO,
+    width: 800, height: 600,
+    physics: { default: 'arcade', arcade: { gravity: { y: 300 }, debug: false } },
+    scene: {
+        preload: function() {
+            this.load.image('bg', 'assets/bg.png');
+            this.load.image('player', 'assets/player.png');
+            this.load.image('enemy', 'assets/enemy.png');
+            this.load.image('coin', 'assets/coin.png');
+        },
+        create: function() {
+            if (this.textures.exists('bg')) this.add.image(400, 300, 'bg');
+            else { const g = this.add.graphics(); g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600); }
+            let player;
+            if (this.textures.exists('player')) {
+                player = this.physics.add.sprite(100, 450, 'player');
+            } else {
+                player = this.add.circle(100, 450, 20, 0x4ecdc4);
+                this.physics.add.existing(player);
+                player.body.setCircle(20);
+            }
+            player.setCollideWorldBounds(true);
+            player.setBounce(0.1);
+            const platforms = this.physics.add.staticGroup();
+            platforms.create(400, 580, 'coin').setScale(10, 0.5).refreshBody();
+            for(let i=0;i<8;i++) platforms.create(80+i*100,400-50*Math.sin(i*0.7),'coin').setScale(2.5,0.3).refreshBody();
+            this.physics.add.collider(player, platforms);
+            const coins = this.physics.add.staticGroup();
+            for(let i=0;i<15;i++) coins.create(50+Math.random()*700,100+Math.random()*300,'coin');
+            const enemies = this.physics.add.group();
+            for(let i=0;i<3;i++){
+                const e=enemies.create(150+i*200,550,'enemy');
+                e.setScale(0.6);
+                e.body.allowGravity=false;
+                e.setVelocityX(80*(i%2===0?1:-1));
+            }
+            const cursors = this.input.keyboard.createCursorKeys();
+            let state = { score:0, lives:3, gameOver:false, mechanicCooldown:0 };
+            const scoreText = this.add.text(16, 16, 'Score: 0', {fontSize:'28px',fill:'#fff'});
+            const livesText = this.add.text(16, 56, 'Lives: 3', {fontSize:'28px',fill:'#fff'});
+            const mechanicText = this.add.text(16, 96, '⚡ Phase Echo (SPACE) - double jump', {fontSize:'20px',fill:'#ffd93d'});
+
+            this.physics.add.overlap(player, coins, (p,c)=>{c.destroy(); state.score+=10; scoreText.setText('Score: '+state.score);});
+            this.physics.add.overlap(player, enemies, (p,e)=>{state.lives--; livesText.setText('Lives: '+state.lives); if(state.lives<=0){state.gameOver=true; showGameOver.call(this);}});
+
+            function useMechanic() {
+                if(state.gameOver||state.mechanicCooldown>0)return;
+                state.mechanicCooldown=120;
+                player.setVelocityY(-500);
+                this.cameras.main.flash(100,0,255,255);
+            }
+            this.input.keyboard.on('keydown-SPACE', useMechanic, this);
+            this.input.on('pointerdown', useMechanic, this);
+
+            function showGameOver() {
+                this.add.text(300,250,'GAME OVER',{fontSize:'64px',fill:'#ff0000'});
+                this.add.text(300,320,'Press R to restart',{fontSize:'32px',fill:'#fff'});
+                this.input.keyboard.on('keydown-R',()=>{this.scene.restart();});
+            }
+            this.update = function() {
+                if(state.gameOver)return;
+                if(cursors.left.isDown) player.setVelocityX(-160);
+                else if(cursors.right.isDown) player.setVelocityX(160);
+                else player.setVelocityX(0);
+                if(cursors.up.isDown && player.body.touching.down) player.setVelocityY(-400);
+                enemies.children.iterate(e=>{if(e.x<50||e.x>750)e.setVelocityX(-e.body.velocity.x);});
+                if(state.mechanicCooldown>0)state.mechanicCooldown--;
+            };
+        }
+    },
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
+};
+const game = new Phaser.Game(config);
+
+    </script>
 </body>
 </html>
