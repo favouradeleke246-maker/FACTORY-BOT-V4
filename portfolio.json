@@ -926,5 +926,19 @@
     "license_key": "DR-VD-20260706-1D5F8A3A",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-07T09:50:23.319661",
+    "game": "Quantum Breach",
+    "genre": "top-down shooter",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Quantum Breach, a top-down shooter where Chrono Fracture changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "minimalist",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-QB-20260707-1A101057",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
