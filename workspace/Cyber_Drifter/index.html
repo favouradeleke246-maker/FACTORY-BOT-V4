@@ -2,509 +2,93 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Cyber Drifter</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            background: linear-gradient(135deg, #1a2a3a, #2a4a5a);
-            min-height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            font-family:'Segoe UI',sans-serif;
-            touch-action:none;
-            overflow:hidden;
-            user-select:none;
-            -webkit-user-select:none;
-        }
-        .wrapper { text-align:center; padding:5px; max-width:100%; }
-        .header {
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:0 5px;
-            margin-bottom:3px;
-        }
-        .title {
-            font-size:1.2rem;
-            color:#ff6b35;
-            text-shadow: none;
-            font-weight:bold;
-        }
-        .stats {
-            display:flex;
-            gap:10px;
-            color:#aaa;
-            font-size:0.7rem;
-        }
-        .stats span { background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:10px; }
-        .canvas-wrapper {
-            position:relative;
-            display:inline-block;
-            width:100%;
-            max-width:700px;
-        }
-        canvas {
-            border:3px solid #ff6b35;
-            border-radius:12px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-            width:100%;
-            height:auto;
-            background:#1a2a3a;
-            display:block;
-            touch-action:none;
-            cursor:pointer;
-        }
-        .touch-controls {
-            width:100%;
-            max-width:700px;
-            margin:3px auto 0;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:3px 8px;
-            touch-action:none;
-        }
-        .touch-joystick {
-            width:80px;
-            height:80px;
-            border-radius:50%;
-            background:rgba(255,255,255,0.08);
-            border:2px solid #ff6b3544;
-            position:relative;
-            touch-action:none;
-        }
-        .touch-joystick-inner {
-            width:30px;
-            height:30px;
-            border-radius:50%;
-            background:#ff6b35;
-            position:absolute;
-            top:25px;
-            left:25px;
-            touch-action:none;
-            box-shadow: 0 0 15px #ff6b3544;
-        }
-        .touch-btn {
-            width:60px;
-            height:60px;
-            border-radius:50%;
-            background:#ff6b3533;
-            border:2px solid #ff6b35;
-            color:#fff;
-            font-size:0.6rem;
-            font-weight:bold;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            touch-action:none;
-            text-align:center;
-            line-height:1.1;
-            padding:4px;
-            box-shadow: 0 0 15px #ff6b3544;
-        }
-        .touch-btn:active { background:#ff6b3566; transform:scale(0.9); }
-        .controls { color:#666; font-size:0.6rem; margin-top:2px; }
-        @media (max-width:500px) {
-            .title { font-size:1rem; }
-            .touch-joystick { width:60px; height:60px; }
-            .touch-joystick-inner { width:22px; height:22px; top:19px; left:19px; }
-            .touch-btn { width:45px; height:45px; font-size:0.5rem; }
-        }
+        body { background:#000; overflow:hidden; touch-action:none; }
+        canvas { display:block; margin:0 auto; }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="header">
-            <div class="title">Cyber Drifter</div>
-            <div class="stats">
-                <span id="waveDisplay">🌊 1</span>
-                <span id="enemyCount">👾 0</span>
-            </div>
-        </div>
-        <div class="canvas-wrapper">
-            <canvas id="c" width="900" height="600"></canvas>
-        </div>
-        <div class="touch-controls">
-            <div class="touch-joystick" id="joystick">
-                <div class="touch-joystick-inner" id="joystickInner"></div>
-            </div>
-            <div class="touch-btn" id="mechanicBtn">⚡<br>Void S</div>
-        </div>
-        <div class="controls">WASD / Joystick • SPACE / Button for Void Step</div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <script>
-        const c=document.getElementById('c'),ctx=c.getContext('2d');
-        const C={p:'#ff6b35',s:'#f7c948',a:'#4ecdc4',g:false};
         
-        // Full game state
-        const G = {
-            p: {x:450,y:300,size:22,h:75,mh:75},
-            enemies: [],
-            particles: [],
-            powerups: [],
-            bullets: [],
-            score: 0,
-            combo: 0,
-            maxCombo: 0,
-            wave: 1,
-            enemiesKilled: 0,
-            gameOver: false,
-            started: false,
-            cd: 0,
-            maxCd: 90,
-            bossActive: false,
-            bossHealth: 0,
-            bossMaxHealth: 0,
-            shieldActive: false,
-            shieldTimer: 0,
-            spawnTimer: 0,
-            difficulty: 1
-        };
-        
-        let keys={}, jActive=false, jX=0, jY=0;
-        
-        // Joystick
-        const j=document.getElementById('joystick'), ji=document.getElementById('joystickInner');
-        j.addEventListener('touchstart',e=>{e.preventDefault();jActive=true;updateJoy(e);});
-        j.addEventListener('touchmove',e=>{e.preventDefault();if(jActive)updateJoy(e);});
-        j.addEventListener('touchend',e=>{e.preventDefault();jActive=false;jX=0;jY=0;ji.style.transform='translate(0,0)';});
-        function updateJoy(e){const r=j.getBoundingClientRect(),t=e.touches[0];let x=(t.clientX-r.left-30)/30,y=(t.clientY-r.top-30)/30;const d=Math.hypot(x,y);if(d>1){x/=d;y/=d;}jX=x;jY=y;ji.style.transform=`translate(${x*15}px,${y*15}px)`;}
-        
-        // Mechanic button
-        document.getElementById('mechanicBtn').addEventListener('touchstart',e=>{e.preventDefault();simulateKey(' ');});
-        document.getElementById('mechanicBtn').addEventListener('mousedown',()=>simulateKey(' '));
-        function simulateKey(k){const ev=new KeyboardEvent('keydown',{key:k});document.dispatchEvent(ev);setTimeout(()=>{document.dispatchEvent(new KeyboardEvent('keyup',{key:k}));},150);}
-        
-        // Enemies
-        function spawnEnemy() {
-            const side=Math.floor(Math.random()*4);
-            let x,y;
-            switch(side){case 0:x=Math.random()*900;y=-20;break;case 1:x=920;y=Math.random()*600;break;case 2:x=Math.random()*900;y=620;break;case 3:x=-20;y=Math.random()*600;break;}
-            const hp=1+Math.floor(G.wave/3);
-            const size=20+Math.min(G.wave,5);
-            G.enemies.push({
-                x,y,size,
-                hp:hp, maxHp:hp,
-                speed:1.5+G.wave*0.08,
-                type:Math.random()>0.7?'fast':'normal',
-                damage:10+Math.floor(G.wave/2)
-            });
+const config = {
+    type: Phaser.AUTO,
+    width: 800, height: 600,
+    physics: { default: 'arcade', arcade: { gravity: { y: 300 }, debug: false } },
+    scene: {
+        preload: function() {
+            this.load.image('bg', 'assets/bg.png');
+            this.load.image('player', 'assets/player.png');
+            this.load.image('enemy', 'assets/enemy.png');
+            this.load.image('coin', 'assets/coin.png');
+        },
+        create: function() {
+            if (this.textures.exists('bg')) this.add.image(400, 300, 'bg');
+            else { const g = this.add.graphics(); g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600); }
+            let player;
+            if (this.textures.exists('player')) {
+                player = this.physics.add.sprite(100, 450, 'player');
+            } else {
+                player = this.add.circle(100, 450, 20, 0x4ecdc4);
+                this.physics.add.existing(player);
+                player.body.setCircle(20);
+            }
+            player.setCollideWorldBounds(true);
+            player.setBounce(0.1);
+            const platforms = this.physics.add.staticGroup();
+            platforms.create(400, 580, 'coin').setScale(10, 0.5).refreshBody();
+            for(let i=0;i<8;i++) platforms.create(80+i*100,400-50*Math.sin(i*0.7),'coin').setScale(2.5,0.3).refreshBody();
+            this.physics.add.collider(player, platforms);
+            const coins = this.physics.add.staticGroup();
+            for(let i=0;i<15;i++) coins.create(50+Math.random()*700,100+Math.random()*300,'coin');
+            const enemies = this.physics.add.group();
+            for(let i=0;i<3;i++){
+                const e=enemies.create(150+i*200,550,'enemy');
+                e.setScale(0.6);
+                e.body.allowGravity=false;
+                e.setVelocityX(80*(i%2===0?1:-1));
+            }
+            const cursors = this.input.keyboard.createCursorKeys();
+            let state = { score:0, lives:3, gameOver:false, mechanicCooldown:0 };
+            const scoreText = this.add.text(16, 16, 'Score: 0', {fontSize:'28px',fill:'#fff'});
+            const livesText = this.add.text(16, 56, 'Lives: 3', {fontSize:'28px',fill:'#fff'});
+            const mechanicText = this.add.text(16, 96, '⚡ Chrono Fracture (SPACE) - double jump', {fontSize:'20px',fill:'#ffd93d'});
+
+            this.physics.add.overlap(player, coins, (p,c)=>{c.destroy(); state.score+=10; scoreText.setText('Score: '+state.score);});
+            this.physics.add.overlap(player, enemies, (p,e)=>{state.lives--; livesText.setText('Lives: '+state.lives); if(state.lives<=0){state.gameOver=true; showGameOver.call(this);}});
+
+            function useMechanic() {
+                if(state.gameOver||state.mechanicCooldown>0)return;
+                state.mechanicCooldown=120;
+                player.setVelocityY(-500);
+                this.cameras.main.flash(100,0,255,255);
+            }
+            this.input.keyboard.on('keydown-SPACE', useMechanic, this);
+            this.input.on('pointerdown', useMechanic, this);
+
+            function showGameOver() {
+                this.add.text(300,250,'GAME OVER',{fontSize:'64px',fill:'#ff0000'});
+                this.add.text(300,320,'Press R to restart',{fontSize:'32px',fill:'#fff'});
+                this.input.keyboard.on('keydown-R',()=>{this.scene.restart();});
+            }
+            this.update = function() {
+                if(state.gameOver)return;
+                if(cursors.left.isDown) player.setVelocityX(-160);
+                else if(cursors.right.isDown) player.setVelocityX(160);
+                else player.setVelocityX(0);
+                if(cursors.up.isDown && player.body.touching.down) player.setVelocityY(-400);
+                enemies.children.iterate(e=>{if(e.x<50||e.x>750)e.setVelocityX(-e.body.velocity.x);});
+                if(state.mechanicCooldown>0)state.mechanicCooldown--;
+            };
         }
-        
-        // Powerups
-        function spawnPowerup(x,y) {
-            if(Math.random()>0.15)return;
-            const types=['health','shield','score'];
-            G.powerups.push({
-                x:x,y:y,size:15,
-                type:types[Math.floor(Math.random()*types.length)],
-                life:300
-            });
-        }
-        
-        // Particles
-        function addParticles(x,y,color,count) {
-            for(let i=0;i<count;i++)G.particles.push({
-                x:x+(Math.random()-0.5)*20,y:y+(Math.random()-0.5)*20,
-                vx:(Math.random()-0.5)*8,vy:(Math.random()-0.5)*8,
-                life:30+Math.random()*30,maxLife:60,
-                color:color,size:2+Math.random()*5
-            });
-        }
-        
-        // Mechanic
-        function useMechanic() {
-            if(G.cd>0)return;G.cd=G.maxCd;
-            // Push enemies + damage
-            G.enemies.forEach(e=>{
-                const dx=e.x-G.p.x,dy=e.y-G.p.y,d=Math.hypot(dx,dy);
-                if(d<180){
-                    const ang=Math.atan2(dy,dx);
-                    e.x+=Math.cos(ang)*100;
-                    e.y+=Math.sin(ang)*100;
-                    e.hp-=2;
-                    addParticles(e.x,e.y,C.s,5);
-                }
-            });
-            addParticles(G.p.x,G.p.y,C.p,30);
-            // Shield if low health
-            if(G.p.h<G.p.mh*0.3){G.shieldActive=true;G.shieldTimer=120;}
-        }
-        
-        // Update
-        function update() {
-            if(G.gameOver||!G.started)return;
-            
-            // Player movement
-            let dx=0,dy=0,speed=4.5+G.difficulty*0.2;
-            if(keys['w']||keys['ArrowUp'])dy=-speed;
-            if(keys['s']||keys['ArrowDown'])dy=speed;
-            if(keys['a']||keys['ArrowLeft'])dx=-speed;
-            if(keys['d']||keys['ArrowRight'])dx=speed;
-            if(jActive){dx+=jX*speed*0.6;dy+=jY*speed*0.6;}
-            if(dx&&dy){dx*=0.707;dy*=0.707;}
-            G.p.x=Math.max(20,Math.min(880,G.p.x+dx));
-            G.p.y=Math.max(20,Math.min(580,G.p.y+dy));
-            
-            // Cooldowns
-            if(G.cd>0)G.cd--;
-            if(G.shieldActive){G.shieldTimer--;if(G.shieldTimer<=0)G.shieldActive=false;}
-            
-            // Spawn enemies
-            G.spawnTimer--;
-            if(G.spawnTimer<=0){
-                const count=1+Math.floor(G.wave/3);
-                for(let i=0;i<count;i++)spawnEnemy();
-                G.spawnTimer=Math.max(20,60-G.wave*2);
-            }
-            
-            // Boss every 5 waves
-            if(G.wave%5===0&&!G.bossActive&&G.enemies.length===0){
-                G.bossActive=true;
-                G.bossMaxHealth=50+G.wave*10;
-                G.bossHealth=G.bossMaxHealth;
-                G.enemies.push({
-                    x:450,y:50,size:60,
-                    hp:G.bossMaxHealth,maxHp:G.bossMaxHealth,
-                    speed:1.2+G.wave*0.05,
-                    type:'boss',
-                    damage:20
-                });
-            }
-            
-            // Update enemies
-            for(let i=G.enemies.length-1;i>=0;i--){
-                const e=G.enemies[i];
-                const dx=G.p.x-e.x,dy=G.p.y-e.y,d=Math.hypot(dx,dy);
-                if(d>0){
-                    const spd=e.type==='fast'?e.speed*1.5:e.speed;
-                    e.x+=(dx/d)*spd;
-                    e.y+=(dy/d)*spd;
-                }
-                e.x=Math.max(10,Math.min(890,e.x));
-                e.y=Math.max(10,Math.min(590,e.y));
-                
-                // Collision
-                const cd=Math.hypot(G.p.x-e.x,G.p.y-e.y);
-                if(cd<G.p.size/2+e.size/2){
-                    if(G.shieldActive){
-                        const ang=Math.atan2(e.y-G.p.y,e.x-G.p.x);
-                        e.x+=Math.cos(ang)*60;e.y+=Math.sin(ang)*60;
-                        e.hp-=3;
-                        addParticles(e.x,e.y,C.p,10);
-                    }else{
-                        G.p.h-=e.damage;
-                        G.combo=0;
-                        addParticles(G.p.x,G.p.y,C.s,15);
-                        if(G.p.h<=0){G.p.h=0;G.gameOver=true;return;}
-                    }
-                }
-                
-                // Enemy death
-                if(e.hp<=0){
-                    G.score+=10*(1+Math.floor(G.combo/10));
-                    G.combo++;G.enemiesKilled++;
-                    if(G.combo>G.maxCombo)G.maxCombo=G.combo;
-                    spawnPowerup(e.x,e.y);
-                    addParticles(e.x,e.y,C.s,20);
-                    G.enemies.splice(i,1);
-                    
-                    // Wave progress
-                    if(G.enemies.length===0&&!G.bossActive){
-                        G.wave++;
-                        G.difficulty=1+G.wave*0.1;
-                        G.spawnTimer=30;
-                    }
-                }
-            }
-            
-            // Update powerups
-            for(let i=G.powerups.length-1;i>=0;i--){
-                const pw=G.powerups[i];
-                pw.life--;
-                if(pw.life<=0){G.powerups.splice(i,1);continue;}
-                const d=Math.hypot(G.p.x-pw.x,G.p.y-pw.y);
-                if(d<G.p.size/2+pw.size/2){
-                    if(pw.type==='health'){G.p.h=Math.min(G.p.mh,G.p.h+25);}
-                    else if(pw.type==='shield'){G.shieldActive=true;G.shieldTimer=90;}
-                    else if(pw.type==='score'){G.score+=50;}
-                    addParticles(pw.x,pw.y,C.a,15);
-                    G.powerups.splice(i,1);
-                }
-            }
-            
-            // Update particles
-            for(let i=G.particles.length-1;i>=0;i--){
-                const p=G.particles[i];
-                p.x+=p.vx;p.y+=p.vy;
-                p.vx*=0.97;p.vy*=0.97;
-                p.life--;
-                if(p.life<=0)G.particles.splice(i,1);
-            }
-            
-            // Update UI
-            document.getElementById('waveDisplay').textContent='🌊 '+G.wave;
-            document.getElementById('enemyCount').textContent='👾 '+G.enemies.length;
-        }
-        
-        // Draw
-        function draw() {
-            const grad=ctx.createRadialGradient(450,300,100,450,300,500);
-            grad.addColorStop(0,'#2a4a5a');grad.addColorStop(1,'#1a2a3a');
-            ctx.fillStyle=grad;ctx.fillRect(0,0,900,600);
-            
-            // Grid
-            ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;
-            for(let i=0;i<900;i+=50){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(900,i);ctx.stroke();}
-            
-            // Powerups
-            G.powerups.forEach(pw=>{
-                ctx.fillStyle=pw.type==='health'?'#ff4444':pw.type==='shield'?'#4ecdc4':'#ffd93d';
-                ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=15;
-                ctx.beginPath();ctx.arc(pw.x,pw.y,pw.size/2,0,Math.PI*2);ctx.fill();
-                ctx.shadowBlur=0;
-                ctx.fillStyle='#fff';ctx.font='12px monospace';
-                ctx.fillText(pw.type==='health'?'❤️':pw.type==='shield'?'🛡️':'⭐',pw.x-8,pw.y-8);
-            });
-            
-            // Enemies
-            G.enemies.forEach(e=>{
-                const grad2=ctx.createRadialGradient(e.x-5,e.y-5,5,e.x,e.y,e.size);
-                grad2.addColorStop(0,e.type==='boss'?'#ff0044':C.s);
-                grad2.addColorStop(1,e.type==='boss'?'#cc0033':'#cc4444');
-                ctx.fillStyle=grad2;
-                ctx.shadowColor=e.type==='boss'?'#ff0000':C.s;
-                ctx.shadowBlur=e.type==='boss'?30:10;
-                ctx.beginPath();ctx.arc(e.x,e.y,e.size/2,0,Math.PI*2);ctx.fill();
-                ctx.shadowBlur=0;
-                
-                // Health bar
-                const w=e.type==='boss'?80:e.size;
-                ctx.fillStyle='#444';
-                ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w,4);
-                ctx.fillStyle=e.type==='boss'?'#ff0044':'#4ecdc4';
-                ctx.fillRect(e.x-w/2,e.y-e.size/2-10,w*(e.hp/e.maxHp),4);
-                
-                ctx.fillStyle='#fff';
-                ctx.font=e.type==='boss'?'30px monospace':'18px monospace';
-                ctx.fillText(e.type==='boss'?'👹':'👾',e.x-12,e.y-8);
-                if(e.type==='boss'){
-                    ctx.fillStyle='#ff0044';ctx.font='bold 14px monospace';
-                    ctx.fillText('BOSS',e.x-20,e.y-e.size/2-18);
-                }
-            });
-            
-            // Player
-            const grad3=ctx.createRadialGradient(G.p.x-8,G.p.y-8,5,G.p.x,G.p.y,G.p.size);
-            grad3.addColorStop(0,G.shieldActive?'#4ecdc4':C.p);
-            grad3.addColorStop(1,G.shieldActive?'#2a9d8f':'#2a7d8f');
-            ctx.fillStyle=grad3;
-            ctx.shadowColor=G.shieldActive?'#4ecdc4':C.p;
-            ctx.shadowBlur=G.shieldActive?40:20;
-            ctx.beginPath();ctx.arc(G.p.x,G.p.y,G.p.size/2,0,Math.PI*2);ctx.fill();
-            ctx.shadowBlur=0;
-            if(G.shieldActive){
-                ctx.strokeStyle=C.p;ctx.lineWidth=3;ctx.shadowColor=C.p;ctx.shadowBlur=30;
-                ctx.beginPath();ctx.arc(G.p.x,G.p.y,G.p.size/2+8,0,Math.PI*2);ctx.stroke();
-                ctx.shadowBlur=0;
-            }
-            ctx.fillStyle='#fff';ctx.font='22px monospace';
-            ctx.fillText('🎮',G.p.x-14,G.p.y-10);
-            
-            // Particles
-            G.particles.forEach(p=>{
-                const a=p.life/p.maxLife;
-                ctx.globalAlpha=a;ctx.fillStyle=p.color;
-                ctx.shadowColor=p.color;ctx.shadowBlur=8;
-                ctx.beginPath();ctx.arc(p.x,p.y,p.size*a,0,Math.PI*2);ctx.fill();
-                ctx.shadowBlur=0;ctx.globalAlpha=1;
-            });
-            
-            // UI
-            ctx.shadowBlur=0;
-            ctx.fillStyle='#fff';ctx.font='bold 22px monospace';
-            ctx.fillText('SCORE: '+G.score,20,40);
-            ctx.fillStyle='#ff4444';ctx.fillRect(20,55,200,12);
-            ctx.fillStyle=C.p;ctx.fillRect(20,55,(G.p.h/G.p.mh)*200,12);
-            ctx.fillStyle='#fff';ctx.font='10px monospace';
-            ctx.fillText('HP: '+Math.round(G.p.h)+'/'+G.p.mh,25,67);
-            
-            if(G.combo>0){
-                ctx.fillStyle=C.a;ctx.font='bold 16px monospace';
-                ctx.fillText('⚡ '+G.combo+'x',20,110);
-            }
-            if(G.cd>0){
-                ctx.fillStyle='rgba(255,255,255,0.2)';
-                ctx.fillRect(20,130,G.cd*2,6);
-            }
-            ctx.fillStyle='#888';ctx.font='11px monospace';
-            ctx.fillText('⚡ '+G.cd+'/'+G.maxCd,20,148);
-            
-            // Game Over
-            if(G.gameOver){
-                ctx.fillStyle='rgba(0,0,0,0.75)';ctx.fillRect(0,0,900,600);
-                ctx.fillStyle='#fff';ctx.font='bold 48px monospace';ctx.textAlign='center';
-                ctx.fillText('GAME OVER',450,230);
-                ctx.font='24px monospace';ctx.fillStyle=C.a;
-                ctx.fillText('Score: '+G.score,450,290);
-                ctx.font='18px monospace';ctx.fillStyle='#aaa';
-                ctx.fillText('Wave: '+G.wave+' • Combo: '+G.maxCombo,450,340);
-                ctx.font='16px monospace';ctx.fillStyle='#888';
-                ctx.fillText('Press R to restart',450,400);
-                ctx.textAlign='left';
-            }
-            
-            // Start
-            if(!G.started&&!G.gameOver){
-                ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,900,600);
-                ctx.fillStyle='#fff';ctx.font='bold 40px monospace';ctx.textAlign='center';
-                ctx.fillText('🎮 Cyber Drifter',450,220);
-                ctx.font='18px monospace';ctx.fillStyle=C.p;
-                ctx.fillText('Genre: strategy game',450,270);
-                ctx.font='16px monospace';ctx.fillStyle=C.s;
-                ctx.fillText('Mechanic: Void Step',450,305);
-                ctx.font='16px monospace';ctx.fillStyle=C.a;
-                ctx.fillText('"Fight. Survive. Evolve."',450,345);
-                ctx.font='18px monospace';ctx.fillStyle='#fff';
-                ctx.fillText('Press SPACE / Tap to Start',450,400);
-                ctx.textAlign='left';
-            }
-        }
-        
-        function loop(){update();draw();requestAnimationFrame(loop);}
-        
-        // Controls
-        document.addEventListener('keydown',function(e){
-            const k=e.key.toLowerCase();keys[k]=true;
-            if(e.key===' '){e.preventDefault();
-                if(!G.started){G.started=true;G.spawnTimer=30;}
-                else useMechanic();
-            }
-            if((e.key==='r'||e.key==='R')&&G.gameOver){
-                Object.assign(G,{
-                    p:{x:450,y:300,size:22,h:75,mh:75},
-                    enemies:[],particles:[],powerups:[],bullets:[],
-                    score:0,combo:0,maxCombo:0,wave:1,enemiesKilled:0,
-                    gameOver:false,started:true,cd:0,maxCd:90,
-                    bossActive:false,shieldActive:false,shieldTimer:0,
-                    spawnTimer:30,difficulty:1
-                });
-            }
-        });
-        document.addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false;});
-        
-        // Click to start
-        c.addEventListener('click',function(){
-            if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}
-        });
-        c.addEventListener('touchstart',function(e){
-            e.preventDefault();
-            if(!G.started&&!G.gameOver){G.started=true;G.spawnTimer=30;}
-        });
-        
-        loop();
+    },
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
+};
+const game = new Phaser.Game(config);
+
     </script>
 </body>
 </html>

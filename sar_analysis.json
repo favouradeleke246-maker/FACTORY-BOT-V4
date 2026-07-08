@@ -610,6 +610,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-07T09:50:26.392870",
         "price": 3
+      },
+      {
+        "name": "Cyber Drifter",
+        "genre": "platformer",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "time_attack",
+        "timestamp": "2026-07-08T08:35:56.027300",
+        "price": 6
       }
     ],
     "successful_art": 25,
