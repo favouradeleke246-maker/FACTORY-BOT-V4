@@ -954,5 +954,19 @@
     "license_key": "DR-CD-20260708-A3F9CDA6",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-09T09:48:06.751043",
+    "game": "Void Runner",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Void Runner, a survival horror where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "minimalist",
+    "game_mode": "endless",
+    "price": 4,
+    "license_key": "DR-VR-20260709-E1279C80",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Runner/index.html",
+    "version": "50.0.0"
   }
 ]

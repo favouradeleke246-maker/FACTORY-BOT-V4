@@ -618,6 +618,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-07-08T08:35:56.027300",
         "price": 6
+      },
+      {
+        "name": "Void Runner",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-07-09T09:48:09.010989",
+        "price": 4
       }
     ],
     "successful_art": 25,
