@@ -626,6 +626,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-09T09:48:09.010989",
         "price": 4
+      },
+      {
+        "name": "Quantum Drifter",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "waves",
+        "timestamp": "2026-07-10T09:43:14.202322",
+        "price": 3
       }
     ],
     "successful_art": 25,
