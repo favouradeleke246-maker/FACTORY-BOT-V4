@@ -634,6 +634,14 @@
         "game_mode": "waves",
         "timestamp": "2026-07-10T09:43:14.202322",
         "price": 3
+      },
+      {
+        "name": "Astral Runner",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-07-11T08:02:42.452360",
+        "price": 8
       }
     ],
     "successful_art": 25,

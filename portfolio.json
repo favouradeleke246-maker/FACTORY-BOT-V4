@@ -982,5 +982,19 @@
     "license_key": "DR-QD-20260710-482DA87D",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-11T08:02:39.954378",
+    "game": "Astral Runner",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Astral Runner, a survival horror where Chrono Fracture changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "neon",
+    "game_mode": "boss_fight",
+    "price": 8,
+    "license_key": "DR-AR-20260711-5B3255DC",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Runner/index.html",
+    "version": "50.0.0"
   }
 ]
