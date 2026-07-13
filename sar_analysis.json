@@ -650,6 +650,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-07-12T08:24:00.892046",
         "price": 7
+      },
+      {
+        "name": "Neon Runner",
+        "genre": "top-down shooter",
+        "mechanic": "Void Step",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-07-13T09:35:46.270659",
+        "price": 7
       }
     ],
     "successful_art": 25,
