@@ -1010,5 +1010,19 @@
     "license_key": "DR-QV-20260712-4B4A27A0",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-13T09:35:44.269414",
+    "game": "Neon Runner",
+    "genre": "top-down shooter",
+    "mechanic": "Void Step",
+    "description": "Step into Neon Runner, a top-down shooter where Void Step changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "pixel",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-NR-20260713-0F23F527",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Runner/index.html",
+    "version": "50.0.0"
   }
 ]
