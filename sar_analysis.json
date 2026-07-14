@@ -658,6 +658,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-07-13T09:35:46.270659",
         "price": 7
+      },
+      {
+        "name": "Void Pulse",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "time_attack",
+        "timestamp": "2026-07-14T08:15:59.908604",
+        "price": 4
       }
     ],
     "successful_art": 25,
