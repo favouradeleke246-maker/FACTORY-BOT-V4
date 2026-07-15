@@ -1038,5 +1038,19 @@
     "license_key": "DR-VP-20260714-4D72EB54",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-15T08:21:48.458239",
+    "game": "Neon Breach",
+    "genre": "top-down shooter",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Neon Breach, a top-down shooter where Chrono Fracture changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "waves",
+    "price": 5,
+    "license_key": "DR-NB-20260715-94EAB5BC",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
+    "version": "50.0.0"
   }
 ]

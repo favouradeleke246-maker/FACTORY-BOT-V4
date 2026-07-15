@@ -666,6 +666,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-07-14T08:15:59.908604",
         "price": 4
+      },
+      {
+        "name": "Neon Breach",
+        "genre": "top-down shooter",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "waves",
+        "timestamp": "2026-07-15T08:21:50.611112",
+        "price": 5
       }
     ],
     "successful_art": 25,
