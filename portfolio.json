@@ -1052,5 +1052,19 @@
     "license_key": "DR-NB-20260715-94EAB5BC",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-16T08:20:31.848998",
+    "game": "Quantum Drifter",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Quantum Drifter, a survival horror where Chrono Fracture changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "minimalist",
+    "game_mode": "survival",
+    "price": 4,
+    "license_key": "DR-QD-20260716-906839A2",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
