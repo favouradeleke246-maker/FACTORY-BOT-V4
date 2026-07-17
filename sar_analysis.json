@@ -682,6 +682,14 @@
         "game_mode": "survival",
         "timestamp": "2026-07-16T08:20:34.150383",
         "price": 4
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "racing game",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-07-17T08:17:26.241286",
+        "price": 3
       }
     ],
     "successful_art": 25,
