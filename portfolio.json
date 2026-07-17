@@ -1066,5 +1066,19 @@
     "license_key": "DR-QD-20260716-906839A2",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-17T08:17:23.933922",
+    "game": "Cyber Runner",
+    "genre": "racing game",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Runner, a racing game where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-CR-20260717-9D5FE643",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
+    "version": "50.0.0"
   }
 ]

@@ -17,89 +17,88 @@
 const config = {
     type: Phaser.AUTO,
     width: 800, height: 600,
+    physics: { default: 'arcade', arcade: { debug: false } },
     scene: {
         preload: function() {
             this.load.image('bg', 'assets/bg.png');
-            this.load.image('coin', 'assets/coin.png');
+            this.load.image('player', 'assets/player.png');
+            this.load.image('enemy', 'assets/enemy.png');
+            this.load.image('powerup', 'assets/powerup.png');
         },
         create: function() {
             if (this.textures.exists('bg')) this.add.image(400, 300, 'bg');
             else { const g = this.add.graphics(); g.fillStyle(0x1a1a2e).fillRect(0, 0, 800, 600); }
-            const emojis = ['🍎','🍌','🍇','🍉','🍓','🍒','🍑','🍊'];
-            let deck = [...emojis, ...emojis];
-            shuffle(deck);
-            const cols=4, rows=4, w=120, h=120, gap=20;
-            const startX=(800-cols*(w+gap)+gap)/2, startY=(600-rows*(h+gap)+gap)/2;
-            let tiles=[], selected=[], matched=0;
-            let score=0, moves=0, timer=0;
-            let gameOver=false, mechanicCooldown=0;
-            for (let r=0; r<rows; r++) {
-                for (let c=0; c<cols; c++) {
-                    const i=r*cols+c;
-                    const x=startX+c*(w+gap), y=startY+r*(h+gap);
-                    const tile = this.add.text(x+10, y+10, '?', { fontSize: '64px', color: '#fff', backgroundColor: '#333', padding: {x:20, y:20} });
-                    tile.setInteractive();
-                    tile.value = deck[i];
-                    tile.revealed = false;
-                    tile.matched = false;
-                    tile.x0=x; tile.y0=y;
-                    tile.on('pointerdown', () => handleTileClick(tile, this));
-                    tiles.push(tile);
-                }
+            let player;
+            if (this.textures.exists('player')) {
+                player = this.physics.add.sprite(400, 520, 'player');
+            } else {
+                player = this.add.circle(400, 520, 20, 0x4ecdc4);
+                this.physics.add.existing(player);
+                player.body.setCircle(20);
             }
+            player.setCollideWorldBounds(true);
+            player.setScale(0.6);
+            const cursors = this.input.keyboard.createCursorKeys();
+            let obstacles = this.physics.add.group();
+            let boost = this.physics.add.group();
+            let state = { score:0, lives:3, speed:6, gameOver:false, mechanicCooldown:0 };
             const scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '28px', fill: '#fff' });
-            const moveText = this.add.text(16, 56, 'Moves: 0', { fontSize: '28px', fill: '#fff' });
-            const timerText = this.add.text(16, 96, 'Time: 0s', { fontSize: '28px', fill: '#fff' });
-            const mechanicText = this.add.text(16, 136, '⚡ Phase Echo (SPACE) - shuffle', { fontSize: '20px', fill: '#ffd93d' });
+            const livesText = this.add.text(16, 56, 'Lives: 3', { fontSize: '28px', fill: '#fff' });
+            const mechanicText = this.add.text(16, 96, '⚡ Phase Echo (SPACE) - boost', { fontSize: '20px', fill: '#ffd93d' });
 
-            function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
-            function handleTileClick(tile, scene) {
-                if (gameOver || tile.revealed || tile.matched || selected.length===2) return;
-                tile.setText(tile.value);
-                tile.revealed = true;
-                selected.push(tile);
-                if (selected.length===2) {
-                    moves++;
-                    moveText.setText('Moves: '+moves);
-                    const [t1,t2] = selected;
-                    if (t1.value === t2.value) {
-                        t1.matched = true; t2.matched = true;
-                        matched++;
-                        score += 10;
-                        scoreText.setText('Score: '+score);
-                        selected = [];
-                        if (matched === 8) {
-                            gameOver = true;
-                            this.add.text(300, 250, 'YOU WIN!', { fontSize: '64px', fill: '#00ff00' });
-                            this.add.text(300, 320, 'Press R to restart', { fontSize: '32px', fill: '#fff' });
-                            this.input.keyboard.on('keydown-R', () => { this.scene.restart(); });
-                        }
-                    } else {
-                        scene.time.delayedCall(500, () => {
-                            t1.setText('?'); t2.setText('?');
-                            t1.revealed = false; t2.revealed = false;
-                            selected = [];
-                        });
-                    }
-                }
+            this.time.addEvent({ delay: 700, callback: spawnObstacle, callbackScope: this, loop: true });
+            this.time.addEvent({ delay: 3000, callback: spawnBoost, callbackScope: this, loop: true });
+
+            function spawnObstacle() {
+                const x = Phaser.Math.Between(40, 760);
+                const ob = obstacles.create(x, -40, 'enemy');
+                ob.setScale(0.5);
+            }
+            function spawnBoost() {
+                const x = Phaser.Math.Between(100, 700);
+                const b = boost.create(x, -30, 'powerup');
+                b.setScale(0.4);
+                b.setVelocityY(50);
             }
             function useMechanic() {
-                if(gameOver||mechanicCooldown>0)return;
-                mechanicCooldown=180;
-                let unmatch = tiles.filter(t => !t.matched);
-                let values = unmatch.map(t => t.value);
-                shuffle(values);
-                unmatch.forEach((t,i) => {
-                    t.value = values[i];
-                    if (t.revealed) t.setText('?');
-                    t.revealed = false;
-                });
-                selected = [];
-                this.cameras.main.flash(200,255,255,0);
+                if(state.gameOver||state.mechanicCooldown>0)return;
+                state.mechanicCooldown=180;
+                state.speed = Math.min(state.speed+4, 15);
+                this.cameras.main.flash(100,255,255,100);
             }
             this.input.keyboard.on('keydown-SPACE', useMechanic, this);
             this.input.on('pointerdown', useMechanic, this);
-            this.time.addEvent({ delay: 1000, callback: () => { if (!gameOver) { timer++; timerText.setText('Time: '+timer+'s'); } }, loop: true });
+            this.physics.add.overlap(player, obstacles, (p, ob) => {
+                ob.destroy();
+                state.lives--;
+                livesText.setText('Lives: '+state.lives);
+                if(state.lives<=0){ state.gameOver=true; showGameOver.call(this); }
+            });
+            this.physics.add.overlap(player, boost, (p, b) => {
+                b.destroy();
+                state.speed = Math.min(state.speed+2, 12);
+            });
+
+            function showGameOver() {
+                this.add.text(300, 250, 'CRASH!', { fontSize: '64px', fill: '#ff0000' });
+                this.add.text(300, 320, 'Press R to restart', { fontSize: '32px', fill: '#fff' });
+                this.input.keyboard.on('keydown-R', () => { this.scene.restart(); });
+            }
+            this.update = function() {
+                if(state.gameOver)return;
+                if(cursors.left.isDown) player.x -= 7;
+                else if(cursors.right.isDown) player.x += 7;
+                state.speed += 0.001;
+                obstacles.children.iterate(ob => {
+                    ob.y += state.speed;
+                    if (ob.y > 650) {
+                        ob.destroy();
+                        state.score++;
+                        scoreText.setText('Score: '+state.score);
+                    }
+                });
+                if(state.mechanicCooldown>0)state.mechanicCooldown--;
+            };
         }
     },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH }
