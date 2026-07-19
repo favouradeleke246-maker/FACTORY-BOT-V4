@@ -1094,5 +1094,19 @@
     "license_key": "DR-QB-20260718-4B2623CD",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-19T08:26:02.979754",
+    "game": "Cyber Drifter",
+    "genre": "platformer",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Cyber Drifter, a platformer where Chrono Fracture changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "cartoon",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-CD-20260719-3CF1CDE9",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
