@@ -1108,5 +1108,19 @@
     "license_key": "DR-CD-20260719-3CF1CDE9",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-20T09:22:51.684257",
+    "game": "Neon Breach",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Neon Breach, a survival horror where Void Step changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-NB-20260720-A150FF5C",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
