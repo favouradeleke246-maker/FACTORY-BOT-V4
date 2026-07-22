@@ -722,6 +722,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-07-21T08:35:55.116064",
         "price": 6
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "puzzle game",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "endless",
+        "timestamp": "2026-07-22T08:35:27.766786",
+        "price": 5
       }
     ],
     "successful_art": 25,
