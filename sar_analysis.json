@@ -730,6 +730,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-22T08:35:27.766786",
         "price": 5
+      },
+      {
+        "name": "Cyber Breach",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-07-23T08:36:46.084877",
+        "price": 5
       }
     ],
     "successful_art": 25,
