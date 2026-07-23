@@ -1150,5 +1150,19 @@
     "license_key": "DR-CR-20260722-5BC528E0",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-23T08:36:43.368824",
+    "game": "Cyber Breach",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Breach, a survival horror where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "endless",
+    "price": 5,
+    "license_key": "DR-CB-20260723-9CAF6EB6",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
