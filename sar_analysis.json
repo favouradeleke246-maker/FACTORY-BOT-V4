@@ -738,6 +738,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-23T08:36:46.084877",
         "price": 5
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "endless",
+        "timestamp": "2026-07-24T08:32:58.480897",
+        "price": 6
       }
     ],
     "successful_art": 25,
