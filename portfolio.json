@@ -1178,5 +1178,19 @@
     "license_key": "DR-CP-20260724-44158907",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-25T08:12:09.624834",
+    "game": "Void Pulse",
+    "genre": "tower defense",
+    "mechanic": "Phase Echo",
+    "description": "Step into Void Pulse, a tower defense where Phase Echo changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "cartoon",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-VP-20260725-985B2FEC",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]

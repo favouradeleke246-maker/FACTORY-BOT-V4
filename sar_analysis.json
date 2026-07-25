@@ -746,6 +746,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-24T08:32:58.480897",
         "price": 6
+      },
+      {
+        "name": "Void Pulse",
+        "genre": "tower defense",
+        "mechanic": "Phase Echo",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-07-25T08:12:12.472143",
+        "price": 7
       }
     ],
     "successful_art": 25,
