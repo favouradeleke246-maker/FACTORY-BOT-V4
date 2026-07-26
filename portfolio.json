@@ -1192,5 +1192,19 @@
     "license_key": "DR-VP-20260725-985B2FEC",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-26T08:32:24.562290",
+    "game": "Cyber Pulse",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Pulse, a survival horror where Phase Echo changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-CP-20260726-FB3CD9E0",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]

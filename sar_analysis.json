@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Solar Blade",
-        "genre": "survival horror",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-05-10T17:23:55.015440",
-        "success": true
-      },
-      {
         "name": "Crimson Blade",
         "genre": "survival horror",
         "mechanic": "Soul Link",
@@ -753,6 +746,14 @@
         "mechanic": "Phase Echo",
         "game_mode": "boss_fight",
         "timestamp": "2026-07-25T08:12:12.472143",
+        "price": 7
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-07-26T08:32:26.423412",
         "price": 7
       }
     ],
