@@ -1220,5 +1220,19 @@
     "license_key": "DR-VP-20260727-744FB32A",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-28T08:41:37.675547",
+    "game": "Cyber Breach",
+    "genre": "action RPG",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Cyber Breach, a action RPG where Chrono Fracture changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "pixel",
+    "game_mode": "survival",
+    "price": 6,
+    "license_key": "DR-CB-20260728-B9CC7F9F",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
+    "version": "50.0.0"
   }
 ]

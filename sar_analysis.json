@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Quantum Strike",
-        "genre": "survival horror",
-        "mechanic": "Gravity Well",
-        "timestamp": "2026-05-11T09:50:46.035894",
-        "success": true
-      },
-      {
         "name": "Cyber Vector",
         "genre": "puzzle game",
         "mechanic": "Soul Link",
@@ -756,6 +749,14 @@
         "game_mode": "endless",
         "timestamp": "2026-07-27T09:59:16.106669",
         "price": 4
+      },
+      {
+        "name": "Cyber Breach",
+        "genre": "action RPG",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "survival",
+        "timestamp": "2026-07-28T08:41:39.451354",
+        "price": 6
       }
     ],
     "successful_art": 25,
