@@ -1234,5 +1234,19 @@
     "license_key": "DR-CB-20260728-B9CC7F9F",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-29T08:47:20.883606",
+    "game": "Quantum Breach",
+    "genre": "puzzle game",
+    "mechanic": "Void Step",
+    "description": "Step into Quantum Breach, a puzzle game where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "time_attack",
+    "price": 4,
+    "license_key": "DR-QB-20260729-356CDDEA",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
