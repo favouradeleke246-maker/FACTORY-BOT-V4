@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Shadow Zone",
-        "genre": "strategy game",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-05-13T08:51:03.754842",
-        "success": true
-      },
-      {
         "name": "Nova Drifter",
         "genre": "extraction shooter",
         "mechanic": "Phase Echo",
@@ -758,6 +751,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-07-29T08:47:23.720559",
         "price": 4
+      },
+      {
+        "name": "Quantum Vector",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "survival",
+        "timestamp": "2026-07-30T08:33:58.769555",
+        "price": 5
       }
     ],
     "successful_art": 25,
