@@ -1262,5 +1262,19 @@
     "license_key": "DR-QV-20260730-123A6A4A",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-07-31T08:55:31.647371",
+    "game": "Cyber Vector",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Vector, a survival horror where Phase Echo changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "neon",
+    "game_mode": "survival",
+    "price": 5,
+    "license_key": "DR-CV-20260731-3B0DD091",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
