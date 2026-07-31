@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Nova Drifter",
-        "genre": "extraction shooter",
-        "mechanic": "Phase Echo",
-        "timestamp": "2026-05-14T08:44:14.435421",
-        "success": true
-      },
-      {
         "name": "Astral Zone",
         "genre": "survival horror",
         "mechanic": "Phase Echo",
@@ -758,6 +751,14 @@
         "mechanic": "Void Step",
         "game_mode": "survival",
         "timestamp": "2026-07-30T08:33:58.769555",
+        "price": 5
+      },
+      {
+        "name": "Cyber Vector",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "survival",
+        "timestamp": "2026-07-31T08:55:33.689629",
         "price": 5
       }
     ],
