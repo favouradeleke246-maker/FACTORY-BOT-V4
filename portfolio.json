@@ -1290,5 +1290,19 @@
     "license_key": "DR-NP-20260801-1C36A404",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-02T08:29:30.605864",
+    "game": "Void Vector",
+    "genre": "top-down shooter",
+    "mechanic": "Void Step",
+    "description": "Step into Void Vector, a top-down shooter where Void Step changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "cartoon",
+    "game_mode": "survival",
+    "price": 4,
+    "license_key": "DR-VV-20260802-005B242E",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Vector/index.html",
+    "version": "50.0.0"
   }
 ]

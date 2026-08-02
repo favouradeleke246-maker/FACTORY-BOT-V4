@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Solar Edge",
-        "genre": "survival horror",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-05-16T08:10:07.169062",
-        "success": true
-      },
-      {
         "name": "Rogue Core",
         "genre": "survival horror",
         "mechanic": "Void Step",
@@ -761,6 +754,14 @@
         "game_mode": "waves",
         "timestamp": "2026-08-01T08:26:56.054801",
         "price": 5
+      },
+      {
+        "name": "Void Vector",
+        "genre": "top-down shooter",
+        "mechanic": "Void Step",
+        "game_mode": "survival",
+        "timestamp": "2026-08-02T08:29:32.980100",
+        "price": 4
       }
     ],
     "successful_art": 25,
