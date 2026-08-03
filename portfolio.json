@@ -1304,5 +1304,19 @@
     "license_key": "DR-VV-20260802-005B242E",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-03T09:54:00.059058",
+    "game": "Void Pulse",
+    "genre": "strategy game",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Void Pulse, a strategy game where Chrono Fracture changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-VP-20260803-EA28F458",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
