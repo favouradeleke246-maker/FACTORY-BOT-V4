@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Rogue Zone",
-        "genre": "survival horror",
-        "mechanic": "Chrono Fracture",
-        "timestamp": "2026-05-18T10:14:40.387400",
-        "success": true
-      },
-      {
         "name": "Neon Blade",
         "genre": "racing game",
         "mechanic": "Soul Link",
@@ -763,6 +756,14 @@
         "game_mode": "endless",
         "timestamp": "2026-08-03T09:54:01.946287",
         "price": 3
+      },
+      {
+        "name": "Cyber Drifter",
+        "genre": "tower defense",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-08-04T08:44:56.801467",
+        "price": 5
       }
     ],
     "successful_art": 25,
