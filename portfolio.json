@@ -1332,5 +1332,19 @@
     "license_key": "DR-CD-20260804-5FAE49D7",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-05T08:42:21.103598",
+    "game": "Quantum Pulse",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Quantum Pulse, a survival horror where Phase Echo changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "boss_fight",
+    "price": 5,
+    "license_key": "DR-QP-20260805-274A0EC9",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]

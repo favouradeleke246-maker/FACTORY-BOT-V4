@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Neon Blade",
-        "genre": "racing game",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-05-19T09:55:27.445052",
-        "success": true
-      },
-      {
         "name": "Phantom Runner",
         "genre": "fighting game",
         "mechanic": "Soul Link",
@@ -763,6 +756,14 @@
         "mechanic": "Void Step",
         "game_mode": "endless",
         "timestamp": "2026-08-04T08:44:56.801467",
+        "price": 5
+      },
+      {
+        "name": "Quantum Pulse",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-08-05T08:42:23.111346",
         "price": 5
       }
     ],
