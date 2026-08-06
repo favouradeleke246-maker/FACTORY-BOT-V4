@@ -1346,5 +1346,19 @@
     "license_key": "DR-QP-20260805-274A0EC9",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-06T08:43:50.712507",
+    "game": "Astral Drifter",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Astral Drifter, a survival horror where Void Step changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "survival",
+    "price": 3,
+    "license_key": "DR-AD-20260806-D0B4CEF1",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
