@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Flux Force",
-        "genre": "survival horror",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-05-21T09:52:07.603246",
-        "success": true
-      },
-      {
         "name": "Astral Shift",
         "genre": "fighting game",
         "mechanic": "Soul Link",
@@ -766,6 +759,14 @@
         "game_mode": "survival",
         "timestamp": "2026-08-06T08:43:52.495063",
         "price": 3
+      },
+      {
+        "name": "Quantum Runner",
+        "genre": "roguelite",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-08-07T07:22:25.147043",
+        "price": 4
       }
     ],
     "successful_art": 25,

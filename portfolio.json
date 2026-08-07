@@ -1360,5 +1360,19 @@
     "license_key": "DR-AD-20260806-D0B4CEF1",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-07T07:22:23.326019",
+    "game": "Quantum Runner",
+    "genre": "roguelite",
+    "mechanic": "Void Step",
+    "description": "Step into Quantum Runner, a roguelite where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "pixel",
+    "game_mode": "time_attack",
+    "price": 4,
+    "license_key": "DR-QR-20260807-BEB1CD97",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Runner/index.html",
+    "version": "50.0.0"
   }
 ]
