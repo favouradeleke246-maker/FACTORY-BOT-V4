@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Astral Shift",
-        "genre": "fighting game",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-05-22T09:37:32.553330",
-        "success": true
-      },
-      {
         "name": "Flux Runner",
         "genre": "fighting game",
         "mechanic": "Soul Link",
@@ -767,6 +760,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-08-07T07:22:25.147043",
         "price": 4
+      },
+      {
+        "name": "Void Runner",
+        "genre": "tower defense",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-08-08T07:00:09.739393",
+        "price": 5
       }
     ],
     "successful_art": 25,
