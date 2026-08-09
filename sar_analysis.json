@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Flux Runner",
-        "genre": "fighting game",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-05-23T08:25:17.718524",
-        "success": true
-      },
-      {
         "name": "Astral Vector",
         "genre": "cozy builder",
         "mechanic": "Gravity Well",
@@ -768,6 +761,14 @@
         "game_mode": "endless",
         "timestamp": "2026-08-08T07:00:09.739393",
         "price": 5
+      },
+      {
+        "name": "Neon Runner",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "survival",
+        "timestamp": "2026-08-09T07:02:27.783779",
+        "price": 4
       }
     ],
     "successful_art": 25,
