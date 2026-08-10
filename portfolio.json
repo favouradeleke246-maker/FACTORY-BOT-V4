@@ -1402,5 +1402,19 @@
     "license_key": "DR-NR-20260809-FDDA19F8",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-10T07:48:57.524588",
+    "game": "Quantum Breach",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Quantum Breach, a survival horror where Void Step changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "neon",
+    "game_mode": "waves",
+    "price": 4,
+    "license_key": "DR-QB-20260810-6B63E92B",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
