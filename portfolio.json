@@ -1416,5 +1416,19 @@
     "license_key": "DR-QB-20260810-6B63E92B",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-11T07:14:44.104221",
+    "game": "Astral Drifter",
+    "genre": "top-down shooter",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Astral Drifter, a top-down shooter where Chrono Fracture changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-AD-20260811-B072A887",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]

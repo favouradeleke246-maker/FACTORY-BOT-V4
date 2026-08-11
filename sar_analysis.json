@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Astral Breach",
-        "genre": "puzzle game",
-        "mechanic": "Gravity Well",
-        "timestamp": "2026-05-25T10:18:44.776086",
-        "success": true
-      },
-      {
         "name": "Flux Realm",
         "genre": "survival horror",
         "mechanic": "Mirror Shell",
@@ -770,6 +763,14 @@
         "game_mode": "waves",
         "timestamp": "2026-08-10T07:48:59.327546",
         "price": 4
+      },
+      {
+        "name": "Astral Drifter",
+        "genre": "top-down shooter",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "endless",
+        "timestamp": "2026-08-11T07:14:46.861165",
+        "price": 3
       }
     ],
     "successful_art": 25,
