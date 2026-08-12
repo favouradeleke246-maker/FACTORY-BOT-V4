@@ -1430,5 +1430,19 @@
     "license_key": "DR-AD-20260811-B072A887",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-12T07:38:27.971891",
+    "game": "Quantum Drifter",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Quantum Drifter, a survival horror where Chrono Fracture changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "endless",
+    "price": 5,
+    "license_key": "DR-QD-20260812-4DB6CA3E",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
