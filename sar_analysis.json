@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Flux Realm",
-        "genre": "survival horror",
-        "mechanic": "Mirror Shell",
-        "timestamp": "2026-05-26T10:05:08.078701",
-        "success": true
-      },
-      {
         "name": "Cyber Drifter",
         "genre": "survival horror",
         "mechanic": "Void Step",
@@ -771,6 +764,14 @@
         "game_mode": "endless",
         "timestamp": "2026-08-11T07:14:46.861165",
         "price": 3
+      },
+      {
+        "name": "Quantum Drifter",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "endless",
+        "timestamp": "2026-08-12T07:38:30.973117",
+        "price": 5
       }
     ],
     "successful_art": 25,
