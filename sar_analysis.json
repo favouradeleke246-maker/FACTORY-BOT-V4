@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Cyber Drifter",
-        "genre": "survival horror",
-        "mechanic": "Void Step",
-        "timestamp": "2026-05-27T10:03:13.316942",
-        "success": true
-      },
-      {
         "name": "Astral Edge",
         "genre": "fighting game",
         "mechanic": "Gravity Well",
@@ -772,6 +765,14 @@
         "game_mode": "endless",
         "timestamp": "2026-08-12T07:38:30.973117",
         "price": 5
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "survival",
+        "timestamp": "2026-08-13T07:40:34.114527",
+        "price": 3
       }
     ],
     "successful_art": 25,
