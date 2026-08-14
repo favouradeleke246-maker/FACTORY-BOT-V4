@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Astral Edge",
-        "genre": "fighting game",
-        "mechanic": "Gravity Well",
-        "timestamp": "2026-05-28T10:13:20.862033",
-        "success": true
-      },
-      {
         "name": "Cyber Force",
         "genre": "survival horror",
         "mechanic": "Phase Echo",
@@ -773,6 +766,14 @@
         "game_mode": "survival",
         "timestamp": "2026-08-13T07:40:34.114527",
         "price": 3
+      },
+      {
+        "name": "Astral Vector",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-08-14T07:37:56.845560",
+        "price": 4
       }
     ],
     "successful_art": 25,
