@@ -1486,5 +1486,19 @@
     "license_key": "DR-CP-20260815-2BB7EF9D",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-16T06:46:25.505825",
+    "game": "Cyber Pulse",
+    "genre": "fighting game",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Pulse, a fighting game where Phase Echo changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "pixel",
+    "game_mode": "waves",
+    "price": 6,
+    "license_key": "DR-CP-20260816-4D0D89DD",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]

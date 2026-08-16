@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Neon Strike",
-        "genre": "survival horror",
-        "mechanic": "Mirror Shell",
-        "timestamp": "2026-05-30T08:33:22.165167",
-        "success": true
-      },
-      {
         "name": "Rogue Force",
         "genre": "survival horror",
         "mechanic": "Void Step",
@@ -775,6 +768,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-08-15T06:44:45.944337",
         "price": 4
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "fighting game",
+        "mechanic": "Phase Echo",
+        "game_mode": "waves",
+        "timestamp": "2026-08-16T06:46:27.511114",
+        "price": 6
       }
     ],
     "successful_art": 25,
