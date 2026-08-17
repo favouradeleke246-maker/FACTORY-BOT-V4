@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Rogue Force",
-        "genre": "survival horror",
-        "mechanic": "Void Step",
-        "timestamp": "2026-05-31T08:52:54.817587",
-        "success": true
-      },
-      {
         "name": "Phantom Pulse",
         "genre": "fighting game",
         "mechanic": "Phase Echo",
@@ -776,6 +769,14 @@
         "game_mode": "waves",
         "timestamp": "2026-08-16T06:46:27.511114",
         "price": 6
+      },
+      {
+        "name": "Neon Vector",
+        "genre": "roguelite",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-08-17T07:03:25.978604",
+        "price": 3
       }
     ],
     "successful_art": 25,
