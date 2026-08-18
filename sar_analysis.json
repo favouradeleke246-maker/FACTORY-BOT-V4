@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Phantom Pulse",
-        "genre": "fighting game",
-        "mechanic": "Phase Echo",
-        "timestamp": "2026-06-01T11:44:58.147204",
-        "success": true
-      },
-      {
         "name": "Echo Breach",
         "genre": "survival horror",
         "mechanic": "Soul Link",
@@ -777,6 +770,14 @@
         "game_mode": "endless",
         "timestamp": "2026-08-17T07:03:25.978604",
         "price": 3
+      },
+      {
+        "name": "Quantum Drifter",
+        "genre": "tower defense",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-08-18T06:50:46.200460",
+        "price": 4
       }
     ],
     "successful_art": 25,
