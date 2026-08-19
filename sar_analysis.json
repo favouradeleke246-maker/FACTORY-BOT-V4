@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Echo Breach",
-        "genre": "survival horror",
-        "mechanic": "Soul Link",
-        "timestamp": "2026-06-02T10:44:41.501992",
-        "success": true
-      },
-      {
         "name": "Flux Lock",
         "genre": "survival horror",
         "mechanic": "Phase Echo",
@@ -778,6 +771,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-08-18T06:50:46.200460",
         "price": 4
+      },
+      {
+        "name": "Quantum Breach",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "survival",
+        "timestamp": "2026-08-19T06:51:01.305509",
+        "price": 6
       }
     ],
     "successful_art": 25,
