@@ -1528,5 +1528,19 @@
     "license_key": "DR-QD-20260818-95B8BD38",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-19T06:50:58.954651",
+    "game": "Quantum Breach",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Quantum Breach, a survival horror where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "pixel",
+    "game_mode": "survival",
+    "price": 6,
+    "license_key": "DR-QB-20260819-4FB7C4FD",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
