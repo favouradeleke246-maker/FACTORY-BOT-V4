@@ -37,7 +37,7 @@ const config = {
             const goldText = this.add.text(20, 20, 'Gold: '+state.gold, { fontSize: '24px', fill: '#fff' });
             const baseHealthText = this.add.text(20, 60, 'Base HP: '+state.baseHealth, { fontSize: '24px', fill: '#fff' });
             const waveText = this.add.text(20, 100, 'Wave: '+state.wave, { fontSize: '24px', fill: '#fff' });
-            const mechanicText = this.add.text(20, 140, '⚡ Void Step (SPACE) - +20 gold', { fontSize: '18px', fill: '#ffd93d' });
+            const mechanicText = this.add.text(20, 140, '⚡ Phase Echo (SPACE) - +20 gold', { fontSize: '18px', fill: '#ffd93d' });
 
             this.time.addEvent({ delay: 1500, callback: spawnEnemy, callbackScope: this, loop: true });
             function spawnEnemy() {
