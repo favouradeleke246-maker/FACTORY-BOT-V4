@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Jinx Siege",
-        "genre": "action RPG",
-        "mechanic": "Bleed Aura",
-        "art": true,
-        "ts": "2026-06-09T13:55:55.276480"
-      },
-      {
         "name": "Wraith Peak",
         "genre": "action RPG",
         "mechanic": "Chrono Fracture",
@@ -780,6 +773,14 @@
         "game_mode": "waves",
         "timestamp": "2026-08-20T06:52:43.721075",
         "price": 5
+      },
+      {
+        "name": "Astral Breach",
+        "genre": "tower defense",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-08-21T06:53:40.991865",
+        "price": 4
       }
     ],
     "successful_art": 25,
