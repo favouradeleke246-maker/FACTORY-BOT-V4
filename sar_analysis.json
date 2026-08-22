@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Wraith Peak",
-        "genre": "action RPG",
-        "mechanic": "Chrono Fracture",
-        "art": true,
-        "ts": "2026-06-09T15:30:33.740159"
-      },
-      {
         "name": "Blaze Yonder",
         "genre": "fighting game",
         "mechanic": "Fracture Line",
@@ -781,6 +774,14 @@
         "game_mode": "endless",
         "timestamp": "2026-08-21T06:53:40.991865",
         "price": 4
+      },
+      {
+        "name": "Quantum Vector",
+        "genre": "roguelite",
+        "mechanic": "Void Step",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-08-22T06:46:52.466633",
+        "price": 6
       }
     ],
     "successful_art": 25,
