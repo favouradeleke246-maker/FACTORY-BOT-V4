@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Warp Mire",
-        "genre": "tower defense",
-        "mechanic": "Chrono Fracture",
-        "art": true,
-        "ts": "2026-06-09T15:43:25.665051"
-      },
-      {
         "name": "Scarlet Gulch",
         "genre": "survival horror",
         "mechanic": "Fracture Line",
@@ -783,6 +776,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-08-23T06:48:02.703689",
         "price": 5
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "top-down shooter",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-08-24T07:05:52.964537",
+        "price": 4
       }
     ],
     "successful_art": 25,
