@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Xenon Tank",
-        "genre": "action RPG",
-        "mechanic": "Void Step",
-        "art": true,
-        "ts": "2026-06-09T16:46:09.669984"
-      },
-      {
         "name": "Ironskin Ops",
         "genre": "fighting game",
         "mechanic": "Death Bloom",
@@ -785,6 +778,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-08-25T06:54:53.514172",
         "price": 6
+      },
+      {
+        "name": "Cyber Breach",
+        "genre": "racing game",
+        "mechanic": "Void Step",
+        "game_mode": "survival",
+        "timestamp": "2026-08-26T06:55:46.787232",
+        "price": 5
       }
     ],
     "successful_art": 25,
