@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Ironskin Ops",
-        "genre": "fighting game",
-        "mechanic": "Death Bloom",
-        "art": true,
-        "ts": "2026-06-09T16:58:34.078755"
-      },
-      {
         "name": "Null Xenith",
         "genre": "action RPG",
         "mechanic": "Chrono Fracture",
@@ -785,6 +778,14 @@
         "mechanic": "Void Step",
         "game_mode": "survival",
         "timestamp": "2026-08-26T06:55:46.787232",
+        "price": 5
+      },
+      {
+        "name": "Neon Breach",
+        "genre": "action RPG",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-08-27T17:29:33.469979",
         "price": 5
       }
     ],
