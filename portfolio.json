@@ -1640,5 +1640,19 @@
     "license_key": "DR-CB-20260826-2F539FCF",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-27T17:29:30.817537",
+    "game": "Neon Breach",
+    "genre": "action RPG",
+    "mechanic": "Void Step",
+    "description": "Step into Neon Breach, a action RPG where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "cartoon",
+    "game_mode": "time_attack",
+    "price": 5,
+    "license_key": "DR-NB-20260827-42C778A2",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
