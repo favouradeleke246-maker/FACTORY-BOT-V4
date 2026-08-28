@@ -1654,5 +1654,19 @@
     "license_key": "DR-NB-20260827-42C778A2",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-28T18:24:42.116082",
+    "game": "Cyber Vector",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Vector, a survival horror where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "pixel",
+    "game_mode": "survival",
+    "price": 4,
+    "license_key": "DR-CV-20260828-C36F685A",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
