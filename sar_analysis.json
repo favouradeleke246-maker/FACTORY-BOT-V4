@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Null Xenith",
-        "genre": "action RPG",
-        "mechanic": "Chrono Fracture",
-        "art": true,
-        "ts": "2026-06-09T17:14:43.888793"
-      },
-      {
         "name": "Crimson March",
         "genre": "action RPG",
         "mechanic": "Mirror Shell",
@@ -787,6 +780,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-08-27T17:29:33.469979",
         "price": 5
+      },
+      {
+        "name": "Cyber Vector",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "survival",
+        "timestamp": "2026-08-28T18:24:45.161679",
+        "price": 4
       }
     ],
     "successful_art": 25,
