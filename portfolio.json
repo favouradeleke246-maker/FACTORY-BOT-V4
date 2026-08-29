@@ -1668,5 +1668,19 @@
     "license_key": "DR-CV-20260828-C36F685A",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-29T12:31:16.447501",
+    "game": "Cyber Pulse",
+    "genre": "roguelite",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Pulse, a roguelite where Void Step changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "pixel",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-CP-20260829-30C68D28",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
