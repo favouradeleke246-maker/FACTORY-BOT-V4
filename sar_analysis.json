@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Quasar Fury",
-        "genre": "action RPG",
-        "mechanic": "Null Field",
-        "art": true,
-        "ts": "2026-06-10T11:34:29.134821"
-      },
-      {
         "name": "Lethal Abyss",
         "genre": "stealth game",
         "mechanic": "Collapse Wave",
@@ -789,6 +782,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-08-29T12:31:18.235969",
         "price": 7
+      },
+      {
+        "name": "Void Vector",
+        "genre": "tower defense",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-08-30T11:36:35.184618",
+        "price": 3
       }
     ],
     "successful_art": 25,
