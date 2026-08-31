@@ -1696,5 +1696,19 @@
     "license_key": "DR-VV-20260830-BBF08E1B",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-08-31T13:11:39.922356",
+    "game": "Astral Vector",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Astral Vector, a survival horror where Phase Echo changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "neon",
+    "game_mode": "endless",
+    "price": 5,
+    "license_key": "DR-AV-20260831-66020E67",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
