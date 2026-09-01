@@ -1710,5 +1710,19 @@
     "license_key": "DR-AV-20260831-66020E67",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-01T11:23:44.718154",
+    "game": "Quantum Drifter",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Quantum Drifter, a survival horror where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "minimalist",
+    "game_mode": "endless",
+    "price": 3,
+    "license_key": "DR-QD-20260901-F6F12DDE",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
