@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Brutal Knell",
-        "genre": "fighting game",
-        "mechanic": "Death Bloom",
-        "art": true,
-        "ts": "2026-06-12T10:21:35.019117"
-      },
-      {
         "name": "Quake War",
         "genre": "survival horror",
         "mechanic": "Echo Strike",
@@ -791,6 +784,14 @@
         "mechanic": "Phase Echo",
         "game_mode": "endless",
         "timestamp": "2026-09-01T11:23:48.397838",
+        "price": 3
+      },
+      {
+        "name": "Neon Runner",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "waves",
+        "timestamp": "2026-09-02T10:57:17.765935",
         "price": 3
       }
     ],
