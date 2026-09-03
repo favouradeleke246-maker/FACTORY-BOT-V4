@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Quake War",
-        "genre": "survival horror",
-        "mechanic": "Echo Strike",
-        "art": true,
-        "ts": "2026-06-13T09:23:41.945980"
-      },
-      {
         "name": "Static Siege",
         "genre": "action RPG",
         "mechanic": "Signal Jam",
@@ -792,6 +785,14 @@
         "mechanic": "Phase Echo",
         "game_mode": "waves",
         "timestamp": "2026-09-02T10:57:17.765935",
+        "price": 3
+      },
+      {
+        "name": "Cyber Vector",
+        "genre": "puzzle game",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "endless",
+        "timestamp": "2026-09-03T10:56:45.995521",
         "price": 3
       }
     ],
