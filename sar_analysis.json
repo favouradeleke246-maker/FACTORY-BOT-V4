@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Static Siege",
-        "genre": "action RPG",
-        "mechanic": "Signal Jam",
-        "art": true,
-        "ts": "2026-06-14T09:43:40.927655"
-      },
-      {
         "name": "Static Mire",
         "genre": "action RPG",
         "mechanic": "Death Bloom",
@@ -793,6 +786,14 @@
         "mechanic": "Chrono Fracture",
         "game_mode": "endless",
         "timestamp": "2026-09-03T10:56:45.995521",
+        "price": 3
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "tower defense",
+        "mechanic": "Void Step",
+        "game_mode": "waves",
+        "timestamp": "2026-09-04T10:56:56.311153",
         "price": 3
       }
     ],
