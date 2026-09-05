@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Static Mire",
-        "genre": "action RPG",
-        "mechanic": "Death Bloom",
-        "art": true,
-        "ts": "2026-06-15T12:26:34.419710"
-      },
-      {
         "name": "Enigma Force",
         "genre": "action RPG",
         "mechanic": "Void Step",
@@ -794,6 +787,14 @@
         "mechanic": "Void Step",
         "game_mode": "waves",
         "timestamp": "2026-09-04T10:56:56.311153",
+        "price": 3
+      },
+      {
+        "name": "Cyber Pulse",
+        "genre": "roguelite",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-09-05T10:17:16.210701",
         "price": 3
       }
     ],
