@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Enigma Force",
-        "genre": "action RPG",
-        "mechanic": "Void Step",
-        "art": true,
-        "ts": "2026-06-16T11:20:36.800109"
-      },
-      {
         "name": "Glitch Loop",
         "genre": "action RPG",
         "mechanic": "Phase Echo",
@@ -795,6 +788,14 @@
         "mechanic": "Phase Echo",
         "game_mode": "endless",
         "timestamp": "2026-09-05T10:17:16.210701",
+        "price": 3
+      },
+      {
+        "name": "Astral Pulse",
+        "genre": "top-down shooter",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "time_attack",
+        "timestamp": "2026-09-06T10:36:55.328966",
         "price": 3
       }
     ],
