@@ -1794,5 +1794,19 @@
     "license_key": "DR-AP-20260906-09DF00B5",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-07T12:03:17.853170",
+    "game": "Cyber Drifter",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Cyber Drifter, a survival horror where Chrono Fracture changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "pixel",
+    "game_mode": "time_attack",
+    "price": 5,
+    "license_key": "DR-CD-20260907-337DAC4B",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
