@@ -1822,5 +1822,19 @@
     "license_key": "DR-QB-20260908-CC2076D1",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-09T11:00:55.903745",
+    "game": "Cyber Pulse",
+    "genre": "top-down shooter",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Pulse, a top-down shooter where Void Step changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "cartoon",
+    "game_mode": "time_attack",
+    "price": 5,
+    "license_key": "DR-CP-20260909-57907DC5",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
