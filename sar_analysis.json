@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Astral Vector",
-        "genre": "survival horror",
-        "mechanic": "Chrono Fracture",
-        "timestamp": "2026-06-19T10:15:29.420547",
-        "price": 4
-      },
-      {
         "name": "Neon Runner",
         "genre": "tower defense",
         "mechanic": "Void Step",
@@ -798,6 +791,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-09-09T11:00:58.819588",
         "price": 5
+      },
+      {
+        "name": "Quantum Breach",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-09-10T10:57:44.450197",
+        "price": 7
       }
     ],
     "successful_art": 25,

@@ -1836,5 +1836,19 @@
     "license_key": "DR-CP-20260909-57907DC5",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-10T10:57:42.303805",
+    "game": "Quantum Breach",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Quantum Breach, a survival horror where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-QB-20260910-3E979B0D",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
