@@ -1850,5 +1850,19 @@
     "license_key": "DR-QB-20260910-3E979B0D",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-11T10:56:06.657544",
+    "game": "Cyber Vector",
+    "genre": "action RPG",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Vector, a action RPG where Phase Echo changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "minimalist",
+    "game_mode": "time_attack",
+    "price": 3,
+    "license_key": "DR-CV-20260911-2F92A502",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
