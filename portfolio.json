@@ -1878,5 +1878,19 @@
     "license_key": "DR-NV-20260912-3A8969C4",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-13T11:25:49.768038",
+    "game": "Neon Pulse",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Neon Pulse, a survival horror where Chrono Fracture changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "minimalist",
+    "game_mode": "survival",
+    "price": 3,
+    "license_key": "DR-NP-20260913-B280E440",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
