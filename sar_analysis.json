@@ -5,13 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Cyber Drifter",
-        "genre": "strategy game",
-        "mechanic": "Void Step",
-        "timestamp": "2026-06-19T10:45:16.426454",
-        "price": 3
-      },
-      {
         "name": "Void Pulse",
         "genre": "survival horror",
         "mechanic": "Chrono Fracture",
@@ -802,6 +795,14 @@
         "game_mode": "survival",
         "timestamp": "2026-09-13T11:25:52.581599",
         "price": 3
+      },
+      {
+        "name": "Cyber Breach",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-09-14T12:18:13.116219",
+        "price": 6
       }
     ],
     "successful_art": 25,
