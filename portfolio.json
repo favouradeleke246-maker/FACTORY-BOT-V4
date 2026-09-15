@@ -1906,5 +1906,19 @@
     "license_key": "DR-CB-20260914-6A74326A",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-15T11:25:47.833068",
+    "game": "Astral Pulse",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Astral Pulse, a survival horror where Phase Echo changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "pixel",
+    "game_mode": "endless",
+    "price": 5,
+    "license_key": "DR-AP-20260915-C947028A",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
