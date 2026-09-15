@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Void Pulse",
-        "genre": "survival horror",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "waves",
-        "timestamp": "2026-06-19T10:46:51.928266",
-        "price": 5
-      },
-      {
         "name": "Cyber Runner",
         "genre": "fighting game",
         "mechanic": "Phase Echo",
@@ -803,6 +795,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-09-14T12:18:13.116219",
         "price": 6
+      },
+      {
+        "name": "Astral Pulse",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-09-15T11:25:49.772292",
+        "price": 5
       }
     ],
     "successful_art": 25,
