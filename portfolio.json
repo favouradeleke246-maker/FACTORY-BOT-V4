@@ -1920,5 +1920,19 @@
     "license_key": "DR-AP-20260915-C947028A",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-16T11:11:17.632702",
+    "game": "Void Pulse",
+    "genre": "strategy game",
+    "mechanic": "Phase Echo",
+    "description": "Step into Void Pulse, a strategy game where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "pixel",
+    "game_mode": "survival",
+    "price": 6,
+    "license_key": "DR-VP-20260916-5331BE10",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
