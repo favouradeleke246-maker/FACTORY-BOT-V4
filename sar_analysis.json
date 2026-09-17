@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Quantum Pulse",
-        "genre": "puzzle game",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "waves",
-        "timestamp": "2026-06-21T09:56:32.436295",
-        "price": 4
-      },
-      {
         "name": "Astral Vector",
         "genre": "strategy game",
         "mechanic": "Chrono Fracture",
@@ -803,6 +795,14 @@
         "game_mode": "survival",
         "timestamp": "2026-09-16T11:11:20.150288",
         "price": 6
+      },
+      {
+        "name": "Astral Vector",
+        "genre": "action RPG",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-09-17T11:19:43.455997",
+        "price": 5
       }
     ],
     "successful_art": 25,
