@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Quantum Runner",
-        "genre": "survival horror",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "survival",
-        "timestamp": "2026-06-23T01:36:27.869780",
-        "price": 4
-      },
-      {
         "name": "Astral Vector",
         "genre": "action RPG",
         "mechanic": "Chrono Fracture",
@@ -803,6 +795,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-09-19T10:36:24.612795",
         "price": 6
+      },
+      {
+        "name": "Quantum Drifter",
+        "genre": "platformer",
+        "mechanic": "Phase Echo",
+        "game_mode": "time_attack",
+        "timestamp": "2026-09-20T10:59:33.790233",
+        "price": 5
       }
     ],
     "successful_art": 25,

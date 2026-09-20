@@ -1976,5 +1976,19 @@
     "license_key": "DR-AR-20260919-30A8DE29",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-20T10:59:30.896206",
+    "game": "Quantum Drifter",
+    "genre": "platformer",
+    "mechanic": "Phase Echo",
+    "description": "Step into Quantum Drifter, a platformer where Phase Echo changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "minimalist",
+    "game_mode": "time_attack",
+    "price": 5,
+    "license_key": "DR-QD-20260920-DA3AA975",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
