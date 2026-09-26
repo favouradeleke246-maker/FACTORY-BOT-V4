@@ -2060,5 +2060,19 @@
     "license_key": "DR-CD-20260925-57EEE016",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-09-26T11:05:40.860605",
+    "game": "Astral Breach",
+    "genre": "survival horror",
+    "mechanic": "Void Step",
+    "description": "Step into Astral Breach, a survival horror where Void Step changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "cartoon",
+    "game_mode": "boss_fight",
+    "price": 5,
+    "license_key": "DR-AB-20260926-28260EE8",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
