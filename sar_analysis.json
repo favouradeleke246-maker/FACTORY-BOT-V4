@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Cyber Pulse",
-        "genre": "top-down shooter",
-        "mechanic": "Void Step",
-        "game_mode": "waves",
-        "timestamp": "2026-06-23T18:18:27.250432",
-        "price": 5
-      },
-      {
         "name": "Quantum Vector",
         "genre": "roguelite",
         "mechanic": "Void Step",
@@ -802,6 +794,14 @@
         "mechanic": "Void Step",
         "game_mode": "endless",
         "timestamp": "2026-09-27T11:44:35.504374",
+        "price": 5
+      },
+      {
+        "name": "Quantum Runner",
+        "genre": "roguelite",
+        "mechanic": "Void Step",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-09-28T13:23:30.525143",
         "price": 5
       }
     ],
