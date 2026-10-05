@@ -2186,5 +2186,19 @@
     "license_key": "DR-AD-20261004-C3181EBC",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Drifter/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-05T14:06:39.316091",
+    "game": "Void Runner",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Void Runner, a survival horror where Phase Echo changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "survival",
+    "price": 4,
+    "license_key": "DR-VR-20261005-E2A5642E",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Runner/index.html",
+    "version": "50.0.0"
   }
 ]

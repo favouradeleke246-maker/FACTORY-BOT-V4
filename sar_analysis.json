@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Cyber Vector",
-        "genre": "tower defense",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "boss_fight",
-        "timestamp": "2026-06-27T08:42:15.064878",
-        "price": 6
-      },
-      {
         "name": "Cyber Runner",
         "genre": "puzzle game",
         "mechanic": "Phase Echo",
@@ -803,6 +795,14 @@
         "game_mode": "endless",
         "timestamp": "2026-10-04T12:03:19.420196",
         "price": 5
+      },
+      {
+        "name": "Void Runner",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "survival",
+        "timestamp": "2026-10-05T14:06:42.265391",
+        "price": 4
       }
     ],
     "successful_art": 25,
