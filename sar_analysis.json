@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Void Runner",
-        "genre": "tower defense",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "survival",
-        "timestamp": "2026-06-30T09:48:32.951015",
-        "price": 5
-      },
-      {
         "name": "Neon Breach",
         "genre": "fighting game",
         "mechanic": "Chrono Fracture",
@@ -802,6 +794,14 @@
         "mechanic": "Void Step",
         "game_mode": "waves",
         "timestamp": "2026-10-07T12:59:02.849411",
+        "price": 5
+      },
+      {
+        "name": "Cyber Vector",
+        "genre": "survival horror",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-10-08T13:06:45.139622",
         "price": 5
       }
     ],
