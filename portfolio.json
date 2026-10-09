@@ -2242,5 +2242,19 @@
     "license_key": "DR-CV-20261008-0C934302",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Vector/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-09T12:53:25.567799",
+    "game": "Cyber Pulse",
+    "genre": "roguelite",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Cyber Pulse, a roguelite where Chrono Fracture changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "minimalist",
+    "game_mode": "survival",
+    "price": 4,
+    "license_key": "DR-CP-20261009-F92C4581",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
+    "version": "50.0.0"
   }
 ]
