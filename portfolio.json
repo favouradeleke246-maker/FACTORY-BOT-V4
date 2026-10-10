@@ -2256,5 +2256,19 @@
     "license_key": "DR-CP-20261009-F92C4581",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Pulse/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-10T12:11:09.716818",
+    "game": "Neon Breach",
+    "genre": "roguelite",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Neon Breach, a roguelite where Chrono Fracture changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "minimalist",
+    "game_mode": "survival",
+    "price": 4,
+    "license_key": "DR-NB-20261010-E336D96F",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
