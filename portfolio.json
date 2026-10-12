@@ -2284,5 +2284,19 @@
     "license_key": "DR-CR-20261011-90FA59DB",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-12T14:55:24.052842",
+    "game": "Cyber Runner",
+    "genre": "tower defense",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Runner, a tower defense where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "boss_fight",
+    "price": 5,
+    "license_key": "DR-CR-20261012-BC856E33",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
+    "version": "50.0.0"
   }
 ]
