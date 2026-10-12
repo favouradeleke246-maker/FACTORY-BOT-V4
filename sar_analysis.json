@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Void Pulse",
-        "genre": "survival horror",
-        "mechanic": "Phase Echo",
-        "game_mode": "endless",
-        "timestamp": "2026-07-04T08:43:37.694474",
-        "price": 4
-      },
-      {
         "name": "Void Vector",
         "genre": "survival horror",
         "mechanic": "Void Step",
@@ -803,6 +795,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-10-11T12:25:22.080491",
         "price": 3
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "tower defense",
+        "mechanic": "Phase Echo",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-10-12T14:55:26.183428",
+        "price": 5
       }
     ],
     "successful_art": 25,
