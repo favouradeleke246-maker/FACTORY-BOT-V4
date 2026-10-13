@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Void Vector",
-        "genre": "survival horror",
-        "mechanic": "Void Step",
-        "game_mode": "waves",
-        "timestamp": "2026-07-05T09:12:12.717393",
-        "price": 5
-      },
-      {
         "name": "Void Drifter",
         "genre": "platformer",
         "mechanic": "Phase Echo",
@@ -802,6 +794,14 @@
         "mechanic": "Phase Echo",
         "game_mode": "boss_fight",
         "timestamp": "2026-10-12T14:55:26.183428",
+        "price": 5
+      },
+      {
+        "name": "Cyber Runner",
+        "genre": "fighting game",
+        "mechanic": "Void Step",
+        "game_mode": "time_attack",
+        "timestamp": "2026-10-13T13:53:46.136557",
         "price": 5
       }
     ],
