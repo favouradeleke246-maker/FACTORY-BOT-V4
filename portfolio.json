@@ -2298,5 +2298,19 @@
     "license_key": "DR-CR-20261012-BC856E33",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-13T13:53:43.062157",
+    "game": "Cyber Runner",
+    "genre": "fighting game",
+    "mechanic": "Void Step",
+    "description": "Step into Cyber Runner, a fighting game where Void Step changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "pixel",
+    "game_mode": "time_attack",
+    "price": 5,
+    "license_key": "DR-CR-20261013-EEE3FE5F",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Runner/index.html",
+    "version": "50.0.0"
   }
 ]
