@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Cyber Drifter",
-        "genre": "platformer",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "time_attack",
-        "timestamp": "2026-07-08T08:35:56.027300",
-        "price": 6
-      },
-      {
         "name": "Void Runner",
         "genre": "survival horror",
         "mechanic": "Phase Echo",
@@ -803,6 +795,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-10-15T11:08:02.443222",
         "price": 5
+      },
+      {
+        "name": "Neon Runner",
+        "genre": "strategy game",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "time_attack",
+        "timestamp": "2026-10-16T11:03:04.319417",
+        "price": 3
       }
     ],
     "successful_art": 25,
