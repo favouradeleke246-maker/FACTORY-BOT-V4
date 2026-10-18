@@ -2368,5 +2368,19 @@
     "license_key": "DR-CB-20261017-E400A6D1",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-18T10:41:08.955291",
+    "game": "Astral Breach",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Astral Breach, a survival horror where Phase Echo changes everything.",
+    "hook": "One mechanic changes everything.",
+    "visual_style": "cartoon",
+    "game_mode": "boss_fight",
+    "price": 7,
+    "license_key": "DR-AB-20261018-37302EDD",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Breach/index.html",
+    "version": "50.0.0"
   }
 ]

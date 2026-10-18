@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Quantum Drifter",
-        "genre": "survival horror",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "waves",
-        "timestamp": "2026-07-10T09:43:14.202322",
-        "price": 3
-      },
-      {
         "name": "Astral Runner",
         "genre": "survival horror",
         "mechanic": "Chrono Fracture",
@@ -803,6 +795,14 @@
         "game_mode": "time_attack",
         "timestamp": "2026-10-17T10:23:21.818632",
         "price": 3
+      },
+      {
+        "name": "Astral Breach",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-10-18T10:41:12.002287",
+        "price": 7
       }
     ],
     "successful_art": 25,
