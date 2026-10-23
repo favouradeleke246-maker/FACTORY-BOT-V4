@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Neon Breach",
-        "genre": "top-down shooter",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "waves",
-        "timestamp": "2026-07-15T08:21:50.611112",
-        "price": 5
-      },
-      {
         "name": "Quantum Drifter",
         "genre": "survival horror",
         "mechanic": "Chrono Fracture",
@@ -803,6 +795,14 @@
         "game_mode": "endless",
         "timestamp": "2026-10-22T11:27:45.563652",
         "price": 6
+      },
+      {
+        "name": "Void Runner",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "waves",
+        "timestamp": "2026-10-23T11:17:41.828094",
+        "price": 4
       }
     ],
     "successful_art": 25,
