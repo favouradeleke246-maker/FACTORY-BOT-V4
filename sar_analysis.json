@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Quantum Drifter",
-        "genre": "survival horror",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "survival",
-        "timestamp": "2026-07-16T08:20:34.150383",
-        "price": 4
-      },
-      {
         "name": "Cyber Runner",
         "genre": "racing game",
         "mechanic": "Phase Echo",
@@ -803,6 +795,14 @@
         "game_mode": "waves",
         "timestamp": "2026-10-23T11:17:41.828094",
         "price": 4
+      },
+      {
+        "name": "Quantum Runner",
+        "genre": "action RPG",
+        "mechanic": "Void Step",
+        "game_mode": "endless",
+        "timestamp": "2026-10-24T10:37:00.347645",
+        "price": 5
       }
     ],
     "successful_art": 25,
