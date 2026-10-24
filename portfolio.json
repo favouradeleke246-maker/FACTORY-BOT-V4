@@ -2452,5 +2452,19 @@
     "license_key": "DR-VR-20261023-17960896",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-24T10:36:57.644736",
+    "game": "Quantum Runner",
+    "genre": "action RPG",
+    "mechanic": "Void Step",
+    "description": "Step into Quantum Runner, a action RPG where Void Step changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "neon",
+    "game_mode": "endless",
+    "price": 5,
+    "license_key": "DR-QR-20261024-EDEAA578",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Runner/index.html",
+    "version": "50.0.0"
   }
 ]
