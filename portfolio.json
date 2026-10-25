@@ -2466,5 +2466,19 @@
     "license_key": "DR-QR-20261024-EDEAA578",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Quantum_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-25T11:01:02.048396",
+    "game": "Astral Vector",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Astral Vector, a survival horror where Phase Echo changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "cartoon",
+    "game_mode": "survival",
+    "price": 5,
+    "license_key": "DR-AV-20261025-9246B6AE",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Vector/index.html",
+    "version": "50.0.0"
   }
 ]
