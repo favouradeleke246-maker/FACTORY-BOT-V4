@@ -2494,5 +2494,19 @@
     "license_key": "DR-CB-20261026-B5ADD065",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-27T11:51:30.416167",
+    "game": "Void Drifter",
+    "genre": "top-down shooter",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Void Drifter, a top-down shooter where Chrono Fracture changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "neon",
+    "game_mode": "endless",
+    "price": 6,
+    "license_key": "DR-VD-20261027-183914C9",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Void_Drifter/index.html",
+    "version": "50.0.0"
   }
 ]
