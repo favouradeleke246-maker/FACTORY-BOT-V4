@@ -2522,5 +2522,19 @@
     "license_key": "DR-AR-20261028-D9844A7F",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Astral_Runner/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-29T12:36:30.069643",
+    "game": "Neon Breach",
+    "genre": "survival horror",
+    "mechanic": "Chrono Fracture",
+    "description": "Step into Neon Breach, a survival horror where Chrono Fracture changes everything.",
+    "hook": "Every second counts.",
+    "visual_style": "dark_fantasy",
+    "game_mode": "boss_fight",
+    "price": 6,
+    "license_key": "DR-NB-20261029-0B8073F0",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
