@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Cyber Breach",
-        "genre": "survival horror",
-        "mechanic": "Void Step",
-        "game_mode": "boss_fight",
-        "timestamp": "2026-07-21T08:35:55.116064",
-        "price": 6
-      },
-      {
         "name": "Cyber Runner",
         "genre": "puzzle game",
         "mechanic": "Chrono Fracture",
@@ -803,6 +795,14 @@
         "game_mode": "survival",
         "timestamp": "2026-10-28T12:26:41.374439",
         "price": 3
+      },
+      {
+        "name": "Neon Breach",
+        "genre": "survival horror",
+        "mechanic": "Chrono Fracture",
+        "game_mode": "boss_fight",
+        "timestamp": "2026-10-29T12:36:32.654429",
+        "price": 6
       }
     ],
     "successful_art": 25,
