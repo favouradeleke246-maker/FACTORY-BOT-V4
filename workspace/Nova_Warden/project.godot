@@ -1,6 +1,0 @@
-
-; Godot 4.2
-config_version=5
-[application]
-config/name="Nova Warden"
-config/icon="res://icon.png"
