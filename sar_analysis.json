@@ -5,14 +5,6 @@
     "art_fail": 0,
     "games": [
       {
-        "name": "Cyber Runner",
-        "genre": "puzzle game",
-        "mechanic": "Chrono Fracture",
-        "game_mode": "endless",
-        "timestamp": "2026-07-22T08:35:27.766786",
-        "price": 5
-      },
-      {
         "name": "Cyber Breach",
         "genre": "survival horror",
         "mechanic": "Void Step",
@@ -803,6 +795,14 @@
         "game_mode": "boss_fight",
         "timestamp": "2026-10-29T12:36:32.654429",
         "price": 6
+      },
+      {
+        "name": "Cyber Breach",
+        "genre": "survival horror",
+        "mechanic": "Phase Echo",
+        "game_mode": "endless",
+        "timestamp": "2026-10-30T12:27:43.803382",
+        "price": 4
       }
     ],
     "successful_art": 25,

@@ -2536,5 +2536,19 @@
     "license_key": "DR-NB-20261029-0B8073F0",
     "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Neon_Breach/index.html",
     "version": "50.0.0"
+  },
+  {
+    "date": "2026-10-30T12:27:41.106845",
+    "game": "Cyber Breach",
+    "genre": "survival horror",
+    "mechanic": "Phase Echo",
+    "description": "Step into Cyber Breach, a survival horror where Phase Echo changes everything.",
+    "hook": "Fight. Survive. Evolve.",
+    "visual_style": "pixel",
+    "game_mode": "endless",
+    "price": 4,
+    "license_key": "DR-CB-20261030-DC9E3169",
+    "html5_url": "https://favouradeleke246-maker.github.io/FACTORY-BOT-V4/workspace/Cyber_Breach/index.html",
+    "version": "50.0.0"
   }
 ]
